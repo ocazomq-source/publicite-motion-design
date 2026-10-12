@@ -20,7 +20,7 @@ concurrency:
 jobs:
   rendu:
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -35,20 +35,25 @@ jobs:
           sudo apt-get install -y -qq ffmpeg fonts-inter fonts-dejavu-core
           pip install --quiet pillow numpy
 
-      - name: Générer la vidéo
+      - name: Générer la vidéo (format horizontal)
         run: python3 parcours.py
+
+      - name: Générer la vidéo (format mobile)
+        run: python3 parcours.py --format vertical
 
       - name: Mettre la vidéo à disposition (onglet Actions)
         uses: actions/upload-artifact@v4
         with:
           name: parcours-autopiec
-          path: output/parcours-autopiec.mp4
+          path: |
+            output/parcours-autopiec.mp4
+            output/parcours-autopiec-mobile.mp4
 
       - name: Enregistrer la vidéo dans le dépôt
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add output/parcours-autopiec.mp4
+          git add output/parcours-autopiec.mp4 output/parcours-autopiec-mobile.mp4
           git commit -m "Vidéo régénérée après modification" || exit 0
           git pull --rebase
           git push

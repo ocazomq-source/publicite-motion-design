@@ -18,8 +18,12 @@ Les 7 étapes : l'expert transmet le PV → Autopiec centralise et source → le
 conformité → l'assurance est notifiée → l'expert est notifié → l'assurance passe le bon de
 commande → Autopiec livre la pièce chez le réparateur.
 
+Version mobile (1080×1920, 9:16 — Instagram, TikTok, WhatsApp, Stories) :
+[`output/parcours-autopiec-mobile.mp4`](output/parcours-autopiec-mobile.mp4), mêmes textes et animations.
+
 ```bash
 python3 parcours.py                  # vidéo complète (~5 min sur 4 cœurs)
+python3 parcours.py --format vertical  # version mobile
 python3 parcours.py --preview        # une image par scène dans output/apercu-parcours/
 python3 parcours.py --preview 22.5   # image à un instant précis
 ```

@@ -52,7 +52,9 @@ Cliquez sur **« Commit changes… »** (bouton vert), puis encore sur **« Comm
 ## 4. Récupérer la vidéo
 
 - Onglet **Actions** : une tâche « Générer la vidéo » démarre (rond jaune). Elle est terminée quand le rond est vert ✅.
-- La nouvelle vidéo remplace alors **`output/parcours-autopiec.mp4`** dans le dépôt (cliquez dessus, puis sur le bouton de téléchargement).
+- Les deux vidéos sont régénérées : **`output/parcours-autopiec.mp4`** (horizontale) et
+  **`output/parcours-autopiec-mobile.mp4`** (mobile, 9:16). Comptez environ 12 minutes.
+- La nouvelle vidéo remplace alors l'ancienne dans le dépôt (cliquez dessus, puis sur le bouton de téléchargement).
 - Elle est aussi téléchargeable en bas de la page de la tâche, rubrique **Artifacts**.
 
 Si le rond devient **rouge ❌**, il y a le plus souvent une erreur de syntaxe dans le fichier

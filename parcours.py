@@ -8,6 +8,7 @@ mouvements de caméra, transitions en travelling / zoom / flou et sons d'interfa
 Usage :
     python3 parcours.py                    # -> output/parcours-autopiec.mp4
     python3 parcours.py --preview          # une image par scène dans output/apercu-parcours/
+    python3 parcours.py --format vertical  # version mobile 1080x1920 -> output/parcours-autopiec-mobile.mp4
     python3 parcours.py --preview 15.2 22  # images à des instants précis
 """
 import argparse
@@ -26,6 +27,8 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 W, H = 1920, 1080
+VERT = False         # True pour la version mobile 1080x1920
+OY = 0               # décalage vertical des scènes centrées (version mobile)
 S = 2                # supersampling
 FPS = 30
 TR = 0.8             # durée d'une transition entre scènes (s)
@@ -484,7 +487,7 @@ def word_layer(parts, kind, size, color, accent):
 
 
 def blur_words(world, lines, kind, size, x, y_top, t, color=None, accent=None, align="l",
-               line_h=None, stagger=0.06, dur=0.7, opacity=1.0, max_w=None, fit_w=None):
+               line_h=None, stagger=0.06, dur=0.7, opacity=1.0, max_w=None, fit_w=None, wrap_w=None):
     """Affiche des lignes (listes de (mot, accent)) mot par mot, chaque mot sortant du flou.
     Si max_w est donné, `lines` est une liste de chaînes balisées à replier."""
     color = color or C["marine"]
@@ -501,6 +504,9 @@ def blur_words(world, lines, kind, size, x, y_top, t, color=None, accent=None, a
         for ln in lines:
             words += markup_words(ln)
         lines = wrap_words(words, kind, size, max_w)
+    elif wrap_w is not None:
+        # chaque ligne de la config est repliée séparément (les retours à la ligne voulus restent)
+        lines = [sub for ln in lines for sub in wrap_words(markup_words(ln), kind, size, wrap_w)]
     else:
         lines = [markup_words(ln) if isinstance(ln, str) else ln for ln in lines]
     space = font(kind, size).getlength(" ") / S
@@ -671,8 +677,34 @@ def background():
 # Éléments communs aux étapes
 # --------------------------------------------------------------------------- #
 CARD_CX, CARD_CY = 575, 520
-TEXT_X = 1120
+TEXT_X, TEXT_Y, TEXT_W = 1120, 330, 700
 NSTEPS = 7
+
+
+def setup_format(fmt):
+    """« horizontal » (1920x1080) ou « vertical » (1080x1920, mobile)."""
+    global W, H, VERT, OY, CARD_CX, CARD_CY, TEXT_X, TEXT_Y, TEXT_W
+    VERT = fmt == "vertical"
+    if VERT:
+        W, H, OY = 1080, 1920, 420
+        CARD_CX, CARD_CY = 540, 1240
+        TEXT_X, TEXT_Y, TEXT_W = 130, 230, 820
+    else:
+        W, H, OY = 1920, 1080, 0
+        CARD_CX, CARD_CY = 575, 520
+        TEXT_X, TEXT_Y, TEXT_W = 1120, 330, 700
+
+
+def ctitle(world, lines, size, y, t, fit_w=1600, line_h=None, **kw):
+    """Titre centré : réduit pour tenir en largeur (horizontal) ou replié ligne par ligne (mobile).
+    Retourne le bas du bloc."""
+    line_h = line_h or size * 1.15
+    if VERT:
+        k = 0.8
+        return blur_words(world, lines, "titre", int(size * k), W / 2, y + OY, t, align="c",
+                          line_h=line_h * k, wrap_w=W - 140, **kw)
+    return blur_words(world, lines, "titre", size, W / 2, y, t, align="c", line_h=line_h,
+                      fit_w=fit_w, **kw)
 
 
 def actor_chip(world, t, actor, x, y):
@@ -695,23 +727,25 @@ def step_text(world, t, idx, step):
     cv = Cv(world)
     label = f"ÉTAPE {idx + 1} / {NSTEPS}"
     op = prog(t, 0.15, 0.4)
-    cv.text(label, "mono", 21, C["bleu"], TEXT_X, 330, opacity=op, tracking=0.2)
-    actor_chip(world, t - 0.3, step["acteur"], TEXT_X, 392)
+    cv.text(label, "mono", 21, C["bleu"], TEXT_X, TEXT_Y, opacity=op, tracking=0.2)
+    actor_chip(world, t - 0.3, step["acteur"], TEXT_X, TEXT_Y + 62)
+    base = 74 if VERT else 66
     if isinstance(step["titre"], list):
         # retours à la ligne choisis dans la config : on garde les lignes telles quelles
-        bottom = blur_words(world, step["titre"], "titre", 66, TEXT_X, 440, t - 0.5,
-                            line_h=74, stagger=0.055, fit_w=740)
+        bottom = blur_words(world, step["titre"], "titre", base, TEXT_X, TEXT_Y + 110, t - 0.5,
+                            line_h=base * 1.12, stagger=0.055, fit_w=TEXT_W + 40)
     else:
-        size = 66
-        while size > 50 and len(wrap_words(markup_words(step["titre"]), "titre", size, 700)) > 3:
+        size = base
+        while size > 50 and len(wrap_words(markup_words(step["titre"]), "titre", size, TEXT_W)) > 3:
             size -= 2
-        bottom = blur_words(world, [step["titre"]], "titre", size, TEXT_X, 440, t - 0.5,
-                            max_w=700, line_h=size * 1.12, stagger=0.055)
-    lines = wrap_words([(w, False) for w in step["texte"].split()], "ui", 28, 680)
+        bottom = blur_words(world, [step["titre"]], "titre", size, TEXT_X, TEXT_Y + 110, t - 0.5,
+                            max_w=TEXT_W, line_h=size * 1.12, stagger=0.055)
+    ts = 31 if VERT else 28
+    lines = wrap_words([(w, False) for w in step["texte"].split()], "ui", ts, TEXT_W - 20)
     for j, ln in enumerate(lines):
         s = " ".join(w for w, _ in ln)
         q = ease_out_cubic(prog(t, 1.3 + j * 0.08, 0.6))
-        cv.text(s, "ui", 28, C["texte_gris"], TEXT_X, bottom + 34 + j * 38 + (1 - q) * 12, opacity=q)
+        cv.text(s, "ui", ts, C["texte_gris"], TEXT_X, bottom + 36 + j * ts * 1.36 + (1 - q) * 12, opacity=q)
 
 
 def step_progress(world, t, idx):
@@ -719,7 +753,7 @@ def step_progress(world, t, idx):
     n = NSTEPS
     sw, gap = 54, 10
     x0 = W / 2 - (n * sw + (n - 1) * gap) / 2
-    y = 1010
+    y = H - 70
     for k in range(n):
         x = x0 + k * (sw + gap)
         cv.rrect(x, y - 3, x + sw, y + 3, 3, fill=C["trait"])
@@ -785,12 +819,18 @@ def mini_card(kind):
 
 def floating_cards(world, t, items, opacity=1.0, blur=0.0):
     for kind, x, y, rot, t_in, vx, vy in items:
+        scale = 1.0
+        if VERT:
+            # coins de l'écran vertical uniquement (les cartes à mi-hauteur gêneraient le texte)
+            if 0.3 < y / 1080 < 0.7:
+                continue
+            x, y, scale = x * W / 1920, y * H / 1080, 0.72
         lay = mini_card(kind)
         if blur:
             lay = blurred_mini(kind, blur)
         w = lay.width / S - 8
         h = lay.height / S - 8
-        place_card(world, lay, x + vx * t, y + vy * t, t, t_in, w=w, h=h, r=20, rot=rot,
+        place_card(world, lay, x + vx * t, y + vy * t, t, t_in, w=w, h=h, r=20, rot=rot, scale=scale,
                    opacity=opacity, dur=1.3, from_dy=60, tilt_from=30)
 
 
@@ -805,19 +845,19 @@ def scene_accroche(world, t):
         ("pv", 300, 250, 6, 0.6, 6, -4), ("valide", 1610, 260, -7, 0.8, -5, 3),
         ("commande", 330, 840, -5, 1.0, 5, -3), ("livraison", 1590, 830, 6, 1.2, -6, -2)],
         opacity=0.55, blur=1.5)
-    blur_words(world, cfg["lignes"], "titre", 80, W / 2, 445, t - 0.25, align="c", line_h=94, stagger=0.07, fit_w=1600)
+    ctitle(world, cfg["lignes"], 80, 445, t - 0.25, line_h=94, stagger=0.07)
     return 1.0 + 0.035 * ease_in_out_cubic(prog(t, 0, 4.5)), 0, 0
 
 
 def scene_probleme(world, t):
     cfg = CFG["probleme"]
-    blur_words(world, cfg["lignes"], "titre", 70, W / 2, 210, t - 0.15, align="c", line_h=82, stagger=0.055, fit_w=1600)
+    bottom = ctitle(world, cfg["lignes"], 70, 210, t - 0.15, line_h=82, stagger=0.055)
     cv = Cv(world)
-    y = 720
+    y = max(720 + OY, bottom + 230) if VERT else 720
     p_in = ease_out_expo(prog(t, 1.3, 0.8))
     if p_in > 0:
         # La pièce de réemploi rejoint les réparateurs agréés par la plateforme
-        xl, xr = 680, 1240
+        xl, xr = W / 2 - 280, W / 2 + 280
         cv.rrect(xl - 110, y - 64, xl + 110, y + 64, 26, fill=mix(C["fond"], C["gris_clair"], p_in))
         cv.paste(asset("pare_chocs.png", 0.27), xl, y - 6, opacity=p_in)
         cv.text(cfg["piece"], "ui_semi", 22, C["marine"], xl, y + 98, align="c", opacity=p_in)
@@ -850,8 +890,12 @@ def scene_probleme(world, t):
 
 def scene_logo(world, t):
     cv = Cv(world)
-    lockup(world, W / 2, 490, 1.05, t - 0.3)
-    cv.text(CFG["logo"]["baseline"], "mono", 21, C["bleu"], W / 2, 600, align="c",
+    lockup(world, W / 2, 490 + OY, 0.85 if VERT else 1.05, t - 0.3)
+    base = CFG["logo"]["baseline"]
+    bsize = 21
+    while bsize > 13 and text_w(base, "mono", bsize, 0.2) > W - 100:
+        bsize -= 1
+    cv.text(base, "mono", bsize, C["bleu"], W / 2, 600 + OY, align="c",
             opacity=ease_out_cubic(prog(t, 1.1, 0.6)), tracking=0.2)
     return 1.0 + 0.05 * ease_in_out_cubic(prog(t, 0, 3.8)), 0, 0
 
@@ -860,16 +904,16 @@ def scene_titre(world, t):
     cfg = CFG["titre"]
     cv = Cv(world)
     if cfg.get("surtitre"):
-        cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, 300, align="c",
+        cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, 300 + OY, align="c",
                 opacity=prog(t, 0.1, 0.4), tracking=0.24)
-    blur_words(world, cfg["lignes"], "titre", 72, W / 2, 330 if cfg.get("surtitre") else 300, t - 0.25, align="c", line_h=84, stagger=0.06, fit_w=1600)
+    ctitle(world, cfg["lignes"], 72, 330 if cfg.get("surtitre") else 300, t - 0.25, line_h=84, stagger=0.06)
 
     # Aperçu du parcours : les acteurs reliés (liste « frise », sinon un par étape)
     actors = cfg.get("frise") or [st["acteur"] for st in CFG["etapes"]]
     n = len(actors)
     half = min(630, 180 * (n - 1) / 2)
     xs = [lerp(W / 2 - half, W / 2 + half, i / (n - 1)) for i in range(n)]
-    y = 660
+    y = 660 + OY
     lp = ease_in_out_cubic(prog(t, 1.1, 1.8))
     if lp > 0:
         cv.line([(xs[0], y), (lerp(xs[0], xs[-1], lp), y)], C["trait"], 3)
@@ -886,7 +930,9 @@ def scene_titre(world, t):
         cv.text(a["court"], "ui_semi", 17, C["marine"], xs[i], y + 62, align="c", opacity=op, tracking=0.04)
         cv.text(str(i + 1), "mono", 16, C["texte_gris"], xs[i], y - 58, align="c", opacity=op)
     q = ease_out_cubic(prog(t, 2.6, 0.6))
-    cv.text(cfg["sous_titre"], "ui", 28, C["texte_gris"], W / 2, 850 + (1 - q) * 10, align="c", opacity=q)
+    sub = cfg["sous_titre"]
+    cv.text(sub, "ui", fit_size(sub, "ui", 28, W - 120), C["texte_gris"], W / 2, 850 + OY + (1 - q) * 10,
+            align="c", opacity=q)
     return 1.0 + 0.03 * ease_in_out_cubic(prog(t, 0, 4.3)), 0, 0
 
 
@@ -923,7 +969,7 @@ def step1(world, t, step):
 
     x0, y0 = card_origin(w, h)
     bx, by = x0 + 410, y0 - 30 + 506
-    draw_cursor(world, t, [(2.1, 980, 900), (2.9, bx + 60, by + 8)], clicks=[3.0], t_hide=4.4)
+    draw_cursor(world, t, [(2.1, CARD_CX + 405, CARD_CY + 380), (2.9, bx + 60, by + 8)], clicks=[3.0], t_hide=4.4)
 
     # Toast : Autopiec reçoit le PV
     tq = prog(t, 3.45, 0.7)
@@ -1043,7 +1089,7 @@ def step3(world, t, step):
     place_card(world, img, CARD_CX, CARD_CY, t, 0.2, w=w, h=h)
 
     x0, y0 = card_origin(w, h)
-    draw_cursor(world, t, [(2.2, 1000, 880), (3.15, x0 + 230, y0 + 646)], clicks=[t_click], t_hide=4.6)
+    draw_cursor(world, t, [(2.2, CARD_CX + 425, CARD_CY + 360), (3.15, x0 + 230, y0 + 646)], clicks=[t_click], t_hide=4.6)
     return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 6.3)), -20, 0
 
 
@@ -1087,7 +1133,7 @@ def step4(world, t, step):
             status_chip(cv, statut, 804, y, opacity=rq)
         if k < len(c["dossiers"]) - 1:
             cv.line([(36, y + 36), (804, y + 36)], C["trait"], 1.2)
-    place_card(world, img, CARD_CX, 420, t, 0.2, w=w, h=h)
+    place_card(world, img, CARD_CX, CARD_CY - 100, t, 0.2, w=w, h=h)
 
     # Notification
     nw, nh = 640, 108
@@ -1097,17 +1143,18 @@ def step4(world, t, step):
     ncv.text(c["notif_app"], "mono", 15, C["texte_gris"], 106, 38, tracking=0.12)
     ncv.text("à l'instant", "ui", 17, C["texte_gris"], nw - 26, 38, align="r")
     ncv.text(c["notif_texte"], "ui_semi", 24, C["marine"], 106, 72)
-    place_card(world, nimg, CARD_CX + 90, 735, t, t_flip, w=nw, h=nh, r=24, dur=0.9, from_dy=-60, tilt_from=-18)
+    place_card(world, nimg, CARD_CX + 90, CARD_CY + 215, t, t_flip, w=nw, h=nh, r=24, dur=0.9, from_dy=-60, tilt_from=-18)
     # Rappel du cas de refus
     rq = ease_out_cubic(prog(t, 2.5, 0.6))
     if rq > 0:
         cvw = Cv(world)
         tw = text_w(c["refus"], "ui", 21)
         x0 = CARD_CX + 90 - nw / 2
-        cvw.rrect(x0, 822 + (1 - rq) * 10, x0 + tw + 70, 876 + (1 - rq) * 10, 27,
+        yb = CARD_CY + 329 + (1 - rq) * 10
+        cvw.rrect(x0, yb - 27, x0 + tw + 70, yb + 27, 27,
                   fill=mix(C["fond"], C["gris_clair"], rq))
-        cvw.disc(x0 + 28, 849 + (1 - rq) * 10, 9 * rq, C["rouge"])
-        cvw.text(c["refus"], "ui", 21, C["texte_gris"], x0 + 48, 849 + (1 - rq) * 10, opacity=rq)
+        cvw.disc(x0 + 28, yb, 9 * rq, C["rouge"])
+        cvw.text(c["refus"], "ui", 21, C["texte_gris"], x0 + 48, yb, opacity=rq)
     return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 6.3)), -20, 0
 
 
@@ -1173,7 +1220,7 @@ def step6(world, t, step):
     button(cv, 36, 470, 784, 542, t, t_click, c["bouton"], c["bouton_ok"], C["bleu"], C["fond"])
     place_card(world, img, CARD_CX, CARD_CY, t, 0.2, w=w, h=h)
     x0, y0 = card_origin(w, h)
-    draw_cursor(world, t, [(1.9, 1000, 920), (2.75, x0 + 470, y0 + 512)], clicks=[t_click], t_hide=4.5)
+    draw_cursor(world, t, [(1.9, CARD_CX + 425, CARD_CY + 400), (2.75, x0 + 470, y0 + 512)], clicks=[t_click], t_hide=4.5)
 
     # Le bon de commande « part » vers Autopiec
     fq = prog(t, 3.3, 1.0)
@@ -1253,12 +1300,13 @@ def scene_suivi(world, t):
     cfg = CFG["suivi"]
     # « titre » : une chaîne (repliée automatiquement) ou une liste de lignes
     if isinstance(cfg["titre"], list):
-        blur_words(world, cfg["titre"], "titre", 70, W / 2, 150, t - 0.15, align="c", line_h=80,
-                   stagger=0.05, fit_w=1600)
+        bottom = ctitle(world, cfg["titre"], 70, 150, t - 0.15, line_h=80, stagger=0.05)
+    elif VERT:
+        bottom = ctitle(world, [cfg["titre"]], 70, 150, t - 0.15, line_h=80, stagger=0.05)
     else:
-        blur_words(world, [cfg["titre"]], "titre", 70, W / 2, 150, t - 0.15, align="c", line_h=80,
-                   stagger=0.05, max_w=1500)
-    w, h = 1060, 500
+        bottom = blur_words(world, [cfg["titre"]], "titre", 70, W / 2, 150, t - 0.15, align="c", line_h=80,
+                            stagger=0.05, max_w=1500)
+    w, h = min(1060, W - 60), 500
     img, cv = new_card(w, h, 28, fill=C["marine"], border=False)
     cv.text(cfg["entete"][0], "mono", 18, C["citron"], 36, 40, tracking=0.16)
     cv.text(cfg["entete"][1], "mono", 18, alpha(C["fond"], 0.55), w - 36, 40, align="r", tracking=0.16)
@@ -1284,34 +1332,36 @@ def scene_suivi(world, t):
         cv.chip(lab, w - 36, y, "ui_semi", 19, fg, bg, align="r", opacity=rq, icon_check=last)
         if k < len(cfg["dossiers"]) - 1:
             cv.line([(36, y + 38), (w - 36, y + 38)], mix(C["marine"], C["fond"], 0.08), 1.2)
-    place_card(world, img, W / 2, 610, t, 0.35, w=w, h=h, r=28, dur=1.1)
+    place_card(world, img, W / 2, bottom + 60 + h / 2 if VERT else 610, t, 0.35, w=w, h=h, r=28, dur=1.1)
     return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 5.3)), 0, 0
 
 
 def scene_benefices(world, t):
     cfg = CFG["benefices"]
     cv = Cv(world)
-    cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, 300, align="c", opacity=prog(t, 0.1, 0.4),
-            tracking=0.24)
+    cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, 460 if VERT else 300,
+            align="c", opacity=prog(t, 0.1, 0.4), tracking=0.24)
     starts = [0.3, 1.25, 2.2]
     for k, line in enumerate(cfg["lignes"]):
         dim = 1 - 0.55 * prog(t, starts[k + 1], 0.5) if k + 1 < len(starts) else 1
-        blur_words(world, [line], "titre", 84, W / 2, 350 + k * 112, t - starts[k], align="c", fit_w=1600,
-                   line_h=100, stagger=0.07, opacity=dim)
+        if VERT:
+            ctitle(world, [line], 84, 120 + k * 200, t - starts[k], line_h=100, stagger=0.07, opacity=dim)
+        else:
+            ctitle(world, [line], 84, 350 + k * 112, t - starts[k], line_h=100, stagger=0.07, opacity=dim)
     return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 5.3)), 0, 0
 
 
 def scene_pilote(world, t):
     cfg = CFG["pilote"]
     cv = Cv(world)
-    blur_words(world, cfg["lignes"], "titre", 88, W / 2, 300, t - 0.15, align="c", line_h=100, stagger=0.07,
-               fit_w=1600)
+    bottom = ctitle(world, cfg["lignes"], 88, 300, t - 0.15, line_h=100, stagger=0.07)
+    yc = max(568, bottom + 70) if VERT else 568
     q = ease_out_back(prog(t, 1.2, 0.6), 1.8)
     if q > 0:
         tw = text_w(cfg["offre"], "ui_semi", 26)
-        cv.rrect(W / 2 - tw / 2 - 30, 568 - 30 * q, W / 2 + tw / 2 + 30, 568 + 30 * q, 30 * q,
+        cv.rrect(W / 2 - tw / 2 - 30, yc - 30 * q, W / 2 + tw / 2 + 30, yc + 30 * q, 30 * q,
                  fill=C["gris_clair"])
-        cv.text(cfg["offre"], "ui_semi", 26, C["marine"], W / 2, 568, align="c", opacity=prog(t, 1.35, 0.3))
+        cv.text(cfg["offre"], "ui_semi", 26, C["marine"], W / 2, yc, align="c", opacity=prog(t, 1.35, 0.3))
     n = cfg["mois"]
     sw, gap = 120, 14
     x0 = W / 2 - (n * sw + (n - 1) * gap) / 2
@@ -1319,10 +1369,11 @@ def scene_pilote(world, t):
         x = x0 + k * (sw + gap)
         st = 1.7 + k * 0.18
         f = ease_out_expo(prog(t, st, 0.5))
-        cv.rrect(x, 700, x + sw, 708, 4, fill=C["trait"])
+        yb = yc + 132
+        cv.rrect(x, yb, x + sw, yb + 8, 4, fill=C["trait"])
         if f > 0:
-            cv.rrect(x, 700, x + sw * f, 708, 4, fill=C["bleu"])
-        cv.text(f"Mois {k + 1}", "mono", 16, C["texte_gris"], x + sw / 2, 738, align="c",
+            cv.rrect(x, yb, x + sw * f, yb + 8, 4, fill=C["bleu"])
+        cv.text(f"Mois {k + 1}", "mono", 16, C["texte_gris"], x + sw / 2, yb + 38, align="c",
                 opacity=prog(t, st, 0.4), tracking=0.08)
     return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 4.8)), 0, 0
 
@@ -1334,10 +1385,10 @@ def scene_fin(world, t):
         ("commande", 270, 930, -6, 0.7, 4, -3), ("livraison", 1660, 920, 7, 0.85, -5, -2),
         ("notif", 1790, 560, -4, 1.0, -3, 2), ("valide", 150, 580, 5, 1.1, 3, -2)])
     cv = Cv(world)
-    lockup(world, W / 2, 345, 0.7, t - 0.2)
-    bottom = blur_words(world, cfg["lignes"], "titre", 84, W / 2, 425, t - 0.5, align="c", line_h=98,
-                        stagger=0.07, fit_w=1300)
-    cv.text(cfg["contact"], "mono", 22, C["bleu"], W / 2, max(690, bottom + 50), align="c",
+    lockup(world, W / 2, 345 + OY, 0.62 if VERT else 0.7, t - 0.2)
+    bottom = ctitle(world, cfg["lignes"], 84, 425, t - 0.5, fit_w=1300, line_h=98, stagger=0.07)
+    cv.text(cfg["contact"], "mono", fit_size(cfg["contact"], "mono", 22, (W - 120) / 1.18), C["bleu"],
+            W / 2, max(690 + OY, bottom + 50), align="c",
             opacity=ease_out_cubic(prog(t, 1.6, 0.6)), tracking=0.18)
     return 1.0 + 0.05 * ease_in_out_cubic(prog(t, 0, 6.0)), 0, 0
 
@@ -1459,7 +1510,8 @@ def render_frame(i):
     return np.clip(out, 0, 255).astype(np.uint8).tobytes()
 
 
-def init_worker(cfg):
+def init_worker(cfg, fmt="horizontal"):
+    setup_format(fmt)
     CFG.clear()
     CFG.update(cfg)
     C.clear()
@@ -1627,18 +1679,22 @@ def synth_audio(path, sr=44100):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config", default=os.path.join(ROOT, "config_parcours.json"))
-    ap.add_argument("--out", default=os.path.join(ROOT, "output", "parcours-autopiec.mp4"))
+    ap.add_argument("--format", choices=["horizontal", "vertical"], default="horizontal",
+                    help="horizontal 1920x1080 (défaut) ou vertical 1080x1920 pour mobile")
+    ap.add_argument("--out")
     ap.add_argument("--preview", nargs="*", type=float, metavar="SEC")
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     args = ap.parse_args()
 
     with open(args.config, encoding="utf-8") as f:
         cfg = json.load(f)
-    init_worker(cfg)
+    init_worker(cfg, args.format)
+    suffix = "-mobile" if VERT else ""
+    args.out = args.out or os.path.join(ROOT, "output", f"parcours-autopiec{suffix}.mp4")
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
 
     if args.preview is not None:
-        outdir = os.path.join(os.path.dirname(os.path.abspath(args.out)), "apercu-parcours")
+        outdir = os.path.join(os.path.dirname(os.path.abspath(args.out)), "apercu-parcours" + suffix)
         os.makedirs(outdir, exist_ok=True)
         secs = args.preview or [s + d - 0.6 for s, (d, *_) in zip(STARTS, TIMELINE)]
         for sec in secs:
@@ -1657,7 +1713,7 @@ def main():
     cmd += ["-c:v", "libx264", "-preset", "slow", "-crf", "17", "-pix_fmt", "yuv420p",
             "-movflags", "+faststart", "-shortest", args.out]
     ff = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-    with Pool(args.jobs, initializer=init_worker, initargs=(cfg,)) as pool:
+    with Pool(args.jobs, initializer=init_worker, initargs=(cfg, args.format)) as pool:
         for i, buf in enumerate(pool.imap(render_frame, range(total), chunksize=2)):
             ff.stdin.write(buf)
             if i % FPS == 0:
