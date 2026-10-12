@@ -1,61 +1,126 @@
 {
   "accroche": {
-    "lignes": ["Chaque sinistre carrosserie", "mérite {la bonne pièce.}"]
+    "lignes": [
+      "Digitaliser et piloter la recherche",
+      "{de pièces automobiles de réemploi}"
+    ]
   },
   "probleme": {
-    "lignes": ["La pièce de réemploi existe.", "Mais elle est {loin du garage.}"],
+    "lignes": [
+      "Une plateforme, un parcours plus fluide",
+      "pour les réparateurs et",
+      "{un meilleur pilotage pour Groupama.}"
+    ],
     "piece": "Pièce de réemploi",
-    "garage": "Garage"
+    "garage": "Réparateurs agréés"
   },
   "logo": {
-    "baseline": "RÉEMPLOI · POUR GROUPAMA ANTILLES-GUYANE"
+    "baseline": "GROUPAMA ANTILLES-GUYANE VERS LA PIÈCE DE RÉEMPLOI"
   },
   "titre": {
-    "surtitre": "LE PARCOURS",
-    "lignes": ["De la création du procès-verbal", "{à la pièce livrée chez le réparateur.}"],
-    "sous_titre": "7 étapes, un seul circuit, tout est tracé."
+    "surtitre": "",
+    "lignes": [
+      "De la création du procès-verbal",
+      "{à la pièce livrée chez le réparateur.}"
+    ],
+    "sous_titre": "7 étapes, un parcours centralisé."
   },
-
   "acteurs": {
-    "expert":     { "nom": "EXPERT AUTOMOBILE", "court": "Expert",     "icone": "presse" },
-    "autopiec":   { "nom": "AUTOPIEC",          "court": "Autopiec",   "icone": "autopiec" },
-    "reparateur": { "nom": "RÉPARATEUR",        "court": "Réparateur", "icone": "cle" },
-    "assurance":  { "nom": "ASSURANCE",         "court": "Assurance",  "icone": "bouclier" }
+    "expert": {
+      "nom": "EXPERT AUTOMOBILE",
+      "court": "EXPERT AUTOMOBILE",
+      "icone": "presse"
+    },
+    "autopiec": {
+      "nom": "AUTOPIEC",
+      "court": "AUTOPIEC",
+      "icone": "autopiec"
+    },
+    "reparateur": {
+      "nom": "RÉPARATEUR AGRÉÉ",
+      "court": "RÉPARATEUR AGRÉÉ",
+      "icone": "cle"
+    },
+    "assurance": {
+      "nom": "ASSURANCE",
+      "court": "ASSURANCE",
+      "icone": "bouclier"
+    }
   },
-
   "etapes": [
     {
       "acteur": "expert",
-      "titre": "L'expert transmet {le procès-verbal.}",
-      "texte": "Le PV identifie une pièce de réemploi.",
+      "titre": "L'expert transmet {le procès-verbal} sans efforts.",
+      "texte": "Une automatisation est mise en place pour faciliter les échanges avec votre administrateur AUTOPIEC.",
       "carte": {
-        "entete": ["PROCÈS-VERBAL D'EXPERTISE", "SINISTRE CARROSSERIE"],
-        "lignes": [
-          ["Assureur", "Groupama Antilles-Guyane"],
-          ["Cabinet", "Cabinet d'expertise mandaté"],
-          ["Réparateur", "Garage agréé · Martinique"],
-          ["Pièce à remplacer", "Pare-chocs avant"]
+        "entete": [
+          "PROCÈS-VERBAL D'EXPERTISE",
+          "N° SINISTRE : 2025304297"
         ],
-        "eligible": ["Pièce de réemploi", "Éligible"],
-        "bouton": "Transmettre à Autopiec",
-        "bouton_ok": "PV transmis à Autopiec",
-        "toast": "Autopiec reçoit le PV…",
-        "toast_ok": "PV reçu par Autopiec"
+        "lignes": [
+          [
+            "Compagnie",
+            "Groupama Antilles-Guyane"
+          ],
+          [
+            "Expert",
+            "IDEA Expertise"
+          ],
+          [
+            "Réparateur",
+            "Garage KERN · Martinique"
+          ],
+          [
+            "Pièce recherchée",
+            "Pare-chocs avant"
+          ]
+        ],
+        "eligible": [
+          "Pièce de réemploi",
+          "Favorable"
+        ],
+        "bouton": "Enregistré",
+        "bouton_ok": "Envoyé",
+        "toast": "En cours de transmission",
+        "toast_ok": "En cours de traitement"
       }
     },
     {
       "acteur": "autopiec",
-      "titre": "Autopiec centralise {et source la pièce.}",
-      "texte": "La demande est centralisée, les fournisseurs sont sollicités.",
+      "titre": "Autopiec {centralise} et assure le sourcing des pièces de réemploi.",
+      "texte": "Un parcours digital : simple, traçable et sécurisé.",
       "carte": {
-        "entete": ["AUTOPIEC · CENTRALE", "DOSSIER #2481"],
-        "recu": ["PV d'expertise reçu", "Pare-chocs avant · Garage agréé Martinique", "Centralisé"],
+        "entete": [
+          "AUTOPIEC · PRE",
+          "N° SINISTRE : 2025304297"
+        ],
+        "recu": [
+          "PV d'expertise reçu",
+          "Pare-chocs avant · Garage KERN · Martinique",
+          "Centralisé"
+        ],
         "sourcing": "SOURCING FOURNISSEURS",
         "fournisseurs": [
-          ["Fournisseur 1", "Martinique", true],
-          ["Fournisseur 2", "Guadeloupe", false],
-          ["Fournisseur 3", "Martinique", true],
-          ["Fournisseur 4", "Martinique", true]
+          [
+            "Fournisseur 1",
+            "Martinique",
+            true
+          ],
+          [
+            "Fournisseur 2",
+            "Guadeloupe",
+            false
+          ],
+          [
+            "Fournisseur 3",
+            "Hexagone",
+            true
+          ],
+          [
+            "Fournisseur 4",
+            "Hexagone",
+            true
+          ]
         ],
         "disponible": "Disponible",
         "indisponible": "Indisponible",
@@ -64,30 +129,63 @@
     },
     {
       "acteur": "reparateur",
-      "titre": "Le réparateur reçoit la pièce {et valide sa conformité.}",
+      "titre": "Le réparateur reçoit la proposition {et valide sa conformité.}",
       "texte": "Ou la refuse, en un clic.",
       "carte": {
-        "entete": ["ESPACE RÉPARATEUR", "PROPOSITION 1 / 3"],
+        "entete": [
+          "ESPACE RÉPARATEUR",
+          "PROPOSITION 1 / 3"
+        ],
         "piece": "Pare-chocs avant",
-        "etiquettes": ["Pièce de réemploi", "Disponible sous 48 h"],
-        "controles": ["Référence constructeur conforme", "État et teinte contrôlés", "Compatible avec le véhicule"],
-        "valider": "Valider la pièce",
+        "etiquettes": [
+          "Pièce de réemploi",
+          "Disponible sous 48 h"
+        ],
+        "controles": [
+          "Référence constructeur conforme",
+          "État et teinte contrôlés",
+          "Compatible avec le véhicule"
+        ],
+        "valider": "Valider",
         "refuser": "Refuser",
-        "valide": "Pièce validée"
+        "valide": "Enregistré"
       }
     },
     {
       "acteur": "assurance",
-      "titre": "L'assurance {est notifiée.}",
-      "texte": "Dès que le réparateur accepte ou refuse la pièce depuis son tableau de bord.",
+      "titre": "L'assureur {est notifié.}",
+      "texte": "Dès que le réparateur accepte la pièce depuis son tableau de bord.",
       "carte": {
-        "entete": ["TABLEAU DE BORD", "GROUPAMA ANTILLES-GUYANE"],
-        "colonnes": ["DOSSIER", "PIÈCE", "STATUT"],
+        "entete": [
+          "TABLEAU DE BORD",
+          "GROUPAMA ANTILLES-GUYANE"
+        ],
+        "colonnes": [
+          "DOSSIER",
+          "PIÈCE",
+          "STATUT"
+        ],
         "dossiers": [
-          ["#2478", "Aile avant", "Livrée"],
-          ["#2479", "Rétroviseur", "Commandée"],
-          ["#2481", "Pare-chocs avant", "En attente"],
-          ["#2483", "Phare avant", "Proposée"]
+          [
+            "2025304188",
+            "Aile avant",
+            "Livrée"
+          ],
+          [
+            "2025304213",
+            "Rétroviseur",
+            "Commandée"
+          ],
+          [
+            "2025304297",
+            "Pare-chocs avant",
+            "En attente"
+          ],
+          [
+            "2025304321",
+            "Phare avant",
+            "Proposée"
+          ]
         ],
         "statut_final": "Acceptée",
         "notif_app": "NOTIFICATION · ASSURANCE",
@@ -104,7 +202,7 @@
         "date": "jeudi 12 octobre",
         "app": "AUTOPIEC · EXPERT",
         "notifs": [
-          "Dossier #2481 : pièce acceptée par le réparateur",
+          "Sinistre 2025304297 : pièce acceptée par le réparateur",
           "Le dossier est suivi en temps réel"
         ]
       }
@@ -114,65 +212,120 @@
       "titre": "L'assurance passe {un bon de commande.}",
       "texte": "Suite à la validation du réparateur, directement à Autopiec.",
       "carte": {
-        "entete": ["BON DE COMMANDE", "GROUPAMA → AUTOPIEC"],
-        "lignes": [
-          ["Émis par", "Groupama Antilles-Guyane"],
-          ["Destinataire", "Autopiec"],
-          ["Pièce", "Pare-chocs avant · réemploi"],
-          ["Livraison", "Garage agréé · Martinique"]
+        "entete": [
+          "BON DE COMMANDE",
+          "GROUPAMA → AUTOPIEC"
         ],
-        "validation": ["Validation réparateur", "Validée"],
+        "lignes": [
+          [
+            "Émis par",
+            "Groupama Antilles-Guyane"
+          ],
+          [
+            "Destinataire",
+            "Autopiec"
+          ],
+          [
+            "Pièce",
+            "Pare-chocs avant · réemploi"
+          ],
+          [
+            "Livraison",
+            "Garage KERN · Martinique"
+          ]
+        ],
+        "validation": [
+          "Validation réparateur",
+          "Validée"
+        ],
         "bouton": "Passer la commande",
-        "bouton_ok": "Commande transmise à Autopiec"
+        "bouton_ok": "Bon de commande validé"
       }
     },
     {
       "acteur": "autopiec",
-      "titre": "Autopiec livre la pièce {chez le réparateur.}",
-      "texte": "Bon de livraison signé, dossier clôturé.",
+      "titre": "Autopiec planifie {la livraison et le suivi.}",
+      "texte": "Bon de livraison signé, le réparateur assure la mission de remise en état du véhicule.",
       "carte": {
-        "entete": ["SUIVI DE LIVRAISON", "DOSSIER #2481"],
+        "entete": [
+          "SUIVI DE LIVRAISON",
+          "N° SINISTRE : 2025304297"
+        ],
         "depart": "Autopiec",
-        "arrivee": "Garage agréé",
+        "arrivee": "Garage KERN",
         "jalons": [
-          "Commande reçue par Autopiec",
-          "Pièce préparée et contrôlée",
+          "Commande en cours de préparation",
+          "Pièce expédiée",
           "En cours d'acheminement",
-          "Livrée au garage · bon de livraison signé"
+          "Livrée au réparateur · bon de livraison signé"
         ]
       }
     }
   ],
-
   "suivi": {
     "titre": "Tout est tracé, {en temps réel.}",
-    "entete": ["TABLEAU DE BORD GROUPAMA", "MARTINIQUE · GUADELOUPE"],
-    "dossiers": [
-      ["#2481", "Pare-chocs avant", 4],
-      ["#2482", "Capot", 4],
-      ["#2483", "Phare avant", 3],
-      ["#2484", "Aile arrière", 2],
-      ["#2485", "Porte avant gauche", 1]
+    "entete": [
+      "TABLEAU DE BORD GROUPAMA",
+      "MARTINIQUE · GUADELOUPE"
     ],
-    "statuts": ["PV reçu", "Proposée", "Validée", "Commandée", "Livrée"]
+    "dossiers": [
+      [
+        "#2481",
+        "Pare-chocs avant",
+        4
+      ],
+      [
+        "#2482",
+        "Capot",
+        4
+      ],
+      [
+        "#2483",
+        "Phare avant",
+        3
+      ],
+      [
+        "#2484",
+        "Aile arrière",
+        2
+      ],
+      [
+        "#2485",
+        "Porte avant gauche",
+        1
+      ]
+    ],
+    "statuts": [
+      "PV reçu",
+      "Proposée",
+      "Validée",
+      "Commandée",
+      "Livrée"
+    ]
   },
-
   "benefices": {
     "surtitre": "POUR GROUPAMA",
-    "lignes": ["Des pièces {moins chères.}", "{Moins d'immobilisation.}", "Plus de {visibilité.}"]
+    "lignes": [
+      "Des pièces {moins chères.}",
+      "{Moins d'immobilisation.}",
+      "Plus de {visibilité.}"
+    ]
   },
-
   "pilote": {
-    "lignes": ["Un pilote de 6 mois,", "{en Martinique d'abord.}"],
-    "offre": "1 500 € HT / mois · sans engagement",
+    "lignes": [
+      "Un pilote de 6 mois,",
+      "{en Martinique d'abord.}"
+    ],
+    "offre": "1 500 € HT / mois",
     "mois": 6
   },
-
   "fin": {
-    "lignes": ["La pièce de réemploi,", "{livrée au garage.}"],
+    "lignes": [
+      "Un accès dédié au réemploi",
+      "{pour les réparateurs.}"
+    ],
     "contact": "AUTOPIEC.MQ  ·  CONTACT@AUTOPIEC.COM"
   },
-
   "couleurs": {
     "bleu": "#005EE9",
     "marine": "#091C3B",
@@ -186,6 +339,5 @@
     "texte_gris": "#6B7385",
     "bleu_clair": "#E8F0FE"
   },
-
   "musique": true
 }

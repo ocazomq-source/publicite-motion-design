@@ -561,13 +561,49 @@ def asset(name, scale=1.0, tint=None):
     im = Image.open(os.path.join(ROOT, "assets", name)).convert("RGBA")
     if tint:
         col = Image.new("RGBA", im.size, tint[:3] + (255,))
-        col.putalpha(im.getchannel("A"))
+        # on écarte les résidus quasi transparents du détourage
+        col.putalpha(im.getchannel("A").point(lambda v: 0 if v < 70 else v))
         im = col
     return im.resize((max(1, int(im.width * scale * S)), max(1, int(im.height * scale * S))), Image.LANCZOS)
 
 
 def logo_bleu(scale):
     return asset("logo_autopiec.png", scale, C["bleu"])
+
+
+def logo_groupama(scale):
+    return asset("logo_groupama.png", scale * 0.8, C["bleu"])
+
+
+def lockup(world, cx, cy, scale, t=10.0, opacity=1.0):
+    """AUTOPIEC  ×  Groupama Antilles-Guyane (version bleue pour fond blanc), entrée animée."""
+    cv = Cv(world)
+    a, g = logo_bleu(scale), logo_groupama(scale)
+    gap = 48 * scale
+    aw, gw = a.width / S, g.width / S
+    x0 = cx - (aw + 2 * gap + gw) / 2
+    p = ease_out_expo(prog(t, 0.0, 0.9))
+    if p > 0:
+        lay = Image.new("RGBA", a.size, (0, 0, 0, 0))
+        lay.paste(a.crop((0, 0, max(1, int(a.width * p)), a.height)), (0, 0))
+        b = (1 - p) * 8 * S
+        if b > 0.4:
+            lay = lay.filter(ImageFilter.GaussianBlur(b))
+        cv.paste(lay, x0 + aw / 2, cy, opacity=opacity)
+    q = ease_out_back(prog(t, 0.35, 0.45), 2.4)
+    if q > 0:
+        xc, k = x0 + aw + gap, 13 * scale * q
+        for sgn in (1, -1):
+            cv.line([(xc - k, cy - k * sgn), (xc + k, cy + k * sgn)], alpha(C["bleu"], opacity),
+                    max(1.5, 3 * scale))
+    r = prog(t, 0.5, 0.7)
+    if r > 0:
+        lay = g
+        b = (1 - ease_out_cubic(r)) * 10 * S
+        if b > 0.4:
+            lay = lay.filter(ImageFilter.GaussianBlur(b))
+        cv.paste(lay, x0 + aw + 2 * gap + gw / 2 + (1 - ease_out_expo(r)) * 30, cy,
+                 opacity=clamp(r * 2) * opacity)
 
 
 _BG = None
@@ -649,7 +685,8 @@ def step_progress(world, t, idx):
             f = 0
         if f > 0:
             cv.rrect(x, y - 3, x + sw * f, y + 3, 3, fill=C["bleu"])
-    cv.paste(logo_bleu(0.3), 80 + logo_bleu(0.3).width / S / 2, 64, opacity=0.95)
+    a, g = logo_bleu(0.3), logo_groupama(0.3)
+    lockup(world, 80 + (a.width / S + g.width / S + 2 * 48 * 0.3) / 2, 64, 0.3)
 
 
 def card_header(cv, w, left, right):
@@ -672,7 +709,7 @@ def mini_card(kind):
     if kind == "pv":
         img, cv = new_card(420, 200, 20)
         card_header(cv, 420, "PROCÈS-VERBAL", "PV")
-        for j, (a, b) in enumerate((("Assureur", "Groupama"), ("Réparateur", "Garage agréé"), ("Pièce", "Pare-chocs"))):
+        for j, (a, b) in enumerate((("Assureur", "Groupama"), ("Réparateur", "Garage KERN"), ("Pièce", "Pare-chocs"))):
             cv.text(a, "ui", 17, C["texte_gris"], 30, 102 + j * 34)
             cv.text(b, "ui_semi", 17, C["marine"], 390, 102 + j * 34, align="r")
     elif kind == "valide":
@@ -690,7 +727,7 @@ def mini_card(kind):
         img, cv = new_card(360, 150, 20)
         card_header(cv, 360, "LIVRAISON", "SUIVI")
         cv.check(40, 112, 16, C["vert"], width=2.6)
-        cv.text("Livrée au garage", "ui_semi", 18, C["marine"], 62, 112)
+        cv.text("Livrée au réparateur", "ui_semi", 18, C["marine"], 62, 112)
     else:  # notification
         img, cv = new_card(400, 96, 20)
         cv.rrect(22, 22, 74, 74, 14, fill=C["bleu"])
@@ -722,66 +759,61 @@ def scene_accroche(world, t):
         ("pv", 300, 250, 6, 0.6, 6, -4), ("valide", 1610, 260, -7, 0.8, -5, 3),
         ("commande", 330, 840, -5, 1.0, 5, -3), ("livraison", 1590, 830, 6, 1.2, -6, -2)],
         opacity=0.55, blur=1.5)
-    blur_words(world, cfg["lignes"], "titre", 92, W / 2, 430, t - 0.25, align="c", line_h=104, stagger=0.08)
+    blur_words(world, cfg["lignes"], "titre", 84, W / 2, 440, t - 0.25, align="c", line_h=98, stagger=0.07)
     return 1.0 + 0.035 * ease_in_out_cubic(prog(t, 0, 4.5)), 0, 0
 
 
 def scene_probleme(world, t):
     cfg = CFG["probleme"]
-    blur_words(world, cfg["lignes"], "titre", 84, W / 2, 330, t - 0.15, align="c", line_h=96, stagger=0.07)
+    blur_words(world, cfg["lignes"], "titre", 70, W / 2, 210, t - 0.15, align="c", line_h=82, stagger=0.055)
     cv = Cv(world)
-    y = 700
-    p_in = ease_out_expo(prog(t, 0.9, 0.8))
+    y = 720
+    p_in = ease_out_expo(prog(t, 1.3, 0.8))
     if p_in > 0:
-        # La pièce à gauche, le garage qui s'éloigne vers la droite
-        stretch = ease_in_out_cubic(prog(t, 1.6, 1.6))
-        xl = 700
-        xr = lerp(1060, 1460, stretch)
+        # La pièce de réemploi rejoint les réparateurs agréés par la plateforme
+        xl, xr = 680, 1240
         cv.rrect(xl - 110, y - 64, xl + 110, y + 64, 26, fill=mix(C["fond"], C["gris_clair"], p_in))
-        bump = asset("pare_chocs.png", 0.27)
-        cv.paste(bump, xl, y - 6, opacity=p_in)
+        cv.paste(asset("pare_chocs.png", 0.27), xl, y - 6, opacity=p_in)
         cv.text(cfg["piece"], "ui_semi", 22, C["marine"], xl, y + 98, align="c", opacity=p_in)
-        # pointillés
         x = xl + 130
         while x < xr - 70:
-            cv.disc(x, y, 3.2, mix(C["fond"], C["texte_gris"], 0.55 * p_in))
+            cv.disc(x, y, 3.2, mix(C["fond"], C["texte_gris"], 0.45 * p_in))
             x += 18
+        link = ease_in_out_cubic(prog(t, 1.9, 1.1))
+        if link > 0:
+            xe = lerp(xl + 120, xr - 66, link)
+            cv.rrect(xl + 120, y - 3, xe, y + 3, 3, fill=C["bleu"])
+            if link < 1:
+                cv.disc(xe, y, 9, C["bleu"])
         cv.disc(xr, y, 62 * p_in, C["bleu_clair"])
         cv.icon("garage", xr, y, 30 * p_in, C["bleu"], bg=C["bleu_clair"])
+        if t > 3.0:
+            cv.check_badge(xr + 44, y - 44, 15, prog(t, 3.0, 0.5), C["vert"], C["fond"])
         cv.text(cfg["garage"], "ui_semi", 22, C["marine"], xr, y + 98, align="c", opacity=p_in)
     return 1.0 + 0.03 * ease_in_out_cubic(prog(t, 0, 4.5)), 0, 0
 
 
 def scene_logo(world, t):
     cv = Cv(world)
-    logo = logo_bleu(1.35)
-    p = ease_out_expo(prog(t, 0.3, 1.0))
-    if p > 0:
-        # révélation de gauche à droite + sortie du flou
-        wpx = int(logo.width * p)
-        lay = Image.new("RGBA", logo.size, (0, 0, 0, 0))
-        lay.paste(logo.crop((0, 0, max(1, wpx), logo.height)), (0, 0))
-        b = (1 - p) * 10 * S
-        if b > 0.4:
-            lay = lay.filter(ImageFilter.GaussianBlur(b))
-        cv.paste(lay, W / 2 + (1 - p) * 30, 500)
-    cv.text(CFG["logo"]["baseline"], "mono", 21, C["bleu"], W / 2, 590, align="c",
-            opacity=ease_out_cubic(prog(t, 0.9, 0.6)), tracking=0.22)
+    lockup(world, W / 2, 490, 1.05, t - 0.3)
+    cv.text(CFG["logo"]["baseline"], "mono", 21, C["bleu"], W / 2, 600, align="c",
+            opacity=ease_out_cubic(prog(t, 1.1, 0.6)), tracking=0.2)
     return 1.0 + 0.05 * ease_in_out_cubic(prog(t, 0, 3.8)), 0, 0
 
 
 def scene_titre(world, t):
     cfg = CFG["titre"]
     cv = Cv(world)
-    cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, 300, align="c",
-            opacity=prog(t, 0.1, 0.4), tracking=0.24)
-    blur_words(world, cfg["lignes"], "titre", 72, W / 2, 350, t - 0.25, align="c", line_h=84, stagger=0.06)
+    if cfg.get("surtitre"):
+        cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, 300, align="c",
+                opacity=prog(t, 0.1, 0.4), tracking=0.24)
+    blur_words(world, cfg["lignes"], "titre", 72, W / 2, 330 if cfg.get("surtitre") else 300, t - 0.25, align="c", line_h=84, stagger=0.06)
 
     # Aperçu du parcours : 7 acteurs reliés
     steps = CFG["etapes"]
     n = len(steps)
-    xs = [lerp(420, 1500, i / (n - 1)) for i in range(n)]
-    y = 680
+    xs = [lerp(330, 1590, i / (n - 1)) for i in range(n)]
+    y = 660
     lp = ease_in_out_cubic(prog(t, 1.1, 1.8))
     if lp > 0:
         cv.line([(xs[0], y), (lerp(xs[0], xs[-1], lp), y)], C["trait"], 3)
@@ -795,7 +827,7 @@ def scene_titre(world, t):
         cv.ring(xs[i], y, 34 * q, 2.5, C["bleu"])
         cv.icon(a["icone"], xs[i], y, 16 * q, C["bleu"], bg=C["fond"])
         op = prog(t, th, 0.4)
-        cv.text(a["court"], "ui_semi", 20, C["marine"], xs[i], y + 62, align="c", opacity=op)
+        cv.text(a["court"], "ui_semi", 17, C["marine"], xs[i], y + 62, align="c", opacity=op, tracking=0.04)
         cv.text(str(i + 1), "mono", 16, C["texte_gris"], xs[i], y - 58, align="c", opacity=op)
     q = ease_out_cubic(prog(t, 2.6, 0.6))
     cv.text(cfg["sous_titre"], "ui", 28, C["texte_gris"], W / 2, 850 + (1 - q) * 10, align="c", opacity=q)
@@ -844,7 +876,9 @@ def step1(world, t, step):
         timg, tcv = new_card(tw, 66, 33, fill=C["gris_clair"], border=False)
         done = t > 4.4
         if done:
-            tcv.check_badge(36, 33, 13, prog(t, 4.4, 0.5), C["vert"], C["fond"])
+            pulse = (t - 4.4) % 1.0
+            tcv.disc(36, 33, 13 + 9 * pulse, mix(C["gris_clair"], C["bleu"], 0.35 * (1 - pulse)))
+            tcv.disc(36, 33, 9, C["bleu"])
             tcv.text(c["toast_ok"], "ui_semi", 23, C["marine"], 62, 33)
         else:
             tcv.spinner(36, 33, 11, t, C["bleu"])
@@ -973,7 +1007,7 @@ def step4(world, t, step):
     card_header(cv, w, *c["entete"])
     cols = c["colonnes"]
     cv.text(cols[0], "mono", 15, C["texte_gris"], 36, 112, tracking=0.12)
-    cv.text(cols[1], "mono", 15, C["texte_gris"], 200, 112, tracking=0.12)
+    cv.text(cols[1], "mono", 15, C["texte_gris"], 250, 112, tracking=0.12)
     cv.text(cols[2], "mono", 15, C["texte_gris"], 804, 112, align="r", tracking=0.12)
     t_flip = 1.55
     for k, (num, piece, statut) in enumerate(c["dossiers"]):
@@ -986,7 +1020,7 @@ def step4(world, t, step):
             hq = prog(t, t_flip, 0.3) * (1 - 0.6 * prog(t, 3.5, 1.0))
             cv.rrect(20, y - 32, w - 20, y + 32, 14, fill=mix(C["fond"], C["bleu_clair"], hq))
         cv.text(num, "ui_bold", 22, C["marine"], 36, y, opacity=rq)
-        cv.text(piece, "ui", 22, C["marine"], 200, y, opacity=rq)
+        cv.text(piece, "ui", 22, C["marine"], 250, y, opacity=rq)
         if focus and t >= t_flip:
             fp = ease_out_back(prog(t, t_flip, 0.4), 2.2)
             status_chip(cv, c["statut_final"], 804, y, opacity=clamp(fp), check=True)
@@ -1232,12 +1266,10 @@ def scene_fin(world, t):
     floating_cards(world, t, [
         ("pv", 250, 170, 8, 0.4, 5, -3), ("valide", 1650, 150, -8, 0.55, -4, 2),
         ("commande", 270, 930, -6, 0.7, 4, -3), ("livraison", 1660, 920, 7, 0.85, -5, -2),
-        ("notif", 1720, 540, -4, 1.0, -3, 2), ("valide", 190, 560, 5, 1.1, 3, -2)])
+        ("notif", 1790, 560, -4, 1.0, -3, 2), ("valide", 150, 580, 5, 1.1, 3, -2)])
     cv = Cv(world)
-    logo = logo_bleu(0.75)
-    lp = ease_out_expo(prog(t, 0.2, 0.8))
-    cv.paste(logo, W / 2, 360 + (1 - lp) * 20, opacity=lp)
-    blur_words(world, cfg["lignes"], "titre", 92, W / 2, 420, t - 0.5, align="c", line_h=104, stagger=0.07)
+    lockup(world, W / 2, 345, 0.7, t - 0.2)
+    blur_words(world, cfg["lignes"], "titre", 84, W / 2, 425, t - 0.5, align="c", line_h=98, stagger=0.07)
     cv.text(cfg["contact"], "mono", 22, C["bleu"], W / 2, 690, align="c",
             opacity=ease_out_cubic(prog(t, 1.6, 0.6)), tracking=0.18)
     return 1.0 + 0.05 * ease_in_out_cubic(prog(t, 0, 6.0)), 0, 0
