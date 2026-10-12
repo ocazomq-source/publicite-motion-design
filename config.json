@@ -1,0 +1,115 @@
+{
+  "intro": {
+    "surtitre": "PROPOSITION DE PARTENARIAT",
+    "territoires": ["Martinique", "Guadeloupe"]
+  },
+
+  "titre": {
+    "lignes": [
+      "Digitaliser et piloter",
+      "la recherche {de pièces}",
+      "{automobiles de réemploi}"
+    ],
+    "sous_titre": "Une plateforme, un réseau de fournisseurs, un parcours plus fluide pour les réparateurs et un meilleur pilotage pour Groupama.",
+    "atouts": [
+      { "icone": "loupe",     "texte": "Recherche & sourcing" },
+      { "icone": "graphique", "texte": "Suivi & pilotage" },
+      { "icone": "camion",    "texte": "De la demande à la livraison" }
+    ]
+  },
+
+  "qui": {
+    "rubrique": "01. QUI SOMMES-NOUS ?",
+    "lignes": ["AUTOPIEC : une couche digitale", "au service {du réemploi}"],
+    "cartes": [
+      { "icone": "ecran",    "titre": "Une porte d'entrée digitale", "texte": "Centraliser les demandes et faciliter la recherche d'une pièce adaptée." },
+      { "icone": "reseau",   "titre": "Un réseau de sourcing",       "texte": "Solliciter les fournisseurs disposant de la pièce recherchée." },
+      { "icone": "document", "titre": "Un parcours traçable",        "texte": "Suivre les réponses et rendre l'information lisible pour les pros." }
+    ],
+    "role_titre": "NOTRE RÔLE PROPOSÉ",
+    "role_texte": "Administrer le dispositif de recherche de pièces de réemploi pour Groupama"
+  },
+
+  "processus": {
+    "rubrique": "02. PROCESSUS CIBLE",
+    "lignes": ["Du procès-verbal", "à {la pièce mise à disposition}"],
+    "etapes": [
+      { "icone": "document", "titre": "Dossier / PV",      "texte": "Le PV d'expertise identifie le besoin" },
+      { "icone": "envoi",    "titre": "Transmission",      "texte": "Intégration ou dépôt structuré" },
+      { "icone": "loupe",    "titre": "Sourcing",          "texte": "Les fournisseurs pertinents sont sollicités" },
+      { "icone": "bulle",    "titre": "Réponses",          "texte": "Disponibilité, prix indicatif et délai" },
+      { "icone": "panier",   "titre": "Choix & commande",  "texte": "Le réparateur confirme la pièce" },
+      { "icone": "camion",   "titre": "Livraison & suivi", "texte": "Statut et indicateurs consolidés" }
+    ],
+    "conclusion": "Un flux automatisé, avec un suivi digital des réponses et de la suite donnée."
+  },
+
+  "deploiement": {
+    "lignes": ["Un accès simple pour les réparateurs,", "{un pilotage central pour Groupama}"],
+    "sous_titre": "Déploiement progressif en Martinique et en Guadeloupe, avec un accompagnement de proximité.",
+    "etapes": [
+      { "icone": "personnes", "titre": "Référencer",  "texte": "Construire la liste des réparateurs agréés" },
+      { "icone": "ecran",     "titre": "Activer",     "texte": "Créer les comptes et définir les rôles" },
+      { "icone": "diplome",   "titre": "Accompagner", "texte": "Former les utilisateurs et assurer le support" }
+    ]
+  },
+
+  "kpi": {
+    "rubrique": "03. PILOTAGE & KPI",
+    "lignes": ["Mesurer l'adoption, l'efficacité", "{et la valeur créée}"],
+    "blocs": [
+      { "icone": "personnes", "titre": "ADOPTION", "texte": "L'engagement des réparateurs",
+        "indicateurs": [
+          { "graphe": "barres",  "texte": "Comptes créés et actifs" },
+          { "graphe": "anneau",  "texte": "Réparateurs actifs / éligibles" },
+          { "graphe": "courbe",  "texte": "Demandes par réparateur" }
+        ] },
+      { "icone": "cible", "titre": "PERFORMANCE SOURCING", "texte": "La capacité du réseau à répondre",
+        "indicateurs": [
+          { "graphe": "anneau",  "texte": "Taux de réponse fournisseurs" },
+          { "graphe": "anneau",  "texte": "Taux de disponibilité positive" },
+          { "graphe": "barres",  "texte": "Réparateurs engagés" }
+        ] }
+    ]
+  },
+
+  "pilote": {
+    "rubrique": "04. CADRE DE PARTENARIAT",
+    "lignes": ["Une phase pilote cadrée,", "puis {une décision fondée sur les résultats}"],
+    "duree": "6",
+    "unite": "mois",
+    "duree_texte": "de phase pilote, avec reporting mensuel",
+    "criteres_titre": "Décision de poursuite basée sur :",
+    "criteres": [
+      { "icone": "graphique", "texte": "L'adoption par les réparateurs" },
+      { "icone": "cible",     "texte": "La performance du sourcing" },
+      { "icone": "horloge",   "texte": "Les délais et la disponibilité" },
+      { "icone": "recyclage", "texte": "La valeur mesurée" }
+    ],
+    "jalons": [
+      { "titre": "Cadrage",             "texte": "Mois 1" },
+      { "titre": "Lancement pilote",    "texte": "Mois 2" },
+      { "titre": "Suivi & ajustements", "texte": "Mois 2 à 6" },
+      { "titre": "Bilan & décision",    "texte": "Mois 3 à 6" }
+    ]
+  },
+
+  "fin": {
+    "lignes": ["Un partenariat au service", "{d'une mobilité plus durable}"],
+    "texte": "Faciliter le recours au réemploi, réduire les délais de réparation et contribuer à une économie plus circulaire."
+  },
+
+  "couleurs": {
+    "marine": "#002A73",
+    "bleu": "#1A56E0",
+    "bleu_vif": "#0197EE",
+    "citron": "#E2FD03",
+    "blanc": "#FFFFFF",
+    "fond_clair": "#EEF4FD",
+    "bordure": "#DCE6F7",
+    "texte": "#0B1A4A",
+    "texte_gris": "#5B6785"
+  },
+
+  "musique": true
+}
