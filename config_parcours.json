@@ -9,7 +9,7 @@
     "lignes": [
       "Un parcours fluide",
       "{de l'expertise à la livraison}",
-      "{pour les professionnels agréés Groupama.}"
+      "pour les professionnels agréés Groupama."
     ],
     "autopiec": "administrateur",
     "piece": "Pièce de réemploi",
@@ -57,7 +57,9 @@
   "etapes": [
     {
       "acteur": "expert",
-      "titre": "L'expert transmet {le procès-verbal}, sans efforts.",
+      "titre": "L'expert transmet le 
+               {procès-verbal}, 
+                sans efforts.",
       "texte": "Les pièces de réemploi sont identifiées et transmises automatiquement.",
       "carte": {
         "entete": [
@@ -94,7 +96,7 @@
     },
     {
       "acteur": "autopiec",
-      "titre": "Une recherche centralisée. Une meilleure visibilité sur les solutions disponibles.",
+      "titre": "{Une recherche centralisée. } Une meilleure visibilité sur les solutions disponibles.",
       "texte": "Disponibilité, localisation, alternatives : les options sont réunies au même endroit.",
       "carte": {
         "entete": [
@@ -140,7 +142,7 @@
       "texte": "Les caractéristiques de la pièce sont consultées avant décision.",
       "carte": {
         "entete": [
-          "ESPACE RÉPARATEUR",
+          "TABLEAU DE BORD RÉPARATEUR",
           "PROPOSITION 1 / 3"
         ],
         "piece": "Pare-chocs avant",
@@ -160,7 +162,7 @@
     },
     {
       "acteur": "assurance",
-      "titre": "Groupama suit l'avancement {et reçoit les notifications clés.}",
+      "titre": "Groupama suit l'avancement et { reçoit les notifications clés.}",
       "texte": "Acceptation, commande, livraison : chaque statut facilite le suivi du dossier.",
       "carte": {
         "entete": [
@@ -207,7 +209,7 @@
       "carte": {
         "heure": "07:24",
         "date": "Mardi 13 octobre",
-        "app": "AUTOPIEC · EXPERT",
+        "app": "AUTOPIEC · PRO",
         "notifs": [
           "Sinistre 2025304297 : pièce acceptée par le réparateur",
           "Le dossier est suivi en temps réel"
@@ -216,7 +218,7 @@
     },
     {
       "acteur": "assurance",
-      "titre": "Une fois la pièce validée, {la commande est transmise à Autopiec.}",
+      "titre": "{le bon de commande }, est transmis à Autopiec.",
       "texte": "Un processus de validation intégré au parcours du sinistre.",
       "carte": {
         "entete": [
@@ -251,7 +253,9 @@
     },
     {
       "acteur": "autopiec",
-      "titre": "Autopiec {coordonne la livraison} jusqu'au réparateur.",
+      "titre": "Autopiec {coordonne 
+                la livraison} jusqu'au 
+                réparateur.",
       "texte": "De l'expédition à la réception, le statut de la commande reste accessible. Le réparateur peut poursuivre la remise en état du véhicule.",
       "carte": {
         "entete": [
@@ -314,8 +318,8 @@
     "surtitre": "POUR GROUPAMA",
     "lignes": [
       "Des coûts de réparation à {optimiser.}",
-      "Un parcours à fluidifier.",
-      "{Moins d'immobilisation.}"
+      "{Un parcours à fluidifier}.",
+      "{Moins d'immobilisation.}" 
     ]
   },
   "pilote": {
@@ -328,10 +332,11 @@
   },
   "fin": {
     "lignes": [
-      "Faites du réemploi un levier de performance",
+      "Le réemploi automobile
+       un levier de performance",
       "{pour vos sinistres.}"
     ],
-    "contact": "AUTOPIEC.MQ  ·  CONTACT@AUTOPIEC.COM"
+    "contact": "WWW.AUTOPIEC.MQ  ·  CONTACT@AUTOPIEC.COM"
   },
   "couleurs": {
     "bleu": "#005EE9",
