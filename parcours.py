@@ -697,11 +697,16 @@ def step_text(world, t, idx, step):
     op = prog(t, 0.15, 0.4)
     cv.text(label, "mono", 21, C["bleu"], TEXT_X, 330, opacity=op, tracking=0.2)
     actor_chip(world, t - 0.3, step["acteur"], TEXT_X, 392)
-    size = 66
-    while size > 50 and len(wrap_words(markup_words(step["titre"]), "titre", size, 700)) > 3:
-        size -= 2
-    bottom = blur_words(world, [step["titre"]], "titre", size, TEXT_X, 440, t - 0.5,
-                        max_w=700, line_h=size * 1.12, stagger=0.055)
+    if isinstance(step["titre"], list):
+        # retours à la ligne choisis dans la config : on garde les lignes telles quelles
+        bottom = blur_words(world, step["titre"], "titre", 66, TEXT_X, 440, t - 0.5,
+                            line_h=74, stagger=0.055, fit_w=740)
+    else:
+        size = 66
+        while size > 50 and len(wrap_words(markup_words(step["titre"]), "titre", size, 700)) > 3:
+            size -= 2
+        bottom = blur_words(world, [step["titre"]], "titre", size, TEXT_X, 440, t - 0.5,
+                            max_w=700, line_h=size * 1.12, stagger=0.055)
     lines = wrap_words([(w, False) for w in step["texte"].split()], "ui", 28, 680)
     for j, ln in enumerate(lines):
         s = " ".join(w for w, _ in ln)
@@ -1330,9 +1335,9 @@ def scene_fin(world, t):
         ("notif", 1790, 560, -4, 1.0, -3, 2), ("valide", 150, 580, 5, 1.1, 3, -2)])
     cv = Cv(world)
     lockup(world, W / 2, 345, 0.7, t - 0.2)
-    blur_words(world, cfg["lignes"], "titre", 84, W / 2, 425, t - 0.5, align="c", line_h=98, stagger=0.07,
-               fit_w=1300)
-    cv.text(cfg["contact"], "mono", 22, C["bleu"], W / 2, 690, align="c",
+    bottom = blur_words(world, cfg["lignes"], "titre", 84, W / 2, 425, t - 0.5, align="c", line_h=98,
+                        stagger=0.07, fit_w=1300)
+    cv.text(cfg["contact"], "mono", 22, C["bleu"], W / 2, max(690, bottom + 50), align="c",
             opacity=ease_out_cubic(prog(t, 1.6, 0.6)), tracking=0.18)
     return 1.0 + 0.05 * ease_in_out_cubic(prog(t, 0, 6.0)), 0, 0
 

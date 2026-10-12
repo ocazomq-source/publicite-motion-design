@@ -24,6 +24,10 @@ Règles à respecter :
 - Gardez les **guillemets** `"` au début et à la fin de chaque texte, et les **virgules** entre les éléments.
 - Pour mettre un guillemet dans un texte, utilisez plutôt « » ou l'apostrophe '.
 - `"lignes": ["ligne 1", "ligne 2"]` : chaque élément est une ligne à l'écran.
+- Un titre d'étape peut aussi être écrit en liste pour choisir les retours à la ligne :
+  `"titre": ["L'expert transmet le", "{procès-verbal},", "sans efforts."]`.
+  Les accolades `{ }` doivent alors s'ouvrir et se fermer sur la même ligne.
+- Ne revenez **jamais** à la ligne à l'intérieur des guillemets : le fichier ne serait plus valide.
 - Les couleurs se changent dans la rubrique `"couleurs"` (codes du type `#005EE9`).
 
 Repères dans le fichier :

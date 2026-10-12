@@ -57,9 +57,7 @@
   "etapes": [
     {
       "acteur": "expert",
-      "titre": "L'expert transmet le 
-               {procès-verbal}, 
-                sans efforts.",
+      "titre": ["L'expert transmet le", "{procès-verbal},", "sans efforts."],
       "texte": "Les pièces de réemploi sont identifiées et transmises automatiquement.",
       "carte": {
         "entete": [
@@ -218,7 +216,7 @@
     },
     {
       "acteur": "assurance",
-      "titre": "{le bon de commande }, est transmis à Autopiec.",
+      "titre": "{Le bon de commande} est transmis à Autopiec.",
       "texte": "Un processus de validation intégré au parcours du sinistre.",
       "carte": {
         "entete": [
@@ -253,9 +251,7 @@
     },
     {
       "acteur": "autopiec",
-      "titre": "Autopiec {coordonne 
-                la livraison} jusqu'au 
-                réparateur.",
+      "titre": ["Autopiec {coordonne}", "{la livraison} jusqu'au", "réparateur."],
       "texte": "De l'expédition à la réception, le statut de la commande reste accessible. Le réparateur peut poursuivre la remise en état du véhicule.",
       "carte": {
         "entete": [
@@ -332,8 +328,8 @@
   },
   "fin": {
     "lignes": [
-      "Le réemploi automobile
-       un levier de performance",
+      "Le réemploi automobile,",
+      "un levier de performance",
       "{pour vos sinistres.}"
     ],
     "contact": "WWW.AUTOPIEC.MQ  ·  CONTACT@AUTOPIEC.COM"
