@@ -1,3 +1,4 @@
 output/apercu/
+output/apercu-parcours/
 output/*.wav
 __pycache__/

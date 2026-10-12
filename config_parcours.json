@@ -1,0 +1,191 @@
+{
+  "accroche": {
+    "lignes": ["Chaque sinistre carrosserie", "mérite {la bonne pièce.}"]
+  },
+  "probleme": {
+    "lignes": ["La pièce de réemploi existe.", "Mais elle est {loin du garage.}"],
+    "piece": "Pièce de réemploi",
+    "garage": "Garage"
+  },
+  "logo": {
+    "baseline": "RÉEMPLOI · POUR GROUPAMA ANTILLES-GUYANE"
+  },
+  "titre": {
+    "surtitre": "LE PARCOURS",
+    "lignes": ["De la création du procès-verbal", "{à la pièce livrée chez le réparateur.}"],
+    "sous_titre": "7 étapes, un seul circuit, tout est tracé."
+  },
+
+  "acteurs": {
+    "expert":     { "nom": "EXPERT AUTOMOBILE", "court": "Expert",     "icone": "presse" },
+    "autopiec":   { "nom": "AUTOPIEC",          "court": "Autopiec",   "icone": "autopiec" },
+    "reparateur": { "nom": "RÉPARATEUR",        "court": "Réparateur", "icone": "cle" },
+    "assurance":  { "nom": "ASSURANCE",         "court": "Assurance",  "icone": "bouclier" }
+  },
+
+  "etapes": [
+    {
+      "acteur": "expert",
+      "titre": "L'expert transmet {le procès-verbal.}",
+      "texte": "Le PV identifie une pièce de réemploi.",
+      "carte": {
+        "entete": ["PROCÈS-VERBAL D'EXPERTISE", "SINISTRE CARROSSERIE"],
+        "lignes": [
+          ["Assureur", "Groupama Antilles-Guyane"],
+          ["Cabinet", "Cabinet d'expertise mandaté"],
+          ["Réparateur", "Garage agréé · Martinique"],
+          ["Pièce à remplacer", "Pare-chocs avant"]
+        ],
+        "eligible": ["Pièce de réemploi", "Éligible"],
+        "bouton": "Transmettre à Autopiec",
+        "bouton_ok": "PV transmis à Autopiec",
+        "toast": "Autopiec reçoit le PV…",
+        "toast_ok": "PV reçu par Autopiec"
+      }
+    },
+    {
+      "acteur": "autopiec",
+      "titre": "Autopiec centralise {et source la pièce.}",
+      "texte": "La demande est centralisée, les fournisseurs sont sollicités.",
+      "carte": {
+        "entete": ["AUTOPIEC · CENTRALE", "DOSSIER #2481"],
+        "recu": ["PV d'expertise reçu", "Pare-chocs avant · Garage agréé Martinique", "Centralisé"],
+        "sourcing": "SOURCING FOURNISSEURS",
+        "fournisseurs": [
+          ["Fournisseur 1", "Martinique", true],
+          ["Fournisseur 2", "Guadeloupe", false],
+          ["Fournisseur 3", "Martinique", true],
+          ["Fournisseur 4", "Martinique", true]
+        ],
+        "disponible": "Disponible",
+        "indisponible": "Indisponible",
+        "bilan": "3 propositions envoyées au réparateur"
+      }
+    },
+    {
+      "acteur": "reparateur",
+      "titre": "Le réparateur reçoit la pièce {et valide sa conformité.}",
+      "texte": "Ou la refuse, en un clic.",
+      "carte": {
+        "entete": ["ESPACE RÉPARATEUR", "PROPOSITION 1 / 3"],
+        "piece": "Pare-chocs avant",
+        "etiquettes": ["Pièce de réemploi", "Disponible sous 48 h"],
+        "controles": ["Référence constructeur conforme", "État et teinte contrôlés", "Compatible avec le véhicule"],
+        "valider": "Valider la pièce",
+        "refuser": "Refuser",
+        "valide": "Pièce validée"
+      }
+    },
+    {
+      "acteur": "assurance",
+      "titre": "L'assurance {est notifiée.}",
+      "texte": "Dès que le réparateur accepte ou refuse la pièce depuis son tableau de bord.",
+      "carte": {
+        "entete": ["TABLEAU DE BORD", "GROUPAMA ANTILLES-GUYANE"],
+        "colonnes": ["DOSSIER", "PIÈCE", "STATUT"],
+        "dossiers": [
+          ["#2478", "Aile avant", "Livrée"],
+          ["#2479", "Rétroviseur", "Commandée"],
+          ["#2481", "Pare-chocs avant", "En attente"],
+          ["#2483", "Phare avant", "Proposée"]
+        ],
+        "statut_final": "Acceptée",
+        "notif_app": "NOTIFICATION · ASSURANCE",
+        "notif_texte": "Pièce acceptée par le réparateur",
+        "refus": "En cas de refus, l'assurance est prévenue de la même façon."
+      }
+    },
+    {
+      "acteur": "expert",
+      "titre": "L'expert est {notifié lui aussi.}",
+      "texte": "En cas de refus, il peut ajuster son procès-verbal.",
+      "carte": {
+        "heure": "10:24",
+        "date": "jeudi 12 octobre",
+        "app": "AUTOPIEC · EXPERT",
+        "notifs": [
+          "Dossier #2481 : pièce acceptée par le réparateur",
+          "Le dossier est suivi en temps réel"
+        ]
+      }
+    },
+    {
+      "acteur": "assurance",
+      "titre": "L'assurance passe {un bon de commande.}",
+      "texte": "Suite à la validation du réparateur, directement à Autopiec.",
+      "carte": {
+        "entete": ["BON DE COMMANDE", "GROUPAMA → AUTOPIEC"],
+        "lignes": [
+          ["Émis par", "Groupama Antilles-Guyane"],
+          ["Destinataire", "Autopiec"],
+          ["Pièce", "Pare-chocs avant · réemploi"],
+          ["Livraison", "Garage agréé · Martinique"]
+        ],
+        "validation": ["Validation réparateur", "Validée"],
+        "bouton": "Passer la commande",
+        "bouton_ok": "Commande transmise à Autopiec"
+      }
+    },
+    {
+      "acteur": "autopiec",
+      "titre": "Autopiec livre la pièce {chez le réparateur.}",
+      "texte": "Bon de livraison signé, dossier clôturé.",
+      "carte": {
+        "entete": ["SUIVI DE LIVRAISON", "DOSSIER #2481"],
+        "depart": "Autopiec",
+        "arrivee": "Garage agréé",
+        "jalons": [
+          "Commande reçue par Autopiec",
+          "Pièce préparée et contrôlée",
+          "En cours d'acheminement",
+          "Livrée au garage · bon de livraison signé"
+        ]
+      }
+    }
+  ],
+
+  "suivi": {
+    "titre": "Tout est tracé, {en temps réel.}",
+    "entete": ["TABLEAU DE BORD GROUPAMA", "MARTINIQUE · GUADELOUPE"],
+    "dossiers": [
+      ["#2481", "Pare-chocs avant", 4],
+      ["#2482", "Capot", 4],
+      ["#2483", "Phare avant", 3],
+      ["#2484", "Aile arrière", 2],
+      ["#2485", "Porte avant gauche", 1]
+    ],
+    "statuts": ["PV reçu", "Proposée", "Validée", "Commandée", "Livrée"]
+  },
+
+  "benefices": {
+    "surtitre": "POUR GROUPAMA",
+    "lignes": ["Des pièces {moins chères.}", "{Moins d'immobilisation.}", "Plus de {visibilité.}"]
+  },
+
+  "pilote": {
+    "lignes": ["Un pilote de 6 mois,", "{en Martinique d'abord.}"],
+    "offre": "1 500 € HT / mois · sans engagement",
+    "mois": 6
+  },
+
+  "fin": {
+    "lignes": ["La pièce de réemploi,", "{livrée au garage.}"],
+    "contact": "AUTOPIEC.MQ  ·  CONTACT@AUTOPIEC.COM"
+  },
+
+  "couleurs": {
+    "bleu": "#005EE9",
+    "marine": "#091C3B",
+    "citron": "#D4F53C",
+    "vert": "#16A34A",
+    "vert_clair": "#E3F6E8",
+    "rouge": "#DC2626",
+    "fond": "#FFFFFF",
+    "gris_clair": "#F4F6FA",
+    "trait": "#E8ECF2",
+    "texte_gris": "#6B7385",
+    "bleu_clair": "#E8F0FE"
+  },
+
+  "musique": true
+}

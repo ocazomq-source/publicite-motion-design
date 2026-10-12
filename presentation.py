@@ -6,9 +6,9 @@ la musique est synthétisée avec numpy, puis ffmpeg assemble le tout en MP4.
 Tous les textes et couleurs se règlent dans config.json.
 
 Usage :
-    python3 render.py                      # -> output/autopiec-groupama.mp4
-    python3 render.py --preview            # quelques images clés dans output/apercu/
-    python3 render.py --config autre.json --out output/autre.mp4
+    python3 presentation.py                      # -> output/autopiec-groupama.mp4
+    python3 presentation.py --preview            # quelques images clés dans output/apercu/
+    python3 presentation.py --config autre.json --out output/autre.mp4
 """
 import argparse
 import json
@@ -1104,7 +1104,7 @@ def synth_music(path, sr=44100):
 # --------------------------------------------------------------------------- #
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--config", default=os.path.join(ROOT, "config.json"))
+    ap.add_argument("--config", default=os.path.join(ROOT, "config_presentation.json"))
     ap.add_argument("--out", default=os.path.join(ROOT, "output", "autopiec-groupama.mp4"))
     ap.add_argument("--preview", nargs="*", type=float, metavar="SEC",
                     help="exporte des images clés (instants en secondes, facultatif)")
