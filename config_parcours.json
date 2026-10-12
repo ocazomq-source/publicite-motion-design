@@ -2,13 +2,13 @@
   "accroche": {
     "lignes": [
       "Et si chaque {sinistre automobile} devenait",
-      "une opportunité d'économies?"
+      "une opportunité d'économies ?"
     ]
   },
   "probleme": {
     "lignes": [
       "Un parcours fluide",
-      "{ de l'expertise à la livraison.}",
+      "{de l'expertise à la livraison}",
       "{pour les professionnels agréés Groupama.}"
     ],
     "autopiec": "administrateur",
@@ -24,7 +24,7 @@
       "De la création du procès-verbal",
       "à la pièce livrée {au réparateur.}"
     ],
-    "sous_titre": "Un portail digital centralisé concu pour les Outres-mer.",
+    "sous_titre": "Un portail digital centralisé conçu pour les Outre-mer.",
     "frise": [
       "expert",
       "autopiec",
@@ -57,9 +57,7 @@
   "etapes": [
     {
       "acteur": "expert",
-      "titre": "L'expert transmet {le procès-verbal}, 
-      "sans efforts.",
-      
+      "titre": "L'expert transmet {le procès-verbal}, sans efforts.",
       "texte": "Les pièces de réemploi sont identifiées et transmises automatiquement.",
       "carte": {
         "entete": [
@@ -152,7 +150,7 @@
         ],
         "controles": [
           "Référence constructeur conforme",
-          "État contrôlés",
+          "État contrôlé",
           "Compatible avec le véhicule"
         ],
         "valider": "Valider",
@@ -162,7 +160,7 @@
     },
     {
       "acteur": "assurance",
-      "titre": "Groupama suit l'avancement {reçoit les notifications clés.}",
+      "titre": "Groupama suit l'avancement {et reçoit les notifications clés.}",
       "texte": "Acceptation, commande, livraison : chaque statut facilite le suivi du dossier.",
       "carte": {
         "entete": [
@@ -272,7 +270,7 @@
     }
   ],
   "suivi": {
-    "titre": "Une vision claire de chaque dossier, {en temps réel.}à chaque étape.",
+    "titre": ["Une vision claire de chaque dossier,", "{en temps réel}, à chaque étape."],
     "entete": [
       "TABLEAU DE BORD GROUPAMA",
       "MARTINIQUE · GUADELOUPE"
@@ -317,7 +315,7 @@
     "lignes": [
       "Des coûts de réparation à {optimiser.}",
       "Un parcours à fluidifier.",
-      "{moins d'immobilisation..}"
+      "{Moins d'immobilisation.}"
     ]
   },
   "pilote": {
@@ -326,11 +324,11 @@
       "{en Martinique.}"
     ],
     "offre": "1 500 € HT / mois",
-    " Engagement mois": 6
+    "mois": 6
   },
   "fin": {
     "lignes": [
-      "Faites du réemploi un levier de performance .",
+      "Faites du réemploi un levier de performance",
       "{pour vos sinistres.}"
     ],
     "contact": "AUTOPIEC.MQ  ·  CONTACT@AUTOPIEC.COM"

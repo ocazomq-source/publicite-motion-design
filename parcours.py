@@ -123,6 +123,13 @@ def text_w(text, kind, size, tracking=0.0):
     return (font(kind, size).getlength(text) + tracking * size * S * max(0, len(text) - 1)) / S
 
 
+def fit_size(text, kind, size, max_w):
+    """Réduit la taille jusqu'à ce que le texte tienne dans max_w."""
+    while size > 12 and text_w(text, kind, size) > max_w:
+        size -= 1
+    return size
+
+
 PAD = 12 * S
 
 
@@ -477,12 +484,18 @@ def word_layer(parts, kind, size, color, accent):
 
 
 def blur_words(world, lines, kind, size, x, y_top, t, color=None, accent=None, align="l",
-               line_h=None, stagger=0.06, dur=0.7, opacity=1.0, max_w=None):
+               line_h=None, stagger=0.06, dur=0.7, opacity=1.0, max_w=None, fit_w=None):
     """Affiche des lignes (listes de (mot, accent)) mot par mot, chaque mot sortant du flou.
     Si max_w est donné, `lines` est une liste de chaînes balisées à replier."""
     color = color or C["marine"]
     accent = accent or C["bleu"]
     line_h = line_h or size * 1.12
+    if fit_w and max_w is None:
+        # réduit le texte si une ligne est plus large que fit_w
+        widest = max(text_w(re.sub(r"[{}]", "", ln), kind, size) for ln in lines)
+        if widest > fit_w:
+            k = fit_w / widest
+            size, line_h = max(24, int(size * k)), line_h * k
     if max_w is not None:
         words = []
         for ln in lines:
@@ -684,8 +697,11 @@ def step_text(world, t, idx, step):
     op = prog(t, 0.15, 0.4)
     cv.text(label, "mono", 21, C["bleu"], TEXT_X, 330, opacity=op, tracking=0.2)
     actor_chip(world, t - 0.3, step["acteur"], TEXT_X, 392)
-    bottom = blur_words(world, [step["titre"]], "titre", 66, TEXT_X, 440, t - 0.5,
-                        max_w=700, line_h=74, stagger=0.055)
+    size = 66
+    while size > 50 and len(wrap_words(markup_words(step["titre"]), "titre", size, 700)) > 3:
+        size -= 2
+    bottom = blur_words(world, [step["titre"]], "titre", size, TEXT_X, 440, t - 0.5,
+                        max_w=700, line_h=size * 1.12, stagger=0.055)
     lines = wrap_words([(w, False) for w in step["texte"].split()], "ui", 28, 680)
     for j, ln in enumerate(lines):
         s = " ".join(w for w, _ in ln)
@@ -784,13 +800,13 @@ def scene_accroche(world, t):
         ("pv", 300, 250, 6, 0.6, 6, -4), ("valide", 1610, 260, -7, 0.8, -5, 3),
         ("commande", 330, 840, -5, 1.0, 5, -3), ("livraison", 1590, 830, 6, 1.2, -6, -2)],
         opacity=0.55, blur=1.5)
-    blur_words(world, cfg["lignes"], "titre", 80, W / 2, 445, t - 0.25, align="c", line_h=94, stagger=0.07)
+    blur_words(world, cfg["lignes"], "titre", 80, W / 2, 445, t - 0.25, align="c", line_h=94, stagger=0.07, fit_w=1600)
     return 1.0 + 0.035 * ease_in_out_cubic(prog(t, 0, 4.5)), 0, 0
 
 
 def scene_probleme(world, t):
     cfg = CFG["probleme"]
-    blur_words(world, cfg["lignes"], "titre", 70, W / 2, 210, t - 0.15, align="c", line_h=82, stagger=0.055)
+    blur_words(world, cfg["lignes"], "titre", 70, W / 2, 210, t - 0.15, align="c", line_h=82, stagger=0.055, fit_w=1600)
     cv = Cv(world)
     y = 720
     p_in = ease_out_expo(prog(t, 1.3, 0.8))
@@ -810,6 +826,15 @@ def scene_probleme(world, t):
             cv.rrect(xl + 120, y - 3, xe, y + 3, 3, fill=C["bleu"])
             if link < 1:
                 cv.disc(xe, y, 9, C["bleu"])
+        if cfg.get("autopiec"):
+            xm = (xl + xr) / 2
+            mq = ease_out_back(prog(t, 1.6, 0.5), 2.2)
+            if mq > 0:
+                cv.disc(xm, y, 46 * mq, C["bleu"])
+                cv.icon("autopiec", xm, y, 22 * mq, C["fond"])
+                op = prog(t, 1.7, 0.4)
+                cv.text("AUTOPIEC", "ui_bold", 20, C["bleu"], xm, y + 82, align="c", opacity=op, tracking=0.06)
+                cv.text(cfg["autopiec"], "ui", 20, C["texte_gris"], xm, y + 110, align="c", opacity=op)
         cv.disc(xr, y, 62 * p_in, C["bleu_clair"])
         cv.icon("garage", xr, y, 30 * p_in, C["bleu"], bg=C["bleu_clair"])
         if t > 3.0:
@@ -832,7 +857,7 @@ def scene_titre(world, t):
     if cfg.get("surtitre"):
         cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, 300, align="c",
                 opacity=prog(t, 0.1, 0.4), tracking=0.24)
-    blur_words(world, cfg["lignes"], "titre", 72, W / 2, 330 if cfg.get("surtitre") else 300, t - 0.25, align="c", line_h=84, stagger=0.06)
+    blur_words(world, cfg["lignes"], "titre", 72, W / 2, 330 if cfg.get("surtitre") else 300, t - 0.25, align="c", line_h=84, stagger=0.06, fit_w=1600)
 
     # Aperçu du parcours : les acteurs reliés (liste « frise », sinon un par étape)
     actors = cfg.get("frise") or [st["acteur"] for st in CFG["etapes"]]
@@ -924,8 +949,11 @@ def step2(world, t, step):
         cv.rrect(32, 98, 788, 196, 20, fill=mix(C["fond"], C["bleu_clair"], q))
         cv.disc(84, 147, 28 * q, C["bleu"])
         cv.icon("doc", 84, 147, 14 * q, C["fond"])
-        cv.text(c["recu"][0], "ui_semi", 25, C["marine"], 128, 133, opacity=q)
-        cv.text(c["recu"][1], "ui", 20, C["texte_gris"], 128, 164, opacity=q)
+        room = 764 - (text_w(c["recu"][2], "ui_bold", 19) + 19 * 0.95 + 28) - 20 - 128
+        cv.text(c["recu"][0], "ui_semi", fit_size(c["recu"][0], "ui_semi", 25, room), C["marine"], 128, 133,
+                opacity=q)
+        cv.text(c["recu"][1], "ui", fit_size(c["recu"][1], "ui", 20, room), C["texte_gris"], 128, 164,
+                opacity=q)
         cq = prog(t, 0.95, 0.4)
         if cq > 0:
             cv.chip(c["recu"][2], 764, 147, "ui_bold", 19, C["fond"], C["bleu"], align="r",
@@ -1218,7 +1246,13 @@ def make_step(idx):
 # --------------------------------------------------------------------------- #
 def scene_suivi(world, t):
     cfg = CFG["suivi"]
-    blur_words(world, [cfg["titre"]], "titre", 80, W / 2, 170, t - 0.15, align="c", line_h=90, stagger=0.06)
+    # « titre » : une chaîne (repliée automatiquement) ou une liste de lignes
+    if isinstance(cfg["titre"], list):
+        blur_words(world, cfg["titre"], "titre", 70, W / 2, 150, t - 0.15, align="c", line_h=80,
+                   stagger=0.05, fit_w=1600)
+    else:
+        blur_words(world, [cfg["titre"]], "titre", 70, W / 2, 150, t - 0.15, align="c", line_h=80,
+                   stagger=0.05, max_w=1500)
     w, h = 1060, 500
     img, cv = new_card(w, h, 28, fill=C["marine"], border=False)
     cv.text(cfg["entete"][0], "mono", 18, C["citron"], 36, 40, tracking=0.16)
@@ -1257,7 +1291,7 @@ def scene_benefices(world, t):
     starts = [0.3, 1.25, 2.2]
     for k, line in enumerate(cfg["lignes"]):
         dim = 1 - 0.55 * prog(t, starts[k + 1], 0.5) if k + 1 < len(starts) else 1
-        blur_words(world, [line], "titre", 84, W / 2, 350 + k * 112, t - starts[k], align="c",
+        blur_words(world, [line], "titre", 84, W / 2, 350 + k * 112, t - starts[k], align="c", fit_w=1600,
                    line_h=100, stagger=0.07, opacity=dim)
     return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 5.3)), 0, 0
 
@@ -1265,7 +1299,8 @@ def scene_benefices(world, t):
 def scene_pilote(world, t):
     cfg = CFG["pilote"]
     cv = Cv(world)
-    blur_words(world, cfg["lignes"], "titre", 88, W / 2, 300, t - 0.15, align="c", line_h=100, stagger=0.07)
+    blur_words(world, cfg["lignes"], "titre", 88, W / 2, 300, t - 0.15, align="c", line_h=100, stagger=0.07,
+               fit_w=1600)
     q = ease_out_back(prog(t, 1.2, 0.6), 1.8)
     if q > 0:
         tw = text_w(cfg["offre"], "ui_semi", 26)
@@ -1295,7 +1330,8 @@ def scene_fin(world, t):
         ("notif", 1790, 560, -4, 1.0, -3, 2), ("valide", 150, 580, 5, 1.1, 3, -2)])
     cv = Cv(world)
     lockup(world, W / 2, 345, 0.7, t - 0.2)
-    blur_words(world, cfg["lignes"], "titre", 84, W / 2, 425, t - 0.5, align="c", line_h=98, stagger=0.07)
+    blur_words(world, cfg["lignes"], "titre", 84, W / 2, 425, t - 0.5, align="c", line_h=98, stagger=0.07,
+               fit_w=1300)
     cv.text(cfg["contact"], "mono", 22, C["bleu"], W / 2, 690, align="c",
             opacity=ease_out_cubic(prog(t, 1.6, 0.6)), tracking=0.18)
     return 1.0 + 0.05 * ease_in_out_cubic(prog(t, 0, 6.0)), 0, 0
