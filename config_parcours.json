@@ -347,5 +347,10 @@
     "texte_gris": "#6B7385",
     "bleu_clair": "#E8F0FE"
   },
-  "musique": true
+  "musique": true,
+  "sons": {
+    "effets": true,
+    "volume_effets": 1.0,
+    "volume_musique": 1.0
+  }
 }

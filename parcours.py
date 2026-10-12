@@ -1595,76 +1595,144 @@ def synth_audio(path, sr=44100):
     x = np.arange(n) / sr
     mus *= np.clip((DURATION - x) / 1.2, 0, 1)
 
-    # --- bruitages
-    def clic():
-        x = tt(0.05)
-        s = rng.standard_normal(len(x)) * np.exp(-x / 0.004)
-        return (np.sin(2 * np.pi * 2200 * x) * np.exp(-x / 0.01) * 0.6 + s * 0.4)
+    # --- bruitages : palette douce « interface d'application » (numpy seul)
+    def fft_band(x, lo, hi, soft=0.25):
+        """Filtre passe-bande à bords doux, appliqué dans le domaine fréquentiel."""
+        n_ = len(x)
+        spec = np.fft.rfft(x)
+        f = np.fft.rfftfreq(n_, 1 / sr)
+        lo_g = 1 / (1 + (lo / np.maximum(f, 1)) ** (2 / soft)) if lo > 0 else 1
+        hi_g = 1 / (1 + (f / hi) ** (2 / soft)) if hi else 1
+        return np.fft.irfft(spec * lo_g * hi_g, n_)
 
-    def tic():
-        x = tt(0.04)
-        return np.sin(2 * np.pi * 1800 * x) * np.exp(-x / 0.008)
+    def reverb(x, mix=0.25, room=0.82, tail=1.2):
+        """Petite réverbération de Schroeder (4 peignes + 2 passe-tout)."""
+        x = np.concatenate([x, np.zeros(int(tail * sr))])
+        wet = np.zeros_like(x)
+        for d_ms, g in ((29.7, room), (37.1, room * 0.98), (41.1, room * 0.96), (43.7, room * 0.94)):
+            d = int(d_ms * sr / 1000)
+            y = x.copy()
+            for i in range(d, len(y), d):           # peigne traité par blocs de taille d
+                y[i:i + d] += g * y[i - d:i - d + len(y[i:i + d])]
+            wet += y
+        wet /= 4
+        for d_ms, g in ((5.0, 0.7), (1.7, 0.7)):
+            d = int(d_ms * sr / 1000)
+            y = np.zeros_like(wet)
+            buf = wet.copy()
+            for i in range(0, len(y), d):
+                seg = buf[i:i + d]
+                prev = y[i - d:i - d + len(seg)] if i >= d else 0
+                prevx = buf[i - d:i - d + len(seg)] if i >= d else 0
+                y[i:i + len(seg)] = -g * seg + prevx + g * prev
+            wet = y
+        wet = fft_band(wet, 200, 7000)
+        return x * (1 - mix) + wet * mix
 
-    def frappe():
-        out = np.zeros(int(0.35 * sr))
-        for j in range(6):
-            x = tt(0.03)
-            s = rng.standard_normal(len(x)) * np.exp(-x / 0.004) * 0.5
-            o = int(j * 0.05 * sr)
-            out[o:o + len(s)] += s
-        return out
+    def bell(freq, dur, decay):
+        """Cloche / verre : partiels légèrement inharmoniques."""
+        x = tt(dur)
+        sig = np.zeros_like(x)
+        for ratio, amp, dk in ((1.0, 1.0, 1.0), (2.76, 0.35, 0.45), (5.4, 0.12, 0.25), (8.93, 0.05, 0.15)):
+            sig += amp * np.sin(2 * np.pi * freq * ratio * x) * np.exp(-x / (decay * dk))
+        return sig * np.clip(x / 0.002, 0, 1)
 
-    def pop():
-        x = tt(0.12)
-        f = 900 * np.exp(-x / 0.03) + 300
-        return np.sin(2 * np.pi * np.cumsum(f) / sr) * np.exp(-x / 0.035)
+    def marimba(freq, dur=0.35):
+        x = tt(dur)
+        body = np.sin(2 * np.pi * freq * x) * np.exp(-x / 0.09)
+        over = 0.25 * np.sin(2 * np.pi * freq * 4 * x) * np.exp(-x / 0.02)
+        return (body + over) * np.clip(x / 0.0015, 0, 1)
 
-    def ping():
-        x = tt(0.9)
-        return (np.sin(2 * np.pi * 1318.5 * x) * np.exp(-x / 0.25) +
-                0.7 * np.sin(2 * np.pi * 1975.5 * x) * np.exp(-(x - 0.09).clip(0) / 0.3) * (x > 0.09))
+    def clic():                                 # « tap » d'écran tactile
+        x = tt(0.06)
+        f = 650 + 900 * np.exp(-x / 0.006)
+        tone = np.sin(2 * np.pi * np.cumsum(f) / sr) * np.exp(-x / 0.012)
+        noise = fft_band(rng.standard_normal(len(x)), 2500, 7000) * np.exp(-x / 0.0025) * 0.35
+        return tone + noise
 
-    def succes():
-        out = np.zeros(int(1.0 * sr))
-        for j, m in enumerate((72, 76, 79)):
-            s = keys(midi(m), 0.8, 0.3)
-            o = int(j * 0.07 * sr)
-            out[o:o + len(s)] += s[:len(out) - o]
-        return out * 0.6
+    def tic(note=79):                           # coche : marimba accordée sur la musique
+        return marimba(midi(note))
 
-    def souffle(dur=0.8):
+    def frappe():                               # clavier feutré, frappes irrégulières
+        out = np.zeros(int(0.4 * sr))
+        t0 = 0.0
+        for j in range(7):
+            x = tt(0.025)
+            k = fft_band(rng.standard_normal(len(x)), 900, 4200) * np.exp(-x / 0.004)
+            k *= rng.uniform(0.5, 1.0)
+            o = int(t0 * sr)
+            out[o:o + len(k)] += k[:len(out) - o]
+            t0 += rng.uniform(0.035, 0.065)
+        return out * 0.8
+
+    def pop():                                  # bulle : glissando montant très court
+        x = tt(0.09)
+        f = 320 + 520 * (1 - np.exp(-x / 0.02))
+        return np.sin(2 * np.pi * np.cumsum(f) / sr) * np.exp(-x / 0.028) * np.clip(x / 0.003, 0, 1)
+
+    def ping():                                 # notification : deux notes de verre
+        a = bell(midi(88), 1.2, 0.35)           # mi
+        b = bell(midi(95), 1.2, 0.45)           # si
+        out = np.zeros(int(1.4 * sr))
+        out[:len(a)] += a
+        o = int(0.11 * sr)
+        out[o:o + len(b)] += 0.8 * b[:len(out) - o]
+        return reverb(out * 0.6, mix=0.3)
+
+    def succes():                               # validation : arpège chaleureux
+        out = np.zeros(int(1.3 * sr))
+        for j, m in enumerate((72, 76, 79, 84)):
+            s_ = marimba(midi(m), 0.6) * (0.9 if j < 3 else 0.6) + 0.25 * bell(midi(m + 12), 0.6, 0.2)
+            o = int(j * 0.06 * sr)
+            out[o:o + len(s_)] += s_[:len(out) - o]
+        return reverb(out * 0.55, mix=0.28)
+
+    def souffle(dur=0.8):                       # passage d'air : bruit filtré dont la bande glisse
         m = int(dur * sr)
         noise = rng.standard_normal(m)
+        out = np.zeros(m)
+        hop, win = 1024, 2048
+        w = np.hanning(win)
+        for i in range(0, m - win, hop):
+            ph = (i + win / 2) / m
+            centre = 350 + 2600 * math.sin(math.pi * ph) ** 2
+            seg = fft_band(noise[i:i + win] * w, centre * 0.5, centre * 1.6, soft=0.5)
+            out[i:i + win] += seg * w
         x = np.arange(m) / sr
-        cutoff = 400 + 5000 * np.sin(np.pi * x / dur) ** 2
-        a = 1 - np.exp(-2 * np.pi * cutoff / sr)
-        y = np.zeros(m)
-        acc = 0.0
-        for i in range(m):
-            acc += a[i] * (noise[i] - acc)
-            y[i] = acc
-        return y * np.sin(np.pi * x / dur) ** 2
+        return out * np.sin(np.pi * x / dur) ** 3 * 0.9
 
-    def impact():
-        x = tt(1.5)
-        f = 40 + 90 * np.exp(-x / 0.05)
-        low = np.sin(2 * np.pi * np.cumsum(f) / sr) * np.exp(-x / 0.4)
-        return low + souffle(1.5) * 0.3
+    def impact():                               # logo : grave adouci + halo cristallin
+        x = tt(2.2)
+        f = 48 + 60 * np.exp(-x / 0.06)
+        low = np.sin(2 * np.pi * np.cumsum(f) / sr) * np.exp(-x / 0.5) * np.clip(x / 0.004, 0, 1)
+        halo = sum(bell(midi(m), 2.2, 0.9) for m in (84, 88, 91)) * 0.18
+        return reverb(low * 0.9 + halo, mix=0.3, tail=0.8)
 
-    gen = {"clic": (clic, 0.5), "tic": (tic, 0.18), "frappe": (frappe, 0.25), "pop": (pop, 0.35),
-           "ping": (ping, 0.22), "succes": (succes, 0.3), "souffle": (souffle, 0.35), "impact": (impact, 0.55)}
+    gen = {"clic": (clic, 0.45), "tic": (tic, 0.2), "frappe": (frappe, 0.18), "pop": (pop, 0.32),
+           "ping": (ping, 0.3), "succes": (succes, 0.3), "souffle": (souffle, 0.3), "impact": (impact, 0.5)}
+    scale = [72, 74, 76, 79, 81, 84, 86, 88]   # gamme pentatonique de do
     cache = {}
     for k, (dur, _f, trans, sounds) in enumerate(TIMELINE):
         origin = STARTS[k] - (TR / 2 if k > 0 else 0)
+        n_tic = 0
         for lt, kind in sounds:
-            if kind not in cache:
-                cache[kind] = gen[kind][0]().astype(np.float32)
-            add(sfx, cache[kind], origin + lt, gen[kind][1])
+            key = kind
+            if kind == "tic":                   # chaque coche monte d'une note
+                key = ("tic", scale[n_tic % len(scale)])
+                n_tic += 1
+            if key not in cache:
+                cache[key] = (tic(key[1]) if kind == "tic" else gen[kind][0]()).astype(np.float32)
+            add(sfx, cache[key], origin + lt, gen[kind][1])
         if trans:
             if "souffle_tr" not in cache:
                 cache["souffle_tr"] = souffle(0.9).astype(np.float32)
-            add(sfx, cache["souffle_tr"], STARTS[k] - 0.5, 0.22 if trans == "travelling" else 0.16)
+            add(sfx, cache["souffle_tr"], STARTS[k] - 0.5, 0.2 if trans == "travelling" else 0.14)
 
+    sons = CFG.get("sons", {})
+    vol_fx = float(sons.get("volume_effets", 1.0)) if sons.get("effets", True) else 0.0
+    vol_mus = float(sons.get("volume_musique", 1.0))
+    mus *= vol_mus
+    sfx *= vol_fx
     out = np.tanh((mus * 0.9 + sfx) * 1.1)
     out /= max(1e-6, np.abs(out).max()) / 0.8
     pcm = (out * 32767).astype(np.int16)
