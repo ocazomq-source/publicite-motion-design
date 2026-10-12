@@ -24,6 +24,8 @@ python3 parcours.py --preview        # une image par scène dans output/apercu-p
 python3 parcours.py --preview 22.5   # image à un instant précis
 ```
 
+Pour modifier vous-même les textes sans rien installer : voir **[MODIFIER.md](MODIFIER.md)**.
+
 Tous les textes (étapes, contenus des interfaces, contact, offre) et les couleurs sont dans
 `config_parcours.json` (`{texte}` = mots en bleu). Les durées des scènes et les bruitages se
 règlent dans `TIMELINE` en bas de `parcours.py`.
