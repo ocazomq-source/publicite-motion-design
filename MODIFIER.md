@@ -31,6 +31,10 @@ Règles à respecter :
 - Les couleurs se changent dans la rubrique `"couleurs"` (codes du type `#005EE9`).
 - Le son se règle dans la rubrique `"sons"` : `"effets": false` coupe les bruitages,
   `"volume_effets"` et `"volume_musique"` (1.0 = normal, 0.5 = moitié moins fort, 1.5 = plus fort).
+  `"desactiver"` coupe un ou plusieurs sons précis, par exemple `"desactiver": ["frappe", "souffle"]`.
+  Noms possibles : `clic` (boutons), `tic` (coches), `frappe` (saisie du PV), `pop` (apparition
+  des cartes), `ping` (notifications), `succes` (validations), `souffle` (transitions),
+  `impact` (logos), `batterie` (pulsation de la musique).
 
 Repères dans le fichier :
 

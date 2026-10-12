@@ -351,6 +351,7 @@
   "sons": {
     "effets": true,
     "volume_effets": 1.0,
-    "volume_musique": 1.0
+    "volume_musique": 1.0,
+    "desactiver": []
   }
 }

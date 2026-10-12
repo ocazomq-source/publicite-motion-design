@@ -1564,16 +1564,11 @@ def synth_audio(path, sr=44100):
         f = 45 + 80 * np.exp(-x / 0.025)
         return np.sin(2 * np.pi * np.cumsum(f) / sr) * np.exp(-x / 0.1)
 
-    def shaker():
-        x = tt(0.08)
-        s = rng.standard_normal(len(x)).astype(np.float32)
-        s = np.diff(s, prepend=0)
-        return s * np.exp(-x / 0.02) * 0.08
-
     chords = [(48, 60, 64, 67, 71), (45, 57, 60, 64, 67), (41, 57, 60, 64, 69), (43, 55, 59, 62, 64)]
     bar = 4 * beat
     end = DURATION - 3.0
     beats_in = STARTS[4] - 0.0          # le rythme démarre avec les étapes
+    off = set(CFG.get("sons", {}).get("desactiver", []))
     for b in range(int(math.ceil(end / bar))):
         ch = chords[b % 4]
         t0 = b * bar
@@ -1585,11 +1580,9 @@ def synth_audio(path, sr=44100):
             add(mus, keys(midi(ch[1 + idx % 4] + 12), 0.6, 0.25), t0 + k8 * beat / 2, 0.07)
     for k in range(int(end / beat)):
         t0 = k * beat
-        if t0 >= beats_in:
-            if k % 2 == 0:
-                add(mus, kick(), t0, 0.55)
-            add(mus, shaker(), t0 + beat / 2, 1.0)
-            add(mus, shaker(), t0, 0.5)
+        # pulsation grave et ronde uniquement (le « shaker » en bruit blanc, trop agressif, est retiré)
+        if t0 >= beats_in and k % 2 == 0 and "batterie" not in off:
+            add(mus, kick(), t0, 0.5)
     add(mus, pad([midi(m) for m in (60, 64, 67, 71, 76)], 3.5), end, 0.12)
     add(mus, keys(midi(48), 3.0, 1.4), end, 0.25)
     x = np.arange(n) / sr
@@ -1695,7 +1688,7 @@ def synth_audio(path, sr=44100):
         w = np.hanning(win)
         for i in range(0, m - win, hop):
             ph = (i + win / 2) / m
-            centre = 350 + 2600 * math.sin(math.pi * ph) ** 2
+            centre = 250 + 1300 * math.sin(math.pi * ph) ** 2
             seg = fft_band(noise[i:i + win] * w, centre * 0.5, centre * 1.6, soft=0.5)
             out[i:i + win] += seg * w
         x = np.arange(m) / sr
@@ -1708,7 +1701,7 @@ def synth_audio(path, sr=44100):
         halo = sum(bell(midi(m), 2.2, 0.9) for m in (84, 88, 91)) * 0.18
         return reverb(low * 0.9 + halo, mix=0.3, tail=0.8)
 
-    gen = {"clic": (clic, 0.45), "tic": (tic, 0.2), "frappe": (frappe, 0.18), "pop": (pop, 0.32),
+    gen = {"clic": (clic, 0.45), "tic": (tic, 0.2), "frappe": (frappe, 0.12), "pop": (pop, 0.32),
            "ping": (ping, 0.3), "succes": (succes, 0.3), "souffle": (souffle, 0.3), "impact": (impact, 0.5)}
     scale = [72, 74, 76, 79, 81, 84, 86, 88]   # gamme pentatonique de do
     cache = {}
@@ -1716,6 +1709,8 @@ def synth_audio(path, sr=44100):
         origin = STARTS[k] - (TR / 2 if k > 0 else 0)
         n_tic = 0
         for lt, kind in sounds:
+            if kind in off:
+                continue
             key = kind
             if kind == "tic":                   # chaque coche monte d'une note
                 key = ("tic", scale[n_tic % len(scale)])
@@ -1723,10 +1718,10 @@ def synth_audio(path, sr=44100):
             if key not in cache:
                 cache[key] = (tic(key[1]) if kind == "tic" else gen[kind][0]()).astype(np.float32)
             add(sfx, cache[key], origin + lt, gen[kind][1])
-        if trans:
+        if trans and "souffle" not in off:
             if "souffle_tr" not in cache:
                 cache["souffle_tr"] = souffle(0.9).astype(np.float32)
-            add(sfx, cache["souffle_tr"], STARTS[k] - 0.5, 0.2 if trans == "travelling" else 0.14)
+            add(sfx, cache["souffle_tr"], STARTS[k] - 0.5, 0.12 if trans == "travelling" else 0.09)
 
     sons = CFG.get("sons", {})
     vol_fx = float(sons.get("volume_effets", 1.0)) if sons.get("effets", True) else 0.0
