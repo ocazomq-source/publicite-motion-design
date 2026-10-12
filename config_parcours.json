@@ -1,8 +1,8 @@
 {
   "accroche": {
     "lignes": [
-      "Digitaliser et piloter la recherche",
-      "{de pièces automobiles de réemploi}"
+      "Et si vous pouviez {indemniser aussi bien}…",
+      "pour moins cher ?"
     ]
   },
   "probleme": {
@@ -21,9 +21,15 @@
     "surtitre": "",
     "lignes": [
       "De la création du procès-verbal",
-      "{à la pièce livrée chez le réparateur.}"
+      "à la pièce livrée {au réparateur.}"
     ],
-    "sous_titre": "7 étapes, un parcours centralisé."
+    "sous_titre": "4 étapes, un seul portail digital centralisé.",
+    "frise": [
+      "expert",
+      "autopiec",
+      "reparateur",
+      "assurance"
+    ]
   },
   "acteurs": {
     "expert": {
@@ -88,7 +94,7 @@
     {
       "acteur": "autopiec",
       "titre": "Autopiec {centralise} et assure le sourcing des pièces de réemploi.",
-      "texte": "Un parcours digital : simple, traçable et sécurisé.",
+      "texte": "Une automatisation qui fluidifie la recherche de pièces de réemploi pour les réparateurs.",
       "carte": {
         "entete": [
           "AUTOPIEC · PRE",

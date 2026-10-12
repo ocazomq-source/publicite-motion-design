@@ -175,11 +175,20 @@ def segments(line, accent):
 
 
 def markup_words(line):
-    """« L'expert {le procès-verbal.} » -> [(mot, accent?), ...]."""
+    """« L'expert {le procès-verbal.} » -> [(mot, accent?), ...].
+    Un mot à cheval sur deux couleurs (« {bien}… ») devient (mot, ((morceau, accent?), ...))."""
     words = []
+    prev_end = ""
     for text, acc in segments(line, True):
-        for w in text.split():
-            words.append((w, bool(acc)))
+        glue = bool(words) and prev_end and not prev_end.isspace() and not text[:1].isspace()
+        for k, w in enumerate(text.split()):
+            if k == 0 and glue:
+                prev_w, prev_acc = words.pop()
+                parts = prev_acc if isinstance(prev_acc, tuple) else ((prev_w, prev_acc),)
+                words.append((prev_w + w, parts + ((w, bool(acc)),)))
+            else:
+                words.append((w, bool(acc)))
+        prev_end = text[-1:]
     return words
 
 
@@ -454,6 +463,19 @@ def wrap_words(words, kind, size, max_w):
     return lines
 
 
+@lru_cache(maxsize=128)
+def word_layer(parts, kind, size, color, accent):
+    """Calque d'un mot composé de morceaux de couleurs différentes."""
+    lays = [text_layer(t, kind, size, accent if a else color) for t, a in parts]
+    w = sum(l.width - 2 * PAD for l in lays) + 2 * PAD
+    im = Image.new("RGBA", (w, lays[0].height), (0, 0, 0, 0))
+    x = 0
+    for l in lays:
+        im.alpha_composite(l, (x, 0))
+        x += l.width - 2 * PAD
+    return im
+
+
 def blur_words(world, lines, kind, size, x, y_top, t, color=None, accent=None, align="l",
                line_h=None, stagger=0.06, dur=0.7, opacity=1.0, max_w=None):
     """Affiche des lignes (listes de (mot, accent)) mot par mot, chaque mot sortant du flou.
@@ -479,7 +501,10 @@ def blur_words(world, lines, kind, size, x, y_top, t, color=None, accent=None, a
             p = prog(t, i * stagger, dur)
             if p > 0 and opacity > 0:
                 e = ease_out_expo(p)
-                lay = text_layer(w, kind, size, accent if acc else color)
+                if isinstance(acc, tuple):
+                    lay = word_layer(acc, kind, size, color, accent)
+                else:
+                    lay = text_layer(w, kind, size, accent if acc else color)
                 blur = (1 - ease_out_cubic(p)) * 14 * S
                 if blur > 0.4:
                     lay = lay.filter(ImageFilter.GaussianBlur(blur))
@@ -759,7 +784,7 @@ def scene_accroche(world, t):
         ("pv", 300, 250, 6, 0.6, 6, -4), ("valide", 1610, 260, -7, 0.8, -5, 3),
         ("commande", 330, 840, -5, 1.0, 5, -3), ("livraison", 1590, 830, 6, 1.2, -6, -2)],
         opacity=0.55, blur=1.5)
-    blur_words(world, cfg["lignes"], "titre", 84, W / 2, 440, t - 0.25, align="c", line_h=98, stagger=0.07)
+    blur_words(world, cfg["lignes"], "titre", 80, W / 2, 445, t - 0.25, align="c", line_h=94, stagger=0.07)
     return 1.0 + 0.035 * ease_in_out_cubic(prog(t, 0, 4.5)), 0, 0
 
 
@@ -809,20 +834,21 @@ def scene_titre(world, t):
                 opacity=prog(t, 0.1, 0.4), tracking=0.24)
     blur_words(world, cfg["lignes"], "titre", 72, W / 2, 330 if cfg.get("surtitre") else 300, t - 0.25, align="c", line_h=84, stagger=0.06)
 
-    # Aperçu du parcours : 7 acteurs reliés
-    steps = CFG["etapes"]
-    n = len(steps)
-    xs = [lerp(330, 1590, i / (n - 1)) for i in range(n)]
+    # Aperçu du parcours : les acteurs reliés (liste « frise », sinon un par étape)
+    actors = cfg.get("frise") or [st["acteur"] for st in CFG["etapes"]]
+    n = len(actors)
+    half = min(630, 180 * (n - 1) / 2)
+    xs = [lerp(W / 2 - half, W / 2 + half, i / (n - 1)) for i in range(n)]
     y = 660
     lp = ease_in_out_cubic(prog(t, 1.1, 1.8))
     if lp > 0:
         cv.line([(xs[0], y), (lerp(xs[0], xs[-1], lp), y)], C["trait"], 3)
-    for i, st in enumerate(steps):
+    for i, actor in enumerate(actors):
         th = 1.1 + 1.8 * (i / (n - 1))
         q = ease_out_back(prog(t, th - 0.1, 0.5), 2.2)
         if q <= 0:
             continue
-        a = CFG["acteurs"][st["acteur"]]
+        a = CFG["acteurs"][actor]
         cv.disc(xs[i], y, 34 * q, C["fond"])
         cv.ring(xs[i], y, 34 * q, 2.5, C["bleu"])
         cv.icon(a["icone"], xs[i], y, 16 * q, C["bleu"], bg=C["fond"])
@@ -1283,7 +1309,7 @@ TIMELINE = [
     (3.5, scene_accroche, None, [(0.3, "pop")]),
     (4.0, scene_probleme, "flou", [(1.0, "pop"), (1.7, "souffle")]),
     (3.0, scene_logo, "zoom", [(0.3, "impact")]),
-    (4.0, scene_titre, "flou", [(1.2, "tic"), (1.5, "tic"), (1.8, "tic"), (2.1, "tic"), (2.4, "tic"), (2.7, "tic"), (3.0, "tic")]),
+    (4.0, scene_titre, "flou", [(1.1, "tic"), (1.7, "tic"), (2.3, "tic"), (2.9, "tic")]),
     (STEP_DUR, make_step(0), "zoom", [(0.7, "frappe"), (0.98, "frappe"), (1.26, "frappe"), (1.54, "frappe"),
                                        (2.0, "pop"), (3.0, "clic"), (3.05, "succes"), (4.4, "ping")]),
     (STEP_DUR, make_step(1), "travelling", [(0.95, "pop"), (1.75, "tic"), (2.1, "tic"), (2.45, "tic"),
