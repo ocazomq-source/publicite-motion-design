@@ -1,21 +1,22 @@
 {
   "accroche": {
     "lignes": [
-      "Et si vous pouviez {indemniser aussi bien}…",
-      "pour moins cher ?"
+      "Et si chaque {sinistre automobile} devenait",
+      "une opportunité d'économies?"
     ]
   },
   "probleme": {
     "lignes": [
-      "Une plateforme, un parcours plus fluide",
-      "pour les réparateurs et",
-      "{un meilleur pilotage pour Groupama.}"
+      "Un parcours fluide",
+      "{ de l'expertise à la livraison.}",
+      "{pour les professionnels agréés Groupama.}"
     ],
+    "autopiec": "administrateur",
     "piece": "Pièce de réemploi",
     "garage": "Réparateurs agréés"
   },
   "logo": {
-    "baseline": "GROUPAMA ANTILLES-GUYANE VERS LA PIÈCE DE RÉEMPLOI"
+    "baseline": "GROUPAMA ANTILLES-GUYANE EN FAVEUR DU RÉEMPLOI AUTOMOBILE"
   },
   "titre": {
     "surtitre": "",
@@ -23,7 +24,7 @@
       "De la création du procès-verbal",
       "à la pièce livrée {au réparateur.}"
     ],
-    "sous_titre": "4 étapes, un seul portail digital centralisé.",
+    "sous_titre": "Un portail digital centralisé concu pour les Outres-mer.",
     "frise": [
       "expert",
       "autopiec",
@@ -56,8 +57,10 @@
   "etapes": [
     {
       "acteur": "expert",
-      "titre": "L'expert transmet {le procès-verbal} sans efforts.",
-      "texte": "Une automatisation est mise en place pour faciliter les échanges avec votre administrateur AUTOPIEC.",
+      "titre": "L'expert transmet {le procès-verbal}, 
+      "sans efforts.",
+      
+      "texte": "Les pièces de réemploi sont identifiées et transmises automatiquement.",
       "carte": {
         "entete": [
           "PROCÈS-VERBAL D'EXPERTISE",
@@ -93,15 +96,15 @@
     },
     {
       "acteur": "autopiec",
-      "titre": "Autopiec {centralise} et assure le sourcing des pièces de réemploi.",
-      "texte": "Une automatisation qui fluidifie la recherche de pièces de réemploi pour les réparateurs.",
+      "titre": "Une recherche centralisée. Une meilleure visibilité sur les solutions disponibles.",
+      "texte": "Disponibilité, localisation, alternatives : les options sont réunies au même endroit.",
       "carte": {
         "entete": [
           "AUTOPIEC · PRE",
           "N° SINISTRE : 2025304297"
         ],
         "recu": [
-          "PV d'expertise reçu",
+          "VOLKSWAGEN - 2.0 TDI 140 CUP BLUEMOTION - 2021",
           "Pare-chocs avant · Garage KERN · Martinique",
           "Centralisé"
         ],
@@ -135,8 +138,8 @@
     },
     {
       "acteur": "reparateur",
-      "titre": "Le réparateur reçoit la proposition {et valide sa conformité.}",
-      "texte": "Ou la refuse, en un clic.",
+      "titre": "Le réparateur vérifie la pièce et {valide sa conformité.}",
+      "texte": "Les caractéristiques de la pièce sont consultées avant décision.",
       "carte": {
         "entete": [
           "ESPACE RÉPARATEUR",
@@ -149,7 +152,7 @@
         ],
         "controles": [
           "Référence constructeur conforme",
-          "État et teinte contrôlés",
+          "État contrôlés",
           "Compatible avec le véhicule"
         ],
         "valider": "Valider",
@@ -159,8 +162,8 @@
     },
     {
       "acteur": "assurance",
-      "titre": "L'assureur {est notifié.}",
-      "texte": "Dès que le réparateur accepte la pièce depuis son tableau de bord.",
+      "titre": "Groupama suit l'avancement {reçoit les notifications clés.}",
+      "texte": "Acceptation, commande, livraison : chaque statut facilite le suivi du dossier.",
       "carte": {
         "entete": [
           "TABLEAU DE BORD",
@@ -201,11 +204,11 @@
     },
     {
       "acteur": "expert",
-      "titre": "L'expert est {notifié lui aussi.}",
-      "texte": "En cas de refus, il peut ajuster son procès-verbal.",
+      "titre": "L'expert reste informé à {chaque étape clé.}",
+      "texte": "En cas de refus, les informations sont partagées pour faciliter la suite du dossier.",
       "carte": {
-        "heure": "10:24",
-        "date": "jeudi 12 octobre",
+        "heure": "07:24",
+        "date": "Mardi 13 octobre",
         "app": "AUTOPIEC · EXPERT",
         "notifs": [
           "Sinistre 2025304297 : pièce acceptée par le réparateur",
@@ -215,11 +218,11 @@
     },
     {
       "acteur": "assurance",
-      "titre": "L'assurance passe {un bon de commande.}",
-      "texte": "Suite à la validation du réparateur, directement à Autopiec.",
+      "titre": "Une fois la pièce validée, {la commande est transmise à Autopiec.}",
+      "texte": "Un processus de validation intégré au parcours du sinistre.",
       "carte": {
         "entete": [
-          "BON DE COMMANDE",
+          "BON DE COMMANDE ",
           "GROUPAMA → AUTOPIEC"
         ],
         "lignes": [
@@ -244,14 +247,14 @@
           "Validation réparateur",
           "Validée"
         ],
-        "bouton": "Passer la commande",
-        "bouton_ok": "Bon de commande validé"
+        "bouton": "Commandé",
+        "bouton_ok": "Validé"
       }
     },
     {
       "acteur": "autopiec",
-      "titre": "Autopiec planifie {la livraison et le suivi.}",
-      "texte": "Bon de livraison signé, le réparateur assure la mission de remise en état du véhicule.",
+      "titre": "Autopiec {coordonne la livraison} jusqu'au réparateur.",
+      "texte": "De l'expédition à la réception, le statut de la commande reste accessible. Le réparateur peut poursuivre la remise en état du véhicule.",
       "carte": {
         "entete": [
           "SUIVI DE LIVRAISON",
@@ -269,7 +272,7 @@
     }
   ],
   "suivi": {
-    "titre": "Tout est tracé, {en temps réel.}",
+    "titre": "Une vision claire de chaque dossier, {en temps réel.}à chaque étape.",
     "entete": [
       "TABLEAU DE BORD GROUPAMA",
       "MARTINIQUE · GUADELOUPE"
@@ -312,23 +315,23 @@
   "benefices": {
     "surtitre": "POUR GROUPAMA",
     "lignes": [
-      "Des pièces {moins chères.}",
-      "{Moins d'immobilisation.}",
-      "Plus de {visibilité.}"
+      "Des coûts de réparation à {optimiser.}",
+      "Un parcours à fluidifier.",
+      "{moins d'immobilisation..}"
     ]
   },
   "pilote": {
     "lignes": [
       "Un pilote de 6 mois,",
-      "{en Martinique d'abord.}"
+      "{en Martinique.}"
     ],
     "offre": "1 500 € HT / mois",
-    "mois": 6
+    " Engagement mois": 6
   },
   "fin": {
     "lignes": [
-      "Un accès dédié au réemploi",
-      "{pour les réparateurs.}"
+      "Faites du réemploi un levier de performance .",
+      "{pour vos sinistres.}"
     ],
     "contact": "AUTOPIEC.MQ  ·  CONTACT@AUTOPIEC.COM"
   },
