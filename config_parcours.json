@@ -1,16 +1,13 @@
 {
   "accroche": {
     "lignes": [
-      "{Réduisez les coûts de réparation}.",
-      "Accélérez la transition vers",
-      "une assurance plus responsable."
+    Accélérez la trasition vers 
+     une {assurance plus durable.}
     ]
   },
   "probleme": {
     "lignes": [
-      "{De l'expertise à la livraison}",
-      "pour les professionnels agréés Groupama."
-    ],
+      "Le 1er portail centralisé conçu pour les {Outre-mer.}"
     "autopiec": "administrateur",
     "piece": "Pièce de réemploi",
     "garage": "Réparateurs agréés"
@@ -19,10 +16,10 @@
     "baseline": "GROUPAMA ANTILLES-GUYANE VERS LE RÉEMPLOI AUTOMOBILE"
   },
   "titre": {
-    "surtitre": "Un portail digital centralisé conçu pour les Outre-mer.",
+    "surtitre": ,
     "lignes": [
-      "De la création du procès-verbal",
-      "à la pièce livrée {au réparateur.}"
+      "Du procès-verbal",
+      "à la livraison de pièce de réemploi {aux réparateurs.}"
     ],
     "sous_titre": "",
     "frise": [
@@ -58,7 +55,7 @@
     {
       "acteur": "expert",
       "titre": ["L'expert transmet", "le {procès-verbal}", "sans efforts."],
-      "texte": "Les pièces de réemploi sont identifiées et transmises automatiquement.",
+      "texte": "L'expert réalise son chiffrage, AUTOPIEC est automatiquement informé.",
       "carte": {
         "entete": [
           "PROCÈS-VERBAL D'EXPERTISE",
@@ -202,7 +199,7 @@
     },
     {
       "acteur": "expert",
-      "titre": "L'expert reste informé à {chaque étape clé.}",
+      "titre": "L'expert contrôle les tarifs proposés et reste informé à {chaque étape clé.}",
       "texte": "En cas de refus, les informations sont partagées pour faciliter la suite du dossier.",
       "carte": {
         "heure": "07:24",
@@ -315,7 +312,10 @@
     "lignes": [
       "Des coûts de réparation {mieux maîtrisés.}",
       "Des délais d'immobilisation{ réduits.}",
+      "Des {coûts de location }de véhicule réduits",
       "Des assurés plus {satisfaits.}" 
+      "Une {économie circulaire} valorisées", 
+      "{Un engagement RSE.}"
     ]
   },
   "pilote": {
