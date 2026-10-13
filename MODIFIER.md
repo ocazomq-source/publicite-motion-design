@@ -47,8 +47,8 @@ Repères dans le fichier :
 | `acteurs` | noms des acteurs (badges et frise) |
 | `etapes` | les 7 étapes, dans l'ordre : `titre`, `texte`, puis le contenu de la `carte` (interface) |
 | `suivi` | tableau de bord « Tout est tracé » |
-| `benefices` | les 3 bénéfices pour Groupama |
-| `pilote` | phrase sur le pilote, offre, nombre de mois |
+| `benefices` | les bénéfices pour Groupama (autant de lignes que voulu : au-delà de 3, ils s'affichent en liste avec coches et la scène s'allonge) |
+| `pilote` | phrase sur le pilote, offre, nombre de mois, et `suite` (ligne affichée sous les mois) |
 | `fin` | phrase finale et contact |
 
 ## 3. Enregistrer

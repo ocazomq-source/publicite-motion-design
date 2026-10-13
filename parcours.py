@@ -616,8 +616,8 @@ def logo_bleu(scale):
 
 
 def logo_groupama(scale):
-    """Logo Groupama Antilles-Guyane (vert d'origine), environ 3 fois la hauteur du logo AUTOPIEC."""
-    return asset("logo_groupama_ag.png", scale * 0.368)
+    """Logo Groupama Antilles-Guyane (vert d'origine), environ 2 fois la hauteur du logo AUTOPIEC."""
+    return asset("logo_groupama_ag.png", scale * 0.418)
 
 
 def lockup(world, cx, cy, scale, t=10.0, opacity=1.0):
@@ -852,40 +852,44 @@ def scene_accroche(world, t):
 
 def scene_probleme(world, t):
     cfg = CFG["probleme"]
-    bottom = ctitle(world, cfg["lignes"], 70, 210, t - 0.15, line_h=82, stagger=0.055)
+    bottom = ctitle(world, cfg["lignes"], 70, 210 if VERT else 270, t - 0.15, line_h=82, stagger=0.055)
     cv = Cv(world)
-    y = max(720 + OY, bottom + 230) if VERT else 720
+    y = max(760 + OY, bottom + 260) if VERT else bottom + 280
     p_in = ease_out_expo(prog(t, 1.3, 0.8))
     if p_in > 0:
-        # La pièce de réemploi rejoint les réparateurs agréés par la plateforme
-        xl, xr = W / 2 - 280, W / 2 + 280
-        cv.rrect(xl - 110, y - 64, xl + 110, y + 64, 26, fill=mix(C["fond"], C["gris_clair"], p_in))
-        cv.paste(asset("pare_chocs.png", 0.27), xl, y - 6, opacity=p_in)
-        cv.text(cfg["piece"], "ui_semi", 22, C["marine"], xl, y + 98, align="c", opacity=p_in)
-        x = xl + 130
-        while x < xr - 70:
-            cv.disc(x, y, 3.2, mix(C["fond"], C["texte_gris"], 0.45 * p_in))
-            x += 18
+        # La pièce de réemploi rejoint les réparateurs agréés en passant par Autopiec
+        gap = 300 if VERT else 440                       # écart entre les trois éléments
+        xl, xr = W / 2 - gap, W / 2 + gap
+        bw, bh, rg, ra = (130, 88, 80, 62) if VERT else (170, 110, 100, 76)
+        cv.rrect(xl - bw, y - bh, xl + bw, y + bh, 34, fill=mix(C["fond"], C["gris_clair"], p_in))
+        cv.paste(asset("pare_chocs.png", 0.32 if VERT else 0.42), xl, y - 8, opacity=p_in)
+        cv.text(cfg["piece"], "ui_semi", 28, C["marine"], xl, y + bh + 46, align="c", opacity=p_in)
+        x = xl + bw + 22
+        while x < xr - rg - 16:
+            cv.disc(x, y, 4, mix(C["fond"], C["texte_gris"], 0.45 * p_in))
+            x += 22
         link = ease_in_out_cubic(prog(t, 1.9, 1.1))
         if link > 0:
-            xe = lerp(xl + 120, xr - 66, link)
-            cv.rrect(xl + 120, y - 3, xe, y + 3, 3, fill=C["bleu"])
+            xs_, xe_ = xl + bw + 10, xr - rg - 6
+            xe = lerp(xs_, xe_, link)
+            cv.rrect(xs_, y - 4, xe, y + 4, 4, fill=C["bleu"])
             if link < 1:
-                cv.disc(xe, y, 9, C["bleu"])
-        if cfg.get("autopiec"):
-            xm = (xl + xr) / 2
-            mq = ease_out_back(prog(t, 1.6, 0.5), 2.2)
-            if mq > 0:
-                cv.disc(xm, y, 46 * mq, C["bleu"])
-                cv.icon("autopiec", xm, y, 22 * mq, C["fond"])
-                op = prog(t, 1.7, 0.4)
-                cv.text("AUTOPIEC", "ui_bold", 20, C["bleu"], xm, y + 82, align="c", opacity=op, tracking=0.06)
-                cv.text(cfg["autopiec"], "ui", 20, C["texte_gris"], xm, y + 110, align="c", opacity=op)
-        cv.disc(xr, y, 62 * p_in, C["bleu_clair"])
-        cv.icon("garage", xr, y, 30 * p_in, C["bleu"], bg=C["bleu_clair"])
+                cv.disc(xe, y, 12, C["bleu"])
+        xm = (xl + xr) / 2
+        mq = ease_out_back(prog(t, 1.6, 0.5), 2.2)
+        if mq > 0:
+            cv.ring(xm, y, (ra + 14) * mq, 3, mix(C["fond"], C["bleu"], 0.35))
+            cv.disc(xm, y, ra * mq, C["bleu"])
+            cv.icon("autopiec", xm, y, ra * 0.48 * mq, C["fond"])
+            op = prog(t, 1.7, 0.4)
+            cv.text("AUTOPIEC", "ui_bold", 28, C["bleu"], xm, y + ra + 50, align="c", opacity=op, tracking=0.06)
+            if cfg.get("autopiec"):
+                cv.text(cfg["autopiec"], "ui", 24, C["texte_gris"], xm, y + ra + 86, align="c", opacity=op)
+        cv.disc(xr, y, rg * p_in, C["bleu_clair"])
+        cv.icon("garage", xr, y, rg * 0.48 * p_in, C["bleu"], bg=C["bleu_clair"])
         if t > 3.0:
-            cv.check_badge(xr + 44, y - 44, 15, prog(t, 3.0, 0.5), C["vert"], C["fond"])
-        cv.text(cfg["garage"], "ui_semi", 22, C["marine"], xr, y + 98, align="c", opacity=p_in)
+            cv.check_badge(xr + rg * 0.72, y - rg * 0.72, 22, prog(t, 3.0, 0.5), C["vert"], C["fond"])
+        cv.text(cfg["garage"], "ui_semi", 28, C["marine"], xr, y + bh + 46, align="c", opacity=p_in)
     return 1.0 + 0.03 * ease_in_out_cubic(prog(t, 0, 4.5)), 0, 0
 
 
@@ -1346,19 +1350,57 @@ def scene_suivi(world, t):
     return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 5.3)), 0, 0
 
 
+def benef_starts(n):
+    """Instants d'apparition des bénéfices (plus serrés quand la liste est longue)."""
+    step = 0.95 if n <= 3 else 0.55
+    return [0.3 + k * step for k in range(n)]
+
+
+def benef_duration():
+    n = len(CFG["benefices"]["lignes"])
+    return max(4.5, benef_starts(n)[-1] + 2.4)
+
+
 def scene_benefices(world, t):
     cfg = CFG["benefices"]
+    lines = cfg["lignes"]
+    n = len(lines)
+    starts = benef_starts(n)
     cv = Cv(world)
-    cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, 460 if VERT else 300,
-            align="c", opacity=prog(t, 0.1, 0.4), tracking=0.24)
-    starts = [0.3, 1.25, 2.2]
-    for k, line in enumerate(cfg["lignes"]):
-        dim = 1 - 0.55 * prog(t, starts[k + 1], 0.5) if k + 1 < len(starts) else 1
-        if VERT:
-            ctitle(world, [line], 84, 120 + k * 200, t - starts[k], line_h=100, stagger=0.07, opacity=dim)
-        else:
-            ctitle(world, [line], 84, 350 + k * 112, t - starts[k], line_h=100, stagger=0.07, opacity=dim)
-    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 5.3)), 0, 0
+    if n <= 3:
+        cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, 460 if VERT else 300,
+                align="c", opacity=prog(t, 0.1, 0.4), tracking=0.24)
+        for k, line in enumerate(lines):
+            dim = 1 - 0.55 * prog(t, starts[k + 1], 0.5) if k + 1 < n else 1
+            y = 120 + k * 200 if VERT else 350 + k * 112
+            ctitle(world, [line], 84, y, t - starts[k], line_h=100, stagger=0.07, opacity=dim)
+        return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 5.3)), 0, 0
+
+    # Liste longue : une coche verte par bénéfice, le bloc centré sur l'écran
+    top, bottom = (420, 1700) if VERT else (240, 1000)
+    max_w = W - 300 if VERT else 1300
+    size = 60 if VERT else 62
+    while True:
+        wrapped = [wrap_words(markup_words(l), "titre", size, max_w) for l in lines]
+        line_h, gap = size * 1.16, size * 0.42
+        total = sum(len(w) for w in wrapped) * line_h + gap * (n - 1)
+        if total <= bottom - top or size <= 30:
+            break
+        size -= 2
+    widest = max(max(text_w(" ".join(x for x, _ in ln), "titre", size) for ln in w) for w in wrapped)
+    r = size * 0.34
+    x_text = W / 2 - (widest + 2 * r + 26) / 2 + 2 * r + 26
+    y = top + (bottom - top - total) / 2
+    cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, y - 60, align="c", opacity=prog(t, 0.1, 0.4),
+            tracking=0.24)
+    for k, (line, w) in enumerate(zip(lines, wrapped)):
+        lt = t - starts[k]
+        q = prog(lt, 0.15, 0.5)
+        if q > 0:
+            cv.check_badge(x_text - 26 - r, y + line_h / 2, r, q, C["vert"], C["fond"])
+        blur_words(world, [line], "titre", size, x_text, y, lt, max_w=max_w, line_h=line_h, stagger=0.05)
+        y += len(w) * line_h + gap
+    return 1.0 + 0.03 * ease_in_out_cubic(prog(t, 0, 6.0)), 0, 0
 
 
 def scene_pilote(world, t):
@@ -1385,6 +1427,11 @@ def scene_pilote(world, t):
             cv.rrect(x, yb, x + sw * f, yb + 8, 4, fill=C["bleu"])
         cv.text(f"Mois {k + 1}", "mono", 16, C["texte_gris"], x + sw / 2, yb + 38, align="c",
                 opacity=prog(t, st, 0.4), tracking=0.08)
+    if cfg.get("suite"):
+        sq = ease_out_cubic(prog(t, 2.9, 0.6))
+        suite = cfg["suite"]
+        cv.text(suite, "ui_semi", fit_size(suite, "ui_semi", 30, W - 140), C["bleu"], W / 2,
+                yc + 132 + 110 + (1 - sq) * 12, align="c", opacity=sq)
     return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 4.8)), 0, 0
 
 
@@ -1427,12 +1474,24 @@ TIMELINE = [
     (4.0, scene_pilote, "flou", [(1.2, "pop")]),
     (5.5, scene_fin, "zoom", [(0.2, "impact")]),
 ]
-STARTS = []
-_acc = 0.0
-for _d, *_ in TIMELINE:
-    STARTS.append(_acc)
-    _acc += _d
-DURATION = _acc
+STARTS, DURATION = [], 0.0
+
+
+def build_timeline():
+    """Recalcule les débuts de scènes (la scène des bénéfices dépend du nombre de lignes)."""
+    global STARTS, DURATION
+    for i, (d, f, tr, snd) in enumerate(TIMELINE):
+        if f is scene_benefices and CFG:
+            n = len(CFG["benefices"]["lignes"])
+            TIMELINE[i] = (benef_duration(), f, tr, [(st, "pop") for st in benef_starts(n)])
+    STARTS, acc = [], 0.0
+    for d, *_ in TIMELINE:
+        STARTS.append(acc)
+        acc += d
+    DURATION = acc
+
+
+build_timeline()
 
 
 def scene_local_time(k, t):
@@ -1526,6 +1585,7 @@ def init_worker(cfg, fmt="horizontal"):
     CFG.update(cfg)
     C.clear()
     C.update({k: hex2rgb(v) for k, v in cfg["couleurs"].items()})
+    build_timeline()
 
 
 # --------------------------------------------------------------------------- #

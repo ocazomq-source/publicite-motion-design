@@ -1,14 +1,15 @@
 {
   "accroche": {
     "lignes": [
-    Accélérez la trasition vers 
-     une {assurance plus durable.}
+      "Accélérez la transition vers",
+      "une {assurance plus durable.}"
     ]
   },
   "probleme": {
     "lignes": [
       "Le 1er portail centralisé conçu pour les {Outre-mer.}"
-    "autopiec":,
+    ],
+    "autopiec": "",
     "piece": "Pièce de réemploi",
     "garage": "Réparateurs agréés"
   },
@@ -16,7 +17,7 @@
     "baseline": "GROUPAMA ANTILLES-GUYANE VERS LE RÉEMPLOI AUTOMOBILE"
   },
   "titre": {
-    "surtitre": ,
+    "surtitre": "",
     "lignes": [
       "Du procès-verbal",
       "à la livraison de pièce de réemploi {aux réparateurs.}"
@@ -213,10 +214,8 @@
     },
     {
       "acteur": "assurance",
-      "titre": "{Le bon de commande} 
-       transmis à Autopiec.",
-      "texte": "Un processus de validation intégré au parcours du sinistre"  
-      "pour faciliter l'adoption des pièces de réemploi.",
+      "titre": ["{Le bon de commande}", "transmis à Autopiec."],
+      "texte": "Un processus de validation intégré au parcours du sinistre pour faciliter l'adoption des pièces de réemploi.",
       "carte": {
         "entete": [
           "BON DE COMMANDE ",
@@ -314,10 +313,10 @@
     "lignes": [
       "Des coûts de réparation {mieux maîtrisés.}",
       "Des délais d'immobilisation{ réduits.}",
-      " Un parcours {fluidifié.}, 
-      "Des {coûts de location }de véhicule réduits",
-      "Des assurés plus {satisfaits.}" 
-      "Une {économie circulaire} valorisées", 
+      "Un parcours {fluidifié.}",
+      "Des {coûts de location} de véhicule réduits.",
+      "Des assurés plus {satisfaits.}",
+      "Une {économie circulaire} valorisée.",
       "{Un engagement RSE.}"
     ]
   },
@@ -327,9 +326,8 @@
       "en { Martinique.}"
     ],
     "offre": "1 500 € HT / mois",
-    "mois": 6
-    ],
-    Puis : Martinique - Guadeloupe - Guyane
+    "mois": 6,
+    "suite": "Puis : Martinique - Guadeloupe - Guyane"
   },
   "fin": {
     "lignes": [
