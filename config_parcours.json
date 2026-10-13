@@ -1,7 +1,7 @@
 {
   "accroche": {
     "lignes": [
-      "Accélérez la transition vers",
+      "Accélérez votre transition vers",
       "une {assurance plus durable.}"
     ]
   },
@@ -56,7 +56,7 @@
   "etapes": [
     {
       "acteur": "expert",
-      "titre": ["L'expert transmet", "le {procès-verbal}", "sans efforts."],
+      "titre": ["L'expert transmet", "le {procès-verbal}"],
       "texte": "L'expert réalise son chiffrage, AUTOPIEC est automatiquement informé.",
       "carte": {
         "entete": [
