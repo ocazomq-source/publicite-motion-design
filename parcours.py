@@ -907,34 +907,41 @@ def scene_titre(world, t):
     cfg = CFG["titre"]
     cv = Cv(world)
     if cfg.get("surtitre"):
-        cv.text(cfg["surtitre"], "mono", 21, C["bleu"], W / 2, 300 + OY, align="c",
+        sur, ssz = cfg["surtitre"], 21
+        while ssz > 13 and text_w(sur, "mono", ssz, 0.24) > W - 120:
+            ssz -= 1
+        cv.text(sur, "mono", ssz, C["bleu"], W / 2, 300 + OY, align="c",
                 opacity=prog(t, 0.1, 0.4), tracking=0.24)
     ctitle(world, cfg["lignes"], 72, 330 if cfg.get("surtitre") else 300, t - 0.25, line_h=84, stagger=0.06)
 
     # Aperçu du parcours : les acteurs reliés (liste « frise », sinon un par étape)
     actors = cfg.get("frise") or [st["acteur"] for st in CFG["etapes"]]
     n = len(actors)
-    half = min(630, 180 * (n - 1) / 2)
+    step = min(270, (W - 280) / max(1, n - 1))      # écart entre deux acteurs
+    half = step * (n - 1) / 2
     xs = [lerp(W / 2 - half, W / 2 + half, i / (n - 1)) for i in range(n)]
-    y = 660 + OY
+    y = 670 + OY
+    r = 54                                            # rayon des pastilles
     lp = ease_in_out_cubic(prog(t, 1.1, 1.8))
     if lp > 0:
-        cv.line([(xs[0], y), (lerp(xs[0], xs[-1], lp), y)], C["trait"], 3)
+        cv.line([(xs[0], y), (lerp(xs[0], xs[-1], lp), y)], C["trait"], 3.5)
     for i, actor in enumerate(actors):
         th = 1.1 + 1.8 * (i / (n - 1))
         q = ease_out_back(prog(t, th - 0.1, 0.5), 2.2)
         if q <= 0:
             continue
         a = CFG["acteurs"][actor]
-        cv.disc(xs[i], y, 34 * q, C["fond"])
-        cv.ring(xs[i], y, 34 * q, 2.5, C["bleu"])
-        cv.icon(a["icone"], xs[i], y, 16 * q, C["bleu"], bg=C["fond"])
+        cv.disc(xs[i], y, r * q, C["fond"])
+        cv.ring(xs[i], y, r * q, 3.5, C["bleu"])
+        cv.icon(a["icone"], xs[i], y, 26 * q, C["bleu"], bg=C["fond"])
         op = prog(t, th, 0.4)
-        cv.text(a["court"], "ui_semi", 17, C["marine"], xs[i], y + 62, align="c", opacity=op, tracking=0.04)
-        cv.text(str(i + 1), "mono", 16, C["texte_gris"], xs[i], y - 58, align="c", opacity=op)
+        lab = a["court"]
+        cv.text(lab, "ui_semi", fit_size(lab, "ui_semi", 21, step - 16), C["marine"], xs[i], y + r + 38,
+                align="c", opacity=op, tracking=0.04)
+        cv.text(str(i + 1), "mono", 19, C["texte_gris"], xs[i], y - r - 30, align="c", opacity=op)
     q = ease_out_cubic(prog(t, 2.6, 0.6))
     sub = cfg["sous_titre"]
-    cv.text(sub, "ui", fit_size(sub, "ui", 28, W - 120), C["texte_gris"], W / 2, 850 + OY + (1 - q) * 10,
+    cv.text(sub, "ui", fit_size(sub, "ui", 28, W - 120), C["texte_gris"], W / 2, 880 + OY + (1 - q) * 10,
             align="c", opacity=q)
     return 1.0 + 0.03 * ease_in_out_cubic(prog(t, 0, 4.3)), 0, 0
 
