@@ -57,7 +57,8 @@
     {
       "acteur": "expert",
       "titre": ["L'expert transmet", "le {procès-verbal}", "sans efforts."],
-      "texte": "L'expert réalise son chiffrage, AUTOPIEC est automatiquement informé.",
+      "texte": "L'expert réalise son chiffrage, AUTOPIEC 
+      est automatiquement informé   .",
       "carte": {
         "entete": [
           "PROCÈS-VERBAL D'EXPERTISE",
@@ -85,7 +86,7 @@
           "Pièce de réemploi",
           "Favorable"
         ],
-        "bouton": "Enregistré",
+        "bouton": "Enregistrer",
         "bouton_ok": "Envoyé",
         "toast": "En cours de transmission",
         "toast_ok": "En cours de traitement"
@@ -136,7 +137,7 @@
     {
       "acteur": "reparateur",
       "titre": "Le réparateur vérifie la pièce et {valide sa conformité.}",
-      "texte": "Les caractéristiques de la pièce sont consultées avant décision.",
+      "texte": "Les caractéristiques de la pièce sont consultées avant la prise de décision.",
       "carte": {
         "entete": [
           "TABLEAU DE BORD RÉPARATEUR",
