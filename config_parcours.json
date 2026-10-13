@@ -213,8 +213,10 @@
     },
     {
       "acteur": "assurance",
-      "titre": "{Le bon de commande} est transmis à Autopiec.",
-      "texte": "Un processus de validation intégré au parcours du sinistre.",
+      "titre": "{Le bon de commande} 
+       transmis à Autopiec.",
+      "texte": "Un processus de validation intégré au parcours du sinistre"  
+      "pour faciliter l'adoption des pièces de réemploi.",
       "carte": {
         "entete": [
           "BON DE COMMANDE ",
@@ -325,6 +327,8 @@
     ],
     "offre": "1 500 € HT / mois",
     "mois": 6
+    ],
+    Puis : Martinique - Guadeloupe - Guyane
   },
   "fin": {
     "lignes": [
