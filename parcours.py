@@ -378,6 +378,7 @@ def icon(cv, name, cx, cy, s, color, bg=None):
 # Ombres, cartes, perspective
 # --------------------------------------------------------------------------- #
 @lru_cache(maxsize=64)
+@lru_cache(maxsize=16)
 def shadow_layer(w, h, r):
     """Ombre douce en deux couches (diffuse + contact) pour une carte w x h."""
     m = 90
@@ -1351,6 +1352,228 @@ def scene_suivi(world, t):
     return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 5.3)), 0, 0
 
 
+# --------------------------------------------------------------------------- #
+# Tableau de bord Groupama : titre, interface animée, zooms + 3 bénéfices
+# --------------------------------------------------------------------------- #
+DASH_BG = (245, 248, 254)
+DASH_KPI = [(298, 208, 601, 359), (619, 208, 922, 359), (940, 208, 1244, 359), (1261, 208, 1565, 359)]
+DASH_KPI_VAL = [(1862, "{:,}", (6, 20, 36)), (86, "{} %", (11, 117, 52)), (4315, "{:,}", (6, 20, 36)),
+                (37, "{}", (6, 20, 36))]
+DASH_ROWS = [(492, 557), (559, 624), (626, 690), (692, 757), (759, 824)]
+DASH_TABLE, DASH_GRAPH, DASH_PIECES = (298, 385, 1565, 879), (298, 905, 1026, 1293), (1044, 905, 1565, 1293)
+DASH_SALUT, DASH_BOUTON = (298, 104, 760, 192), (1350, 126, 1569, 187)
+# zones mises en avant pendant chaque bénéfice :
+# (centre x, centre y, largeur horizontale, largeur mobile, centre x mobile), cadre
+DASH_FOCUS = [((860, 640, 1000, 780, 905), (1066, 502, 1272, 818)),
+              ((1150, 330, 880, 700, 1245), (1261, 208, 1565, 359)),
+              ((662, 1099, 820, 760, 662), DASH_GRAPH)]
+DASH_T_IN = 3.4                       # arrivée de l'interface
+DASH_T_FOCUS = [5.6, 9.2, 12.8]       # début de chaque zoom
+RESEAU_DUR = 16.4
+
+
+@lru_cache(maxsize=None)
+def dash_parts():
+    """Image du tableau de bord découpée : fond vide + éléments à animer."""
+    full = Image.open(os.path.join(ROOT, "assets", "tableau_groupama.png")).convert("RGB")
+    # vrai logo Groupama à la place de l'emplacement « LOGO »
+    d = ImageDraw.Draw(full)
+    d.rectangle((216, 12, 400, 70), fill=(255, 255, 255))
+    lg = Image.open(os.path.join(ROOT, "assets", "logo_groupama_ag.png")).convert("RGBA")
+    lg = lg.resize((int(lg.width * 34 / lg.height), 34), Image.LANCZOS)
+    full.paste(lg, (228, 41 - 17), lg)
+    a = np.asarray(full).copy()
+    crop = lambda r: Image.fromarray(a[r[1]:r[3], r[0]:r[2]].copy())
+    parts = {"salut": crop(DASH_SALUT), "bouton": crop(DASH_BOUTON),
+             "rows": [crop((310, y0, 1554, y1)) for y0, y1 in DASH_ROWS]}
+    # cartes chiffres : valeur effacée (redessinée en comptant)
+    kpis = []
+    for r in DASH_KPI:
+        k = a[r[1]:r[3], r[0]:r[2]].copy()
+        k[46:90, 88:-12] = 255
+        kpis.append(Image.fromarray(k))
+    parts["kpi"] = kpis
+    # tableau sans ses lignes
+    t = a[DASH_TABLE[1]:DASH_TABLE[3], DASH_TABLE[0]:DASH_TABLE[2]].copy()
+    for y0, y1 in DASH_ROWS:
+        t[y0 - DASH_TABLE[1]:y1 - DASH_TABLE[1], 12:-12] = 255
+    parts["table"] = Image.fromarray(t)
+    # histogramme : barres + valeurs retirées, quadrillage reconstitué
+    g = a[DASH_GRAPH[1]:DASH_GRAPH[3], DASH_GRAPH[0]:DASH_GRAPH[2]].astype(int)
+    gx0, gy0, gx1, gy1 = 380 - DASH_GRAPH[0], 1005 - DASH_GRAPH[1], 1000 - DASH_GRAPH[0], 1193 - DASH_GRAPH[1]
+    reg = g[gy0:gy1, gx0:gx1]
+    bars = (reg[..., 2] - reg[..., 0] > 50) | (reg.sum(2) < 450)
+    fill = np.repeat(g[gy0:gy1, 372 - DASH_GRAPH[0]][:, None, :], gx1 - gx0, 1)
+    empty = g.copy()
+    empty[gy0:gy1, gx0:gx1] = np.where(bars[..., None], fill, reg)
+    parts["graph"] = (Image.fromarray(empty.astype(np.uint8)), reg.astype(np.uint8), bars, (gx0, gy0))
+    # pièces les plus demandées : jauges vides puis remplies
+    p = a[DASH_PIECES[1]:DASH_PIECES[3], DASH_PIECES[0]:DASH_PIECES[2]].astype(int)
+    px0, py0, px1, py1 = 1280 - DASH_PIECES[0], 990 - DASH_PIECES[1], 1496 - DASH_PIECES[0], 1176 - DASH_PIECES[1]
+    preg = p[py0:py1, px0:px1]
+    pbar = preg[..., 2] - preg[..., 0] > 50
+    pempty = p.copy()
+    pempty[py0:py1, px0:px1] = np.where(pbar[..., None], np.array([238, 242, 245]), preg)
+    parts["pieces"] = (Image.fromarray(pempty.astype(np.uint8)), preg.astype(np.uint8), pbar, (px0, py0))
+    # fond : en-tête et menu seuls
+    base = a.copy()
+    for r in [DASH_SALUT, DASH_BOUTON, *DASH_KPI, DASH_TABLE, DASH_GRAPH, DASH_PIECES]:
+        base[r[1] - 4:r[3] + 6, r[0] - 4:r[2] + 4] = DASH_BG
+    parts["base"] = Image.fromarray(base)
+    return parts
+
+
+def dash_compose(dt):
+    """Tableau de bord à l'instant dt (s) après son arrivée, éléments qui se mettent en place."""
+    P = dash_parts()
+    im = P["base"].copy()
+
+    def put(lay, x, y, p, dy=24, dx=0):
+        if p <= 0:
+            return
+        e = ease_out_expo(p)
+        x, y = int(x + (1 - e) * dx), int(y + (1 - e) * dy)
+        if p >= 1:
+            im.paste(lay, (x, y))
+        else:
+            bg = im.crop((x, y, x + lay.width, y + lay.height))
+            im.paste(Image.blend(bg, lay, clamp(p * 2)), (x, y))
+
+    put(P["salut"], DASH_SALUT[0], DASH_SALUT[1], prog(dt, 0.15, 0.7))
+    put(P["bouton"], DASH_BOUTON[0], DASH_BOUTON[1], prog(dt, 0.45, 0.6), dy=0, dx=30)
+    fnt = font("titre_b", 37 / S)
+    for k, (r, (val, fmt, col)) in enumerate(zip(DASH_KPI, DASH_KPI_VAL)):
+        st = 0.3 + k * 0.1
+        q = prog(dt, st, 0.8)
+        if q <= 0:
+            continue
+        card = P["kpi"][k].copy()
+        n = int(round(val * ease_out_cubic(prog(dt, st + 0.2, 1.4))))
+        ImageDraw.Draw(card).text((r[0] + 95 - r[0], 276 - r[1]), fmt.format(n).replace(",", " "),
+                                  font=fnt, fill=col, anchor="lm")
+        put(card, r[0], r[1], q, dy=36)
+    q = prog(dt, 0.7, 0.8)
+    if q > 0:
+        put(P["table"], DASH_TABLE[0], DASH_TABLE[1], q, dy=36)
+        for k, (y0, _) in enumerate(DASH_ROWS):
+            put(P["rows"][k], 310, y0, prog(dt, 1.0 + k * 0.09, 0.6), dy=0, dx=-40)
+    for key, rect, st, vertical in (("graph", DASH_GRAPH, 0.95, True), ("pieces", DASH_PIECES, 1.05, False)):
+        q = prog(dt, st, 0.8)
+        if q <= 0:
+            continue
+        empty, reg, mask, (ox, oy) = P[key]
+        card = empty.copy()
+        h, w = mask.shape
+        if vertical:   # barres qui montent, l'une après l'autre
+            xs = np.arange(w)[None, :]
+            f = np.clip((dt - st - 0.4 - xs / w * 0.7) / 0.8, 0, 1)
+            f = 1 - (1 - f) ** 3
+            show = mask & (np.arange(h)[:, None] >= h * (1 - f))
+        else:          # jauges remplies de gauche à droite
+            ys = np.arange(h)[:, None]
+            f = np.clip((dt - st - 0.4 - ys / h * 0.5) / 0.9, 0, 1)
+            f = 1 - (1 - f) ** 3
+            show = mask & (np.arange(w)[None, :] <= w * f)
+        arr = np.asarray(card).copy()
+        sub = arr[oy:oy + h, ox:ox + w]
+        sub[show] = reg[show]
+        put(Image.fromarray(arr), rect[0], rect[1], q, dy=36)
+    return im
+
+
+def reseau_layout():
+    """Cadres d'écran (cx, cy, w, h) : vue d'ensemble et vue zoomée."""
+    if VERT:
+        return (540, 1150, 1000, 875), (540, 1300, 1000, 1060)
+    return (960, 580, 980, 858), (1300, 570, 1130, 850)
+
+
+def dash_view(dt, src, vw, vh, hl=None, hl_op=0.0):
+    """Recadrage (src = centre x, centre y, largeur) rendu en calque arrondi de vw x vh."""
+    M = 700
+    comp = dash_compose(dt)
+    pad = Image.new("RGB", (comp.width + 2 * M, comp.height + 2 * M), DASH_BG)
+    pad.paste(comp, (M, M))
+    sx, sy, sw = src
+    sh = sw * vh / vw
+    box = (sx - sw / 2 + M, sy - sh / 2 + M, sx + sw / 2 + M, sy + sh / 2 + M)
+    lay = pad.resize((int(vw * S), int(vh * S)), Image.BICUBIC, box=box).convert("RGBA")
+    if hl and hl_op > 0:
+        k = vw / sw
+        x0, y0 = (hl[0] - box[0] + M) * k, (hl[1] - box[1] + M) * k
+        x1, y1 = (hl[2] - box[0] + M) * k, (hl[3] - box[1] + M) * k
+        cv = Cv(lay)
+        g = 10 * (1 - hl_op)
+        cv.rrect(x0 - 8 - g, y0 - 8 - g, x1 + 8 + g, y1 + 8 + g, 18, outline=alpha(C["bleu"], hl_op),
+                 width=3)
+    mask = Image.new("L", lay.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, lay.width - 1, lay.height - 1), radius=int(22 * S), fill=255)
+    lay.putalpha(mask)
+    Cv(lay).rrect(0, 0, vw - 0.5, vh - 0.5, 22, outline=C["trait"], width=1.5)
+    return lay
+
+
+def scene_reseau(world, t):
+    cfg = CFG["reseau"]
+    # 1. le titre, qui s'efface à l'arrivée de l'interface
+    out = ease_in_out_cubic(prog(t, DASH_T_IN - 0.3, 0.6))
+    if out < 1:
+        ctitle(world, cfg["titre"], 84, 400 - out * 60, t - 0.15, line_h=98, stagger=0.06, opacity=1 - out)
+    dt = t - DASH_T_IN
+    if dt <= 0:
+        return 1.0, 0, 0
+    full, focus = reseau_layout()
+    # 2. vue d'ensemble puis zooms successifs (cadre et recadrage interpolés)
+    src0 = (800, 700, 1600)
+    cur_v, cur_s, hl, hl_op = full, src0, None, 0.0
+    for k, t0 in enumerate(DASH_T_FOCUS):
+        p = ease_in_out_cubic(prog(t, t0, 1.3))
+        if p <= 0:
+            break
+        (fx, fy, fwh, fwv, fxv), rect = DASH_FOCUS[k]
+        tgt = (fxv, fy, fwv) if VERT else (fx, fy, fwh)
+        cur_v = tuple(lerp(a, b, p) for a, b in zip(cur_v, focus))
+        sw = math.exp(lerp(math.log(cur_s[2]), math.log(tgt[2]), p))
+        cur_s = (lerp(cur_s[0], tgt[0], p), lerp(cur_s[1], tgt[1], p), sw)
+        hl, hl_op = rect, ease_out_cubic(prog(t, t0 + 1.1, 0.5))
+    # lente poussée pendant les temps de lecture
+    drift = 1 - 0.05 * ease_in_out_cubic(prog(t, DASH_T_FOCUS[0], RESEAU_DUR - DASH_T_FOCUS[0]))
+    cur_s = (cur_s[0], cur_s[1], cur_s[2] * drift)
+    cx, cy, vw, vh = cur_v
+    lay = dash_view(dt, cur_s, vw, vh, hl, hl_op)
+    place_card(world, lay, cx, cy, t, DASH_T_IN, w=vw, h=vh, r=22, dur=1.2, from_dy=120)
+    # 3. les bénéfices, un par zoom ; les précédents restent en retrait
+    lines = cfg["benefices"]
+    cv = Cv(world)
+    if VERT:
+        x, top, max_w, size = 90, 150, W - 180, 54
+    else:
+        x, top, max_w, size = 110, 0, 1300 - focus[2] / 2 - 110 - 60, 54
+    while True:
+        wrapped = [wrap_words(markup_words(l), "titre", size, max_w) for l in lines]
+        line_h, gap = size * 1.14, size * 1.15
+        total = sum(len(w) for w in wrapped) * line_h + gap * len(lines)
+        if total <= (560 if VERT else 820) or size <= 30:
+            break
+        size -= 2
+    y = top if VERT else 540 - total / 2
+    for k, (line, w) in enumerate(zip(lines, wrapped)):
+        if k >= len(DASH_T_FOCUS):
+            break
+        lt = t - DASH_T_FOCUS[k] - 0.35
+        nxt = DASH_T_FOCUS[k + 1] if k + 1 < len(DASH_T_FOCUS) else 99
+        dim = 1 - 0.6 * prog(t, nxt, 0.5)
+        q = ease_out_cubic(prog(lt, 0, 0.5))
+        if q > 0:
+            cv.text(f"0{k + 1}", "mono", 20, mix(C["fond"], C["bleu"], dim), x, y + 16, opacity=q,
+                    tracking=0.2)
+            cv.rrect(x + 46, y + 15, x + 46 + 60 * q, y + 17, 1, fill=mix(C["fond"], C["bleu"], 0.5 * dim))
+        blur_words(world, [line], "titre", size, x, y + 34, lt, max_w=max_w, line_h=line_h, stagger=0.05,
+                   opacity=dim)
+        y += len(w) * line_h + gap
+    return 1.0, 0, 0
+
+
 def benef_starts(n):
     """Instants d'apparition des bénéfices (plus serrés quand la liste est longue)."""
     step = 1.2 if n <= 3 else 0.85
@@ -1471,6 +1694,10 @@ TIMELINE = [
     (STEP_DUR, make_step(5), "travelling", [(1.2, "pop"), (2.85, "clic"), (2.9, "succes"), (3.3, "souffle")]),
     (STEP_DUR, make_step(6), "travelling", [(1.0, "souffle"), (3.35, "succes")]),
     (6.0, scene_suivi, "zoom", [(1.5, "tic"), (2.0, "tic"), (2.5, "tic"), (3.0, "succes")]),
+    (RESEAU_DUR, scene_reseau, "flou", [(0.3, "pop"), (DASH_T_IN, "souffle"), (DASH_T_IN + 0.5, "tic"),
+                                         (DASH_T_IN + 0.6, "tic"), (DASH_T_IN + 0.7, "tic"),
+                                         (DASH_T_IN + 0.8, "tic"), (DASH_T_FOCUS[0] + 0.4, "pop"),
+                                         (DASH_T_FOCUS[1] + 0.4, "pop"), (DASH_T_FOCUS[2] + 0.4, "pop")]),
     (4.5, scene_benefices, "flou", [(0.3, "pop"), (1.25, "pop"), (2.2, "pop")]),
     (5.5, scene_pilote, "flou", [(1.2, "pop")]),
     (6.5, scene_fin, "zoom", [(0.2, "impact")]),

@@ -309,6 +309,14 @@
       "Livrée"
     ]
   },
+  "reseau": {
+    "titre": ["Pilotez le réemploi au cœur", "de votre {réseau partenaire.}"],
+    "benefices": [
+      "Suivez vos {dossiers et vos commandes.}",
+      "Pilotez l'activité de votre {réseau partenaire.}",
+      "Mesurez les {résultats du réemploi.}"
+    ]
+  },
   "benefices": {
     "surtitre": "POUR GROUPAMA",
     "lignes": [
