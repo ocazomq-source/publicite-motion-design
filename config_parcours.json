@@ -271,7 +271,7 @@
     "titre": ["Une vision claire de chaque dossier,", "{en temps réel}, à chaque étape."],
     "entete": [
       "TABLEAU DE BORD GROUPAMA",
-      "MARTINIQUE · GUADELOUPE"
+      "MARTINIQUE · GUADELOUPE· GUYANE"
     ],
     "dossiers": [
       [
@@ -327,7 +327,7 @@
     ],
     "offre": "1 500 € HT / mois",
     "mois": 6,
-    "suite": "Puis : Martinique - Guadeloupe - Guyane"
+    "suite": "Lancement officiel : Martinique - Guadeloupe - Guyane"
   },
   "fin": {
     "lignes": [
