@@ -1,13 +1,11 @@
 {
   "accroche": {
     "lignes": [
-      "Et si chaque {sinistre automobile} devenait",
-      "une opportunité d'économies ?"
-    ]
+      "{Réduisez les coûts de réparation}. 
+      Accélérez la transition vers une assurance plus responsable.
   },
   "probleme": {
-    "lignes": [
-      "Un parcours fluide",
+    "lignes": [ 
       "{de l'expertise à la livraison}",
       "pour les professionnels agréés Groupama."
     ],
@@ -16,15 +14,15 @@
     "garage": "Réparateurs agréés"
   },
   "logo": {
-    "baseline": "GROUPAMA ANTILLES-GUYANE EN FAVEUR DU RÉEMPLOI AUTOMOBILE"
+    "baseline": "GROUPAMA ANTILLES-GUYANE VERS LE RÉEMPLOI AUTOMOBILE"
   },
   "titre": {
-    "surtitre": "",
+    "surtitre": "Un portail digital centralisé conçu pour les Outre-mer.",
     "lignes": [
       "De la création du procès-verbal",
       "à la pièce livrée {au réparateur.}"
     ],
-    "sous_titre": "Un portail digital centralisé conçu pour les Outre-mer.",
+    "sous_titre": 
     "frise": [
       "expert",
       "autopiec",
@@ -57,7 +55,9 @@
   "etapes": [
     {
       "acteur": "expert",
-      "titre": ["L'expert transmet le", "{procès-verbal},", "sans efforts."],
+      "titre": ["L'expert transmet 
+        "le {procès-verbal}", 
+        "sans efforts."],
       "texte": "Les pièces de réemploi sont identifiées et transmises automatiquement.",
       "carte": {
         "entete": [
@@ -102,7 +102,7 @@
           "N° SINISTRE : 2025304297"
         ],
         "recu": [
-          "VOLKSWAGEN - 2.0 TDI 140 CUP BLUEMOTION - 2021",
+          "VOLKSWAGEN - 2.0 TDI 140 BLUEMOTION - 2021",
           "Pare-chocs avant · Garage KERN · Martinique",
           "Centralisé"
         ],
@@ -121,7 +121,7 @@
           [
             "Fournisseur 3",
             "Hexagone",
-            true
+            false
           ],
           [
             "Fournisseur 4",
@@ -131,7 +131,7 @@
         ],
         "disponible": "Disponible",
         "indisponible": "Indisponible",
-        "bilan": "3 propositions envoyées au réparateur"
+        "bilan": "2 propositions envoyées au réparateur"
       }
     },
     {
@@ -313,15 +313,15 @@
   "benefices": {
     "surtitre": "POUR GROUPAMA",
     "lignes": [
-      "Des coûts de réparation à {optimiser.}",
-      "{Un parcours à fluidifier}.",
-      "{Moins d'immobilisation.}" 
+      "Des coûts de réparation {mieux maîtrisés.}",
+      "Des délais d'immobilisation{ réduits.}",
+      "Des assurés plus{satisfaits.}" 
     ]
   },
   "pilote": {
     "lignes": [
       "Un pilote de 6 mois,",
-      "{en Martinique.}"
+      "en { Martinique.}"
     ],
     "offre": "1 500 € HT / mois",
     "mois": 6
