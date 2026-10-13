@@ -1,12 +1,14 @@
 {
   "accroche": {
     "lignes": [
-      "{Réduisez les coûts de réparation}. 
-      Accélérez la transition vers une assurance plus responsable.
+      "{Réduisez les coûts de réparation}.",
+      "Accélérez la transition vers",
+      "une assurance plus responsable."
+    ]
   },
   "probleme": {
-    "lignes": [ 
-      "{de l'expertise à la livraison}",
+    "lignes": [
+      "{De l'expertise à la livraison}",
       "pour les professionnels agréés Groupama."
     ],
     "autopiec": "administrateur",
@@ -22,7 +24,7 @@
       "De la création du procès-verbal",
       "à la pièce livrée {au réparateur.}"
     ],
-    "sous_titre": 
+    "sous_titre": "",
     "frise": [
       "expert",
       "autopiec",
@@ -55,9 +57,7 @@
   "etapes": [
     {
       "acteur": "expert",
-      "titre": ["L'expert transmet 
-        "le {procès-verbal}", 
-        "sans efforts."],
+      "titre": ["L'expert transmet", "le {procès-verbal}", "sans efforts."],
       "texte": "Les pièces de réemploi sont identifiées et transmises automatiquement.",
       "carte": {
         "entete": [
@@ -315,7 +315,7 @@
     "lignes": [
       "Des coûts de réparation {mieux maîtrisés.}",
       "Des délais d'immobilisation{ réduits.}",
-      "Des assurés plus{satisfaits.}" 
+      "Des assurés plus {satisfaits.}" 
     ]
   },
   "pilote": {
@@ -345,7 +345,8 @@
     "gris_clair": "#F4F6FA",
     "trait": "#E8ECF2",
     "texte_gris": "#6B7385",
-    "bleu_clair": "#E8F0FE"
+    "bleu_clair": "#E8F0FE",
+    "groupama": "#086D44"
   },
   "musique": true,
   "sons": {

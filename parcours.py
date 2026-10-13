@@ -616,7 +616,8 @@ def logo_bleu(scale):
 
 
 def logo_groupama(scale):
-    return asset("logo_groupama.png", scale * 0.8, C["bleu"])
+    """Logo Groupama Antilles-Guyane (vert d'origine), environ 3 fois la hauteur du logo AUTOPIEC."""
+    return asset("logo_groupama_ag.png", scale * 0.368)
 
 
 def lockup(world, cx, cy, scale, t=10.0, opacity=1.0):
@@ -766,7 +767,7 @@ def step_progress(world, t, idx):
         if f > 0:
             cv.rrect(x, y - 3, x + sw * f, y + 3, 3, fill=C["bleu"])
     a, g = logo_bleu(0.3), logo_groupama(0.3)
-    lockup(world, 80 + (a.width / S + g.width / S + 2 * 48 * 0.3) / 2, 64, 0.3)
+    lockup(world, 80 + (a.width / S + g.width / S + 2 * 48 * 0.3) / 2, 100 if VERT else 66, 0.3)
 
 
 def card_header(cv, w, left, right):
@@ -810,7 +811,7 @@ def mini_card(kind):
         cv.text("Livrée au réparateur", "ui_semi", 18, C["marine"], 62, 112)
     else:  # notification
         img, cv = new_card(400, 96, 20)
-        cv.rrect(22, 22, 74, 74, 14, fill=C["bleu"])
+        cv.rrect(22, 22, 74, 74, 14, fill=C.get("groupama", C["bleu"]))
         cv.text("G", "ui_bold", 24, C["fond"], 48, 48, align="c")
         cv.text("NOTIFICATION · ASSURANCE", "mono", 13, C["texte_gris"], 90, 36, tracking=0.1)
         cv.text("Pièce acceptée", "ui_semi", 19, C["marine"], 90, 64)
@@ -890,12 +891,14 @@ def scene_probleme(world, t):
 
 def scene_logo(world, t):
     cv = Cv(world)
-    lockup(world, W / 2, 490 + OY, 0.85 if VERT else 1.05, t - 0.3)
+    lsc = 0.85 if VERT else 1.05
+    lockup(world, W / 2, 470 + OY, lsc, t - 0.3)
+    yb = 470 + OY + logo_groupama(lsc).height / S / 2 + 45
     base = CFG["logo"]["baseline"]
     bsize = 21
     while bsize > 13 and text_w(base, "mono", bsize, 0.2) > W - 100:
         bsize -= 1
-    cv.text(base, "mono", bsize, C["bleu"], W / 2, 600 + OY, align="c",
+    cv.text(base, "mono", bsize, C["bleu"], W / 2, yb, align="c",
             opacity=ease_out_cubic(prog(t, 1.1, 0.6)), tracking=0.2)
     return 1.0 + 0.05 * ease_in_out_cubic(prog(t, 0, 3.8)), 0, 0
 
@@ -1138,7 +1141,7 @@ def step4(world, t, step):
     # Notification
     nw, nh = 640, 108
     nimg, ncv = new_card(nw, nh, 24)
-    ncv.rrect(22, 22, 86, 86, 16, fill=C["bleu"])
+    ncv.rrect(22, 22, 86, 86, 16, fill=C.get("groupama", C["bleu"]))
     ncv.text("G", "ui_bold", 30, C["fond"], 54, 54, align="c")
     ncv.text(c["notif_app"], "mono", 15, C["texte_gris"], 106, 38, tracking=0.12)
     ncv.text("à l'instant", "ui", 17, C["texte_gris"], nw - 26, 38, align="r")
