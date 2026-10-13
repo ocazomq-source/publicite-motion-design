@@ -56,7 +56,7 @@
   "etapes": [
     {
       "acteur": "expert",
-      "titre": ["L'expert transmet", "le {procès-verbal}"],
+      "titre": ["L'expert transmet", transmets "les données du {procès-verbal}"],
       "texte": "L'expert réalise son chiffrage, AUTOPIEC est automatiquement informé.",
       "carte": {
         "entete": [
