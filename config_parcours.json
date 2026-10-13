@@ -353,6 +353,9 @@
     "groupama": "#086D44"
   },
   "musique": true,
+  "rythme": {
+    "duree": 1.0
+  },
   "sons": {
     "effets": true,
     "volume_effets": 1.0,

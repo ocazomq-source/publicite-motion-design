@@ -29,6 +29,8 @@ Règles à respecter :
   Les accolades `{ }` doivent alors s'ouvrir et se fermer sur la même ligne.
 - Ne revenez **jamais** à la ligne à l'intérieur des guillemets : le fichier ne serait plus valide.
 - Les couleurs se changent dans la rubrique `"couleurs"` (codes du type `#005EE9`).
+- Le rythme se règle dans la rubrique `"rythme"` : `"duree": 1.2` allonge toutes les scènes de 20 %
+  (plus de temps pour lire), `0.9` les raccourcit de 10 %. Les animations gardent leur vitesse.
 - Le son se règle dans la rubrique `"sons"` : `"effets": false` coupe les bruitages,
   `"volume_effets"` et `"volume_musique"` (1.0 = normal, 0.5 = moitié moins fort, 1.5 = plus fort).
   `"desactiver"` coupe un ou plusieurs sons précis, par exemple `"desactiver": ["frappe", "souffle"]`.

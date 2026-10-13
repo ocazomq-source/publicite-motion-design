@@ -761,7 +761,7 @@ def step_progress(world, t, idx):
         if k < idx:
             f = 1.0
         elif k == idx:
-            f = ease_in_out_cubic(prog(t, 0.4, 4.6))
+            f = ease_in_out_cubic(prog(t, 0.4, STEP_DUR - 0.9))
         else:
             f = 0
         if f > 0:
@@ -1001,7 +1001,7 @@ def step1(world, t, step):
             tcv.spinner(36, 33, 11, t, C["bleu"])
             tcv.text(c["toast"], "ui", 23, C["texte_gris"], 62, 33)
         place_card(world, timg, CARD_CX - 130, CARD_CY + 330, t, 3.45, w=tw, h=66, r=33, dur=0.8, from_dy=40)
-    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 6.3)), -20, 0
+    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, STEP_DUR + 0.8)), -20, 0
 
 
 def step2(world, t, step):
@@ -1070,7 +1070,7 @@ def step2(world, t, step):
         if 0 < q < 1.4 and t < 3.0:
             r = 200 + 360 * ease_out_cubic(q / 1.4)
             cvw.ring(CARD_CX + 380, CARD_CY - 40, r, 2.5, alpha(C["bleu"], 0.25 * (1 - q / 1.4)))
-    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 6.3)), -20, 0
+    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, STEP_DUR + 0.8)), -20, 0
 
 
 def step3(world, t, step):
@@ -1105,7 +1105,7 @@ def step3(world, t, step):
 
     x0, y0 = card_origin(w, h)
     draw_cursor(world, t, [(2.2, CARD_CX + 425, CARD_CY + 360), (3.15, x0 + 230, y0 + 646)], clicks=[t_click], t_hide=4.6)
-    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 6.3)), -20, 0
+    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, STEP_DUR + 0.8)), -20, 0
 
 
 STATUS_STYLE = {
@@ -1170,7 +1170,7 @@ def step4(world, t, step):
                   fill=mix(C["fond"], C["gris_clair"], rq))
         cvw.disc(x0 + 28, yb, 9 * rq, C["rouge"])
         cvw.text(c["refus"], "ui", 21, C["texte_gris"], x0 + 48, yb, opacity=rq)
-    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 6.3)), -20, 0
+    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, STEP_DUR + 0.8)), -20, 0
 
 
 def step5(world, t, step):
@@ -1211,7 +1211,7 @@ def step5(world, t, step):
         composite(img, fade(nimg, clamp(q * 2.5)), (pw / 2 - 177 + 4) * S - 4 * S, (y0 + 4) * S - 4 * S)
     place_card(world, img, CARD_CX, CARD_CY + math.sin(t * 1.4) * 4 * prog(t, 1.2, 0.5), t, 0.2,
                w=pw, h=ph, r=66, dur=1.1, tilt_from=28)
-    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 6.3)), -20, 0
+    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, STEP_DUR + 0.8)), -20, 0
 
 
 def step6(world, t, step):
@@ -1247,7 +1247,7 @@ def step6(world, t, step):
         r = 30 * (1 - 0.4 * e)
         cvw.disc(x, y, r, alpha(C["bleu"], 1 - fq ** 3))
         cvw.icon("doc", x, y, r * 0.5, alpha(C["fond"], 1 - fq ** 3))
-    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 6.3)), -20, 0
+    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, STEP_DUR + 0.8)), -20, 0
 
 
 def step7(world, t, step):
@@ -1292,7 +1292,7 @@ def step7(world, t, step):
         bold = k == 3 and q > 0
         cv.text(label, "ui_semi" if bold else "ui", 23, C["marine"] if q > 0 else C["texte_gris"], 78, yy)
     place_card(world, img, CARD_CX, CARD_CY, t, 0.2, w=w, h=h)
-    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, 6.3)), -20, 0
+    return 1.0 + 0.04 * ease_in_out_cubic(prog(t, 0, STEP_DUR + 0.8)), -20, 0
 
 
 STEP_FUNCS = [step1, step2, step3, step4, step5, step6, step7]
@@ -1353,13 +1353,13 @@ def scene_suivi(world, t):
 
 def benef_starts(n):
     """Instants d'apparition des bénéfices (plus serrés quand la liste est longue)."""
-    step = 0.95 if n <= 3 else 0.55
+    step = 1.2 if n <= 3 else 0.85
     return [0.3 + k * step for k in range(n)]
 
 
 def benef_duration():
     n = len(CFG["benefices"]["lignes"])
-    return max(4.5, benef_starts(n)[-1] + 2.4)
+    return max(6.0, benef_starts(n)[-1] + 3.0)
 
 
 def scene_benefices(world, t):
@@ -1454,12 +1454,12 @@ def scene_fin(world, t):
 # --------------------------------------------------------------------------- #
 # Montage : (durée, scène, transition d'entrée, sons [(t local, type)])
 # --------------------------------------------------------------------------- #
-STEP_DUR = 5.5
+STEP_DUR = 7.5
 TIMELINE = [
-    (3.5, scene_accroche, None, [(0.3, "pop")]),
-    (4.0, scene_probleme, "flou", [(1.0, "pop"), (1.7, "souffle")]),
-    (3.0, scene_logo, "zoom", [(0.3, "impact")]),
-    (4.0, scene_titre, "flou", [(1.1, "tic"), (1.7, "tic"), (2.3, "tic"), (2.9, "tic")]),
+    (5.0, scene_accroche, None, [(0.3, "pop")]),
+    (5.5, scene_probleme, "flou", [(1.0, "pop"), (1.7, "souffle")]),
+    (3.5, scene_logo, "zoom", [(0.3, "impact")]),
+    (5.5, scene_titre, "flou", [(1.1, "tic"), (1.7, "tic"), (2.3, "tic"), (2.9, "tic")]),
     (STEP_DUR, make_step(0), "zoom", [(0.7, "frappe"), (0.98, "frappe"), (1.26, "frappe"), (1.54, "frappe"),
                                        (2.0, "pop"), (3.0, "clic"), (3.05, "succes"), (4.4, "ping")]),
     (STEP_DUR, make_step(1), "travelling", [(0.95, "pop"), (1.75, "tic"), (2.1, "tic"), (2.45, "tic"),
@@ -1470,10 +1470,10 @@ TIMELINE = [
     (STEP_DUR, make_step(4), "travelling", [(0.95, "ping"), (2.25, "ping")]),
     (STEP_DUR, make_step(5), "travelling", [(1.2, "pop"), (2.85, "clic"), (2.9, "succes"), (3.3, "souffle")]),
     (STEP_DUR, make_step(6), "travelling", [(1.0, "souffle"), (3.35, "succes")]),
-    (4.5, scene_suivi, "zoom", [(1.5, "tic"), (2.0, "tic"), (2.5, "tic"), (3.0, "succes")]),
+    (6.0, scene_suivi, "zoom", [(1.5, "tic"), (2.0, "tic"), (2.5, "tic"), (3.0, "succes")]),
     (4.5, scene_benefices, "flou", [(0.3, "pop"), (1.25, "pop"), (2.2, "pop")]),
-    (4.0, scene_pilote, "flou", [(1.2, "pop")]),
-    (5.5, scene_fin, "zoom", [(0.2, "impact")]),
+    (5.5, scene_pilote, "flou", [(1.2, "pop")]),
+    (6.5, scene_fin, "zoom", [(0.2, "impact")]),
 ]
 STARTS, DURATION = [], 0.0
 
@@ -1485,10 +1485,12 @@ def build_timeline():
         if f is scene_benefices and CFG:
             n = len(CFG["benefices"]["lignes"])
             TIMELINE[i] = (benef_duration(), f, tr, [(st, "pop") for st in benef_starts(n)])
+    # « rythme.duree » : 1.0 = normal, 1.2 = scènes 20 % plus longues (jamais moins de 0.85)
+    k = max(0.85, float(CFG.get("rythme", {}).get("duree", 1.0))) if CFG else 1.0
     STARTS, acc = [], 0.0
     for d, *_ in TIMELINE:
         STARTS.append(acc)
-        acc += d
+        acc += d * k
     DURATION = acc
 
 
