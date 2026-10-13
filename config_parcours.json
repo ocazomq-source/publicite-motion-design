@@ -20,8 +20,8 @@
     "surtitre": "",
     "lignes": [
       "Du procès-verbal",
-      "à la livraison de pièce de réemploi 
-      {aux réparateurs.}"
+      "à la livraison de pièce de réemploi",
+      "{aux réparateurs.}"
     ],
     "sous_titre": "",
     "frise": [
@@ -57,8 +57,7 @@
     {
       "acteur": "expert",
       "titre": ["L'expert transmet", "le {procès-verbal}", "sans efforts."],
-      "texte": "L'expert réalise son chiffrage, AUTOPIEC 
-      est automatiquement informé   .",
+      "texte": "L'expert réalise son chiffrage, AUTOPIEC est automatiquement informé.",
       "carte": {
         "entete": [
           "PROCÈS-VERBAL D'EXPERTISE",
@@ -273,7 +272,7 @@
     "titre": ["Une vision claire de chaque dossier,", "{en temps réel}, à chaque étape."],
     "entete": [
       "TABLEAU DE BORD GROUPAMA",
-      "MARTINIQUE · GUADELOUPE· GUYANE"
+      "MARTINIQUE · GUADELOUPE · GUYANE"
     ],
     "dossiers": [
       [

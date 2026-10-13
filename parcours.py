@@ -916,7 +916,8 @@ def scene_titre(world, t):
             ssz -= 1
         cv.text(sur, "mono", ssz, C["bleu"], W / 2, 300 + OY, align="c",
                 opacity=prog(t, 0.1, 0.4), tracking=0.24)
-    ctitle(world, cfg["lignes"], 72, 330 if cfg.get("surtitre") else 300, t - 0.25, line_h=84, stagger=0.06)
+    tb = ctitle(world, cfg["lignes"], 72, 330 if cfg.get("surtitre") else 300, t - 0.25, line_h=84,
+                stagger=0.06)
 
     # Aperçu du parcours : les acteurs reliés (liste « frise », sinon un par étape)
     actors = cfg.get("frise") or [st["acteur"] for st in CFG["etapes"]]
@@ -924,7 +925,7 @@ def scene_titre(world, t):
     step = min(270, (W - 280) / max(1, n - 1))      # écart entre deux acteurs
     half = step * (n - 1) / 2
     xs = [lerp(W / 2 - half, W / 2 + half, i / (n - 1)) for i in range(n)]
-    y = 670 + OY
+    y = max(670 + OY, tb + 150)                       # la frise reste sous le titre
     r = 54                                            # rayon des pastilles
     lp = ease_in_out_cubic(prog(t, 1.1, 1.8))
     if lp > 0:
@@ -945,7 +946,7 @@ def scene_titre(world, t):
         cv.text(str(i + 1), "mono", 19, C["texte_gris"], xs[i], y - r - 30, align="c", opacity=op)
     q = ease_out_cubic(prog(t, 2.6, 0.6))
     sub = cfg["sous_titre"]
-    cv.text(sub, "ui", fit_size(sub, "ui", 28, W - 120), C["texte_gris"], W / 2, 880 + OY + (1 - q) * 10,
+    cv.text(sub, "ui", fit_size(sub, "ui", 28, W - 120), C["texte_gris"], W / 2, y + 210 + (1 - q) * 10,
             align="c", opacity=q)
     return 1.0 + 0.03 * ease_in_out_cubic(prog(t, 0, 4.3)), 0, 0
 
