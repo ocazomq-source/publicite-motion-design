@@ -14,62 +14,54 @@
     "blanc": "#FFFFFF"
   },
 
-  "voix": { "active": true, "modele": "siwis", "vitesse": 1.3, "volume": 1.0 },
-  "sons": { "effets": true, "volume_effets": 1.0, "volume_musique": 1.0, "desactiver": [] },
+  "voix": { "active": true, "modele": "kokoro", "vitesse": 1.05, "volume": 1.0 },
+  "sons": { "effets": true, "volume_effets": 0.8, "volume_musique": 0.9, "desactiver": [] },
+  "sous_titres": true,
 
   "accroche": {
-    "lignes": ["Cette erreur coûte", "{21 ans de Netflix}"],
-    "compteur": "ANS",
-    "note": "abonnement Standard à 14,99 € par mois",
-    "sticker": "Elle est en n°4",
-    "voix": "Cette erreur en bourse coûte vingt et un ans de Netflix. Elle est en numéro quatre."
+    "chiffre": "3",
+    "lignes": ["erreurs qui coûtent cher", "quand on débute {en bourse}"],
+    "sticker": "La n°3 ne se voit pas…",
+    "voix": "Trois erreurs qui coûtent cher quand on débute en bourse."
   },
 
   "erreurs": [
     {
-      "titre": ["Suivre", "{la mode}"],
-      "badge": "TENDANCE IA",
+      "titre": "Suivre {la mode}",
+      "messages": ["T'as vu Oracle ?", "Tout le monde en parle !", "J'achète !"],
       "action": "ORACLE",
       "de": 345, "a": 115, "unite": "$",
       "tampon": "−67 %",
-      "legende": "en 10 mois",
-      "voix": "Suivre la mode : Oracle, star de l'IA, moins soixante-sept pour cent."
+      "legende": "sept. 2025 → juil. 2026",
+      "reflexe": "Investir dans ce qu'on comprend",
+      "sous_titre": "1 : suivre la mode. En 2025, tout le monde parlait d'Oracle. Dix mois plus tard, l'action avait perdu deux tiers de sa valeur.",
+      "voix": "Un : suivre la mode. En deux mille vingt-cinq, tout le monde parlait d'Oracle. Dix mois plus tard, l'action avait perdu deux tiers de sa valeur."
     },
     {
-      "titre": ["Tout miser sur", "{une seule action}"],
-      "contexte": "10 000 € dans Atos en 2017…",
-      "de": 10000, "a": 0.47,
-      "chute": "Même pas de quoi payer un café.",
-      "voix": "Tout miser sur une action : dix mille euros dans Atos… même pas de quoi payer un café."
-    },
-    {
-      "titre": ["Vendre", "{en panique}"],
-      "contexte": "Covid, mars 2020",
-      "creux": "−34 % en un mois",
-      "bouton": "VENDRE",
+      "titre": "Vendre {en panique}",
+      "alerte": "La bourse s'effondre : −34 %",
+      "alerte_quand": "mars 2020",
+      "vendu": "Vendu au plus bas : perte définitive",
       "retour": "5 mois plus tard : tout est revenu",
-      "voix": "Vendre en panique : le Covid fait chuter la bourse d'un tiers… tout revient en cinq mois."
+      "reflexe": "Fixer son horizon, et s'y tenir",
+      "sous_titre": "2 : vendre en panique. En mars 2020, la bourse chute d'un tiers. Cinq mois plus tard, tout est revenu. Ceux qui ont vendu ont perdu.",
+      "voix": "Deux : vendre en panique. En mars deux mille vingt, la bourse chute d'un tiers. Cinq mois plus tard, tout est revenu. Ceux qui ont vendu ont perdu."
     },
     {
-      "titre": ["Ignorer", "{les frais}"],
-      "contexte": "+1 % de frais par an · 10 000 € sur 20 ans",
+      "titre": "Ignorer {les frais}",
+      "contexte": "10 000 € placés 20 ans à 5 % par an",
+      "ligne": "Frais en plus : 1 % par an",
       "montant": 3850,
-      "egal": "= 21 ans de Netflix",
-      "voix": "Les frais : un pour cent de plus sur vingt ans, c'est vingt et un ans de Netflix."
-    },
-    {
-      "titre": ["Ne pas", "{diversifier}"],
-      "contexte": "Nasdaq : record de mars 2000…",
-      "annees": 15,
-      "retour": "…retrouvé en avril 2015",
-      "chute": "Le temps qu'un bébé arrive en 3e.",
-      "voix": "Ne pas diversifier : quinze ans pour que le Nasdaq s'en remette. Le temps qu'un bébé arrive en troisième."
+      "total": "de moins au bout de 20 ans",
+      "reflexe": "Comparer les frais avant de signer",
+      "sous_titre": "3 : ignorer les frais. 1 % de plus par an, ça paraît peu. Sur 20 ans, c'est 3 850 € de moins.",
+      "voix": "Trois : ignorer les frais. Un pour cent de plus par an, ça paraît peu. Sur vingt ans, c'est trois mille huit cent cinquante euros de moins."
     }
   ],
 
   "fin": {
     "question": ["Laquelle avez-vous", "{déjà faite} ?"],
-    "choix": ["1", "2", "3", "4", "5"],
+    "choix": ["1", "2", "3"],
     "marque": "O'MORGAN",
     "activite": "CONSEIL EN GESTION DE PATRIMOINE",
     "voix": "Et vous, laquelle avez-vous déjà faite ?"

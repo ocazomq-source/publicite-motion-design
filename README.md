@@ -67,21 +67,23 @@ les points chiffrés du document (indiqué sur chaque graphique) ; la courbe des
 Les sources du PDF (« à ne pas publier ») ne figurent pas dans la vidéo. Une modification de
 `config_erreurs.json` sur GitHub régénère automatiquement les deux vidéos.
 
-## 4. Short 30 s « 5 erreurs… et ce qu'elles coûtent en vrai » — [`output/short-5-erreurs.mp4`](output/short-5-erreurs.mp4)
+## 4. Short 30 s « 3 erreurs qui coûtent cher » — [`output/short-3-erreurs.mp4`](output/short-3-erreurs.mp4)
 
-29,5 s, vertical 1080×1920 (Reels, TikTok, Shorts), avec voix off. Accroche qui annonce l'erreur
-n°4 (« 21 ans de Netflix ») pour garder le spectateur jusqu'au bout, une coupe toutes les 4 s
-environ, fonds de couleur, textes qui « pop », secousses sur les chutes, barre de progression
-façon story, question finale pour les commentaires et mentions légales visibles en permanence.
+30 s, vertical 1080×1920 (Reels, TikTok, Shorts), pensé pour être compris du premier coup :
+trois erreurs seulement, environ 8 s chacune, une situation du quotidien par erreur, un seul
+chiffre clé à l'écran, le bon réflexe en fin de scène, sous-titres synchronisés (lisible sans
+le son) et question finale pour les commentaires. Mentions légales visibles en permanence.
 
-Exemples du quotidien, tous calculés à partir de faits réels :
-- Netflix : 3 850 € ÷ 14,99 € par mois (formule Standard, tarif France 2026) ≈ 257 mois, soit 21 ans ;
-- café : 10 000 € d'actions Atos à 107 € (février 2017) ≈ 93 actions × 0,005 € ≈ 0,47 € ;
-- gâteau d'anniversaire : Nasdaq, record du 10 mars 2000 retrouvé le 23 avril 2015, soit 15 ans,
-  l'âge d'un élève de 3e.
+| Erreur | Situation du quotidien | Fait réel |
+|---|---|---|
+| Suivre la mode | discussion de groupe « T'as vu Oracle ? » | Oracle : 345 $ (sept. 2025) → 115 $ (juil. 2026), −67 % |
+| Vendre en panique | alerte sur le téléphone | Covid, mars 2020 : −34 % en un mois, niveau retrouvé 5 mois plus tard |
+| Ignorer les frais | relevé de placement | 1 % de frais en plus, 10 000 € sur 20 ans à 5 % : 3 850 € de moins |
 
-Textes, chiffres et voix off dans `config_short.json` ; rendu avec `python3 short_erreurs.py`
-(`--preview` pour les images clés). Le total est plafonné à 30 s.
+Voix off féminine Kokoro (voix « ff_siwis », plus naturelle que Piper, via `pip install
+sherpa-onnx`, modèle ≈ 350 Mo téléchargé dans `voix/` au premier lancement). Textes, sous-titres
+et voix dans `config_short.json` ; rendu avec `python3 short_erreurs.py` (`--preview` pour les
+images clés). La durée totale est plafonnée à 30 s.
 
 ## Prérequis et visuels
 

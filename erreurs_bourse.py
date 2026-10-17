@@ -1214,9 +1214,10 @@ def build_timeline():
 # --------------------------------------------------------------------------- #
 VOIX_DIR = os.path.join(ROOT, "voix")
 VOIX_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/{}.tar.bz2"
-MODELES = {   # nom : (archive, modèle, locuteur)
+MODELES = {   # nom : (archive, modèle, locuteur) ; « kokoro » = voix plus naturelle (sherpa-onnx)
     "siwis": ("vits-piper-fr_FR-siwis-medium", "fr_FR-siwis-medium", None),
     "jessica": ("vits-piper-fr_FR-upmc-medium", "fr_FR-upmc-medium", 0),
+    "kokoro": ("kokoro-multi-lang-v1_0", None, 30),          # 30 = ff_siwis, voix féminine française
 }
 VOIX = {}     # clé -> signal mono 44,1 kHz (processus principal uniquement)
 KICK_EVERY = 2  # pulsation grave : un temps sur deux (1 = chaque temps, plus nerveux)
@@ -1235,15 +1236,53 @@ def voix_textes(cfg):
 def telecharger_modele(archive, modele):
     """Récupère le modèle de voix (≈ 70 Mo, une seule fois) dans voix/."""
     os.makedirs(VOIX_DIR, exist_ok=True)
-    print(f"Téléchargement de la voix {modele}…")
+    print(f"Téléchargement de la voix {modele or archive}…")
     with tempfile.NamedTemporaryFile(suffix=".tar.bz2") as tmp:
         urllib.request.urlretrieve(VOIX_URL.format(archive), tmp.name)
         with tarfile.open(tmp.name, "r:bz2") as tar:
             for m in tar.getmembers():
                 name = os.path.basename(m.name)
-                if name in (modele + ".onnx", modele + ".onnx.json"):
+                if modele is None:                  # Kokoro : on garde tout le dossier du modèle
+                    if m.isfile():
+                        dst = os.path.join(VOIX_DIR, m.name)
+                        os.makedirs(os.path.dirname(dst), exist_ok=True)
+                        with tar.extractfile(m) as src, open(dst, "wb") as out:
+                            out.write(src.read())
+                elif name in (modele + ".onnx", modele + ".onnx.json"):
                     with tar.extractfile(m) as src, open(os.path.join(VOIX_DIR, name), "wb") as dst:
                         dst.write(src.read())
+
+
+def moteur_voix(nom, vitesse):
+    """Renvoie une fonction texte -> (échantillons int16, fréquence)."""
+    archive, modele, speaker = MODELES[nom]
+    if modele is None:
+        d = os.path.join(VOIX_DIR, archive)
+        if not os.path.exists(os.path.join(d, "model.onnx")):
+            telecharger_modele(archive, None)
+        import sherpa_onnx
+        tts = sherpa_onnx.OfflineTts(sherpa_onnx.OfflineTtsConfig(model=sherpa_onnx.OfflineTtsModelConfig(
+            kokoro=sherpa_onnx.OfflineTtsKokoroModelConfig(
+                model=f"{d}/model.onnx", voices=f"{d}/voices.bin", tokens=f"{d}/tokens.txt",
+                data_dir=f"{d}/espeak-ng-data", dict_dir=f"{d}/dict", lexicon=f"{d}/lexicon-us-en.txt",
+                lang="fr"),
+            num_threads=os.cpu_count() or 2)))
+
+        def synth(texte):
+            a = tts.generate(texte, sid=speaker, speed=vitesse)
+            return (np.clip(np.array(a.samples), -1, 1) * 32767).astype(np.int16), a.sample_rate
+        return synth
+    onnx = os.path.join(VOIX_DIR, modele + ".onnx")
+    if not os.path.exists(onnx):
+        telecharger_modele(archive, modele)
+    from piper import PiperVoice, SynthesisConfig
+    voice = PiperVoice.load(onnx, config_path=onnx + ".json")
+    syn = SynthesisConfig(speaker_id=speaker, length_scale=1 / vitesse)
+
+    def synth(texte):
+        chunks = list(voice.synthesize(texte, syn_config=syn))
+        return np.concatenate([c.audio_int16_array for c in chunks]), voice.config.sample_rate
+    return synth
 
 
 def prepare_voix(cfg, textes=None, sr=44100):
@@ -1256,7 +1295,6 @@ def prepare_voix(cfg, textes=None, sr=44100):
     if not textes:
         return {}
     nom = opts.get("modele", "siwis")
-    archive, modele, speaker = MODELES[nom]
     vitesse = float(opts.get("vitesse", 1.0))
     cache = os.path.join(ROOT, "output", "voix-cache")
     os.makedirs(cache, exist_ok=True)
@@ -1267,15 +1305,14 @@ def prepare_voix(cfg, textes=None, sr=44100):
         path = os.path.join(cache, f"{key}-{h}.wav")
         if not os.path.exists(path):
             if voice is None:
-                onnx = os.path.join(VOIX_DIR, modele + ".onnx")
-                if not os.path.exists(onnx):
-                    telecharger_modele(archive, modele)
-                from piper import PiperVoice, SynthesisConfig
-                voice = PiperVoice.load(onnx, config_path=onnx + ".json")
-                syn = SynthesisConfig(speaker_id=speaker, length_scale=1 / vitesse)
+                voice = moteur_voix(nom, vitesse)
+            pcm, rate = voice(texte)
             with tempfile.NamedTemporaryFile(suffix=".wav") as raw:
                 with wave.open(raw.name, "wb") as w:
-                    voice.synthesize_wav(texte, w, syn_config=syn)
+                    w.setnchannels(1)
+                    w.setsampwidth(2)
+                    w.setframerate(rate)
+                    w.writeframes(pcm.tobytes())
                 # 44,1 kHz, coupe des graves, légère compression et niveau homogène
                 subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw.name, "-af",
                                 "silenceremove=start_periods=1:start_threshold=-50dB,areverse,"
