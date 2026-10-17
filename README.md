@@ -41,15 +41,19 @@ Textes dans `config_presentation.json`, rendu avec `python3 presentation.py`.
 
 ## 3. O'MORGAN : « 5 erreurs qui coûtent cher » — [`output/5-erreurs-bourse.mp4`](output/5-erreurs-bourse.mp4)
 
-≈ 100 s, 1920×1080, adaptée du carrousel PDF « 5 erreurs qui coûtent cher à un investisseur
-débutant ». Version mobile 9:16 : [`output/5-erreurs-bourse-mobile.mp4`](output/5-erreurs-bourse-mobile.mp4).
+≈ 2 min 26, 1920×1080, avec voix off féminine, adaptée du carrousel PDF « 5 erreurs qui coûtent
+cher à un investisseur débutant ». Version mobile 9:16 :
+[`output/5-erreurs-bourse-mobile.mp4`](output/5-erreurs-bourse-mobile.mp4).
 
-| Temps | Scène |
-|---|---|
-| 0–6,5 s | Couverture : « 5 erreurs qui coûtent cher quand on débute en bourse » |
-| 6,5–76 s | Les 5 erreurs : texte + graphique animé (Oracle, Atos, S&P 500 Covid, frais, Nasdaq), puis « Le bon réflexe » |
-| 76–84,5 s | Récapitulatif (les 5 erreurs barrées) et « Laquelle avez-vous déjà faite ? » |
-| 84,5–100,5 s | Conclusion, signature O'MORGAN et mentions légales |
+Déroulé : couverture → les 5 erreurs (texte + graphique animé : Oracle, Atos, S&P 500 pendant le
+Covid, frais, Nasdaq, puis « Le bon réflexe ») → récapitulatif → conclusion, signature O'MORGAN et
+mentions légales. La durée de chaque scène s'adapte au texte lu par la voix off.
+
+La voix off est synthétisée hors ligne avec [Piper](https://github.com/rhasspy/piper) (voix
+française « siwis », licence CC-BY 4.0) : `pip install piper-tts`. Le modèle (≈ 70 Mo) est
+téléchargé automatiquement dans `voix/` au premier lancement, les phrases déjà lues sont gardées
+dans `output/voix-cache/`. Une autre voix féminine est disponible (`"modele": "jessica"`), et
+`"active": false` retire la voix off.
 
 ```bash
 python3 erreurs_bourse.py                    # vidéo horizontale
@@ -65,7 +69,7 @@ Les sources du PDF (« à ne pas publier ») ne figurent pas dans la vidéo. Une
 
 ## Prérequis et visuels
 
-Python 3 avec Pillow et numpy, ffmpeg, police Inter (sinon DejaVu est utilisée).
+Python 3 avec Pillow et numpy (et piper-tts pour la voix off), ffmpeg, police Inter (sinon DejaVu est utilisée).
 
 `assets/` contient les logos et visuels extraits du PDF (`outils/extraire_visuels.py`) et la photo
 du pare-chocs reprise de la première version de la vidéo.

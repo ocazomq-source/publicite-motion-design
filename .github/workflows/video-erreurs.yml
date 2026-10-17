@@ -32,7 +32,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg fonts-inter fonts-dejavu-core
-          pip install --quiet pillow numpy
+          pip install --quiet pillow numpy piper-tts
 
       - name: Générer la vidéo (format horizontal)
         run: python3 erreurs_bourse.py

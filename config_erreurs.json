@@ -22,6 +22,42 @@
     "desactiver": []
   },
 
+  "voix": {
+    "active": true,
+    "modele": "siwis",
+    "vitesse": 1.1,
+    "volume": 1.0
+  },
+
+  "voix_off": {
+    "couverture": "Cinq erreurs qui coûtent cher quand on débute en bourse. Et la quatrième passe souvent inaperçue… pendant vingt ans.",
+    "erreurs": [
+      [
+        "Erreur numéro un : suivre la mode. En septembre deux mille vingt-cinq, portée par l'euphorie de l'intelligence artificielle, l'action Oracle atteint un record. Dix mois plus tard : moins soixante-sept pour cent. Dix mille investis au sommet ? Il en reste trois mille trois cents.",
+        "Le bon réflexe : investissez dans ce que vous comprenez, pas dans ce qui fait le buzz."
+      ],
+      [
+        "Erreur numéro deux : tout miser sur une seule action. En deux mille dix-sept, Atosse, fleuron français du numérique, valait plus de cent euros. Fin deux mille vingt-cinq : un demi-centime. Dix mille euros investis ? Il en reste moins d'un euro.",
+        "Le bon réflexe : aucune ligne ne devrait peser assez lourd pour mettre en danger votre épargne."
+      ],
+      [
+        "Erreur numéro trois : vendre en panique. Mars deux mille vingt, crise du Covid : les grandes valeurs américaines chutent de trente-quatre pour cent en un mois. Vendre au plus bas, c'est rendre la perte définitive. Rester investi, c'est retrouver son niveau en cinq mois.",
+        "Le bon réflexe : définir votre horizon de placement avant d'investir, et vous y tenir."
+      ],
+      [
+        "Erreur numéro quatre : ignorer les frais. Dix mille euros placés vingt ans, à cinq pour cent brut par an. Avec deux pour cent de frais, environ dix-huit mille euros. Avec un pour cent, près de vingt-deux mille. Un point de frais, c'est trois mille huit cent cinquante euros de moins.",
+        "Le bon réflexe : vérifier les frais d'entrée, de gestion et d'arbitrage avant de signer."
+      ],
+      [
+        "Erreur numéro cinq : ne pas diversifier. En deux mille, la bulle internet éclate : le Nasdaq perd soixante-dix-huit pour cent. Il lui faudra quinze ans pour retrouver son niveau, pendant que d'autres actifs, comme les obligations, continuaient de progresser.",
+        "Le bon réflexe : répartissez entre classes d'actifs, zones géographiques et secteurs, et investissez progressivement dans le temps."
+      ]
+    ],
+    "recap": "Récapitulons. Suivre la mode. Tout miser sur une ligne. Vendre en panique. Ignorer les frais. Ne pas diversifier. Et vous, laquelle avez-vous déjà faite ?",
+    "conclusion": "Ces erreurs, presque tout le monde les fait un jour. La différence se joue dans le fait de les repérer avant qu'elles ne coûtent cher.",
+    "fin": "Besoin d'un regard extérieur ? Nous sommes là pour vous accompagner. Ô Morgane, conseil en gestion de patrimoine."
+  },
+
   "couverture": {
     "surtitre": "INVESTIR EN BOURSE",
     "lignes": ["{5 erreurs} qui coûtent cher", "quand on débute en bourse"],

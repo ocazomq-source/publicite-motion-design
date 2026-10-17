@@ -5,7 +5,9 @@ Reprend le carrousel : couverture, une scène par erreur (le chiffre clé sous f
 de graphique animé, puis « le bon réflexe »), récapitulatif et conclusion avec les
 mentions légales. Même technique que parcours.py : images dessinées avec Pillow
 (supersampling x2), musique et bruitages synthétisés avec numpy, assemblage ffmpeg.
-Tous les textes et couleurs sont dans config_erreurs.json.
+Voix off féminine française synthétisée hors ligne (Piper, voix « siwis ») : la durée
+des scènes s'adapte au texte lu et la musique s'efface sous la voix.
+Tous les textes, la voix off et les couleurs sont dans config_erreurs.json.
 
 Usage :
     python3 erreurs_bourse.py                    # -> output/5-erreurs-bourse.mp4
@@ -14,12 +16,16 @@ Usage :
     python3 erreurs_bourse.py --preview 12.5     # image à un instant précis
 """
 import argparse
+import hashlib
 import json
 import math
 import os
 import re
 import subprocess
 import sys
+import tarfile
+import tempfile
+import urllib.request
 import wave
 from functools import lru_cache
 from multiprocessing import Pool
@@ -1026,7 +1032,7 @@ def make_erreur(idx):
             CHARTS[idx][0](ccv, cw_, ch_, t - CHART_T0, g)
             place_card(world, lay, ccx, ccy, t_card, cw_, ch_)
         # textes : contexte + résultat, puis le bon réflexe
-        t2 = reflexe_at(D)
+        t2 = REFLEXE[idx]
         y0 = L["text_y"] or bottom + 44
         out = prog(t, t2 - 0.55, 0.5)
         op = 1 - ease_in_out_cubic(out)
@@ -1048,10 +1054,6 @@ def result_at(idx):
     return max(1.0 + n * 0.022 + 0.9, CHART_T0 + CHART_DUR - 0.6)
 
 
-def reflexe_at(D):
-    return D * 0.6
-
-
 def scene_recap(world, t, D):
     cfg = CFG["recap"]
     cv = Cv(world)
@@ -1063,7 +1065,7 @@ def scene_recap(world, t, D):
     x0 = W / 2 - (tw + 96) / 2
     y = bottom + (56 if not VERT else 120)
     for k, s in enumerate(cfg["lignes"]):
-        tk = t - 0.6 - k * 0.32
+        tk = t - RECAP_T0 - k * RECAP_STEP
         p = prog(tk, 0, 0.6)
         if p <= 0:
             continue
@@ -1080,7 +1082,7 @@ def scene_recap(world, t, D):
             sw = text_w(s, "titre", size)
             cv.line([(x0 + 90, cy + 5), (x0 + 90 + (sw + 12) * r, cy + 5)], C["rouge"], 4.5)
     yq = y + 5 * step + (70 if not VERT else 140)
-    tq = t - 3.9
+    tq = t - RECAP_Q
     end = ctitle(world, [cfg["question"]], 50 if not VERT else 58, yq, tq, color=C["or"], stagger=0.06)
     if tq > 0.6:
         b = math.sin((tq - 0.6) * 5.5) * 8
@@ -1145,40 +1147,142 @@ def scene_fin(world, t, D):
 # Montage : (durée, scène, transition d'entrée, sons [(t local, type)])
 # --------------------------------------------------------------------------- #
 ERR_DUR = [13.5, 13.5, 13.5, 13.0, 16.0]
+RECAP_T0, RECAP_STEP, RECAP_Q = 1.3, 0.95, 6.2    # récapitulatif : 1re ligne, écart, question
 TIMELINE = []
 STARTS, DURATION = [], 0.0
+REFLEXE = []      # début du « bon réflexe » dans chaque scène d'erreur (s)
+VO = []           # voix off : [(t absolu, clé)]
 
 
-def erreur_sounds(idx, D):
+def erreur_sounds(idx, t2):
     snd = [(0.15, "pop"), (0.95, "souffle")]
     for frac, kind in CHARTS[idx][1]:
         tt = CHART_DUR + 0.05 if frac == "fin" else t_at(frac)
         snd.append((CHART_T0 + tt, kind))
     snd.append((result_at(idx), "ping"))
-    snd.append((reflexe_at(D) + 0.3, "succes"))
+    snd.append((t2 + 0.3, "succes"))
     return snd
 
 
 def build_timeline():
-    """Durées des scènes (multipliées par « rythme.duree ») et sons associés."""
+    """Durées des scènes (multipliées par « rythme.duree », allongées si la voix off le demande),
+    sons associés et instants de la voix off."""
     global STARTS, DURATION
     k = max(0.85, float(CFG.get("rythme", {}).get("duree", 1.0))) if CFG else 1.0
+    dv = CFG.get("_durees_voix", {}) if CFG else {}
     TIMELINE.clear()
-    TIMELINE.append((6.5 * k, scene_couverture, None, [(0.1, "pop"), (0.5, "souffle"), (2.0, "pop")]))
+    REFLEXE.clear()
+    voix = []                                    # par scène : [(t local, clé)]
+
+    def lu(key, t0, base, apres):
+        """Durée de scène : au moins `base`, et assez pour lire la clé à t0 puis `apres` s de silence."""
+        if key in dv:
+            voix[-1].append((t0, key))
+            return max(base, t0 + dv[key] + apres)
+        return base
+
+    voix.append([])
+    TIMELINE.append((lu("couverture", 0.6, 6.5 * k, 1.0), scene_couverture, None,
+                     [(0.1, "pop"), (0.5, "souffle"), (2.0, "pop")]))
     for i, d in enumerate(ERR_DUR):
-        D = d * k
+        voix.append([])
+        t2 = lu(f"erreur{i + 1}a", 0.5, d * k * 0.6, 0.6)
+        REFLEXE.append(t2)
+        D = lu(f"erreur{i + 1}b", t2 + 0.35, d * k, 1.2)
         TIMELINE.append((D, make_erreur(i), "zoom" if i == 0 else "travelling",
-                         erreur_sounds(i, D) if CFG else []))
-    TIMELINE.append((8.5 * k, scene_recap, "zoom",
-                     [(0.6 + j * 0.32, "tic") for j in range(5)] + [(2.4 + j * 0.32, "barre") for j in range(5)]
-                     + [(3.9, "pop")]))
-    TIMELINE.append((6.0 * k, scene_conclusion, "flou", [(0.2, "pop")]))
-    TIMELINE.append((10.0 * k, scene_fin, "flou", [(0.2, "pop"), (1.4, "impact")]))
+                         erreur_sounds(i, t2) if CFG else []))
+    voix.append([])
+    rows = [RECAP_T0 + j * RECAP_STEP for j in range(5)]
+    TIMELINE.append((lu("recap", 0.4, 9.5 * k, 1.3), scene_recap, "zoom",
+                     [(r, "tic") for r in rows] + [(r + 1.8, "barre") for r in rows] + [(RECAP_Q, "pop")]))
+    voix.append([])
+    TIMELINE.append((lu("conclusion", 0.3, 6.0 * k, 1.2), scene_conclusion, "flou", [(0.2, "pop")]))
+    voix.append([])
+    TIMELINE.append((lu("fin", 0.3, 10.0 * k, 4.0), scene_fin, "flou", [(0.2, "pop"), (1.4, "impact")]))
     STARTS, acc = [], 0.0
     for d, *_ in TIMELINE:
         STARTS.append(acc)
         acc += d
     DURATION = acc
+    VO.clear()
+    for i, evs in enumerate(voix):
+        VO.extend((STARTS[i] - (TR / 2 if i else 0) + lt, key) for lt, key in evs)
+
+
+# --------------------------------------------------------------------------- #
+# Voix off : synthèse neuronale hors ligne (Piper), voix française féminine
+# --------------------------------------------------------------------------- #
+VOIX_DIR = os.path.join(ROOT, "voix")
+VOIX_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/{}.tar.bz2"
+MODELES = {   # nom : (archive, modèle, locuteur)
+    "siwis": ("vits-piper-fr_FR-siwis-medium", "fr_FR-siwis-medium", None),
+    "jessica": ("vits-piper-fr_FR-upmc-medium", "fr_FR-upmc-medium", 0),
+}
+VOIX = {}     # clé -> signal mono 44,1 kHz (processus principal uniquement)
+
+
+def voix_textes(cfg):
+    v = cfg.get("voix_off", {})
+    out = [("couverture", v.get("couverture"))]
+    for i, (a, b) in enumerate(v.get("erreurs", [])):
+        out += [(f"erreur{i + 1}a", a), (f"erreur{i + 1}b", b)]
+    out += [(key, v.get(key)) for key in ("recap", "conclusion", "fin")]
+    return [(key, t) for key, t in out if t]
+
+
+def telecharger_modele(archive, modele):
+    """Récupère le modèle de voix (≈ 70 Mo, une seule fois) dans voix/."""
+    os.makedirs(VOIX_DIR, exist_ok=True)
+    print(f"Téléchargement de la voix {modele}…")
+    with tempfile.NamedTemporaryFile(suffix=".tar.bz2") as tmp:
+        urllib.request.urlretrieve(VOIX_URL.format(archive), tmp.name)
+        with tarfile.open(tmp.name, "r:bz2") as tar:
+            for m in tar.getmembers():
+                name = os.path.basename(m.name)
+                if name in (modele + ".onnx", modele + ".onnx.json"):
+                    with tar.extractfile(m) as src, open(os.path.join(VOIX_DIR, name), "wb") as dst:
+                        dst.write(src.read())
+
+
+def prepare_voix(cfg, sr=44100):
+    """Synthétise chaque phrase de la voix off (avec cache) ; renvoie {clé: durée en s}."""
+    opts = cfg.get("voix", {})
+    if not opts.get("active", True):
+        return {}
+    textes = voix_textes(cfg)
+    if not textes:
+        return {}
+    nom = opts.get("modele", "siwis")
+    archive, modele, speaker = MODELES[nom]
+    vitesse = float(opts.get("vitesse", 1.0))
+    cache = os.path.join(ROOT, "output", "voix-cache")
+    os.makedirs(cache, exist_ok=True)
+    voice = None
+    durees = {}
+    for key, texte in textes:
+        h = hashlib.sha1(f"{nom}|{vitesse}|{texte}".encode()).hexdigest()[:16]
+        path = os.path.join(cache, f"{key}-{h}.wav")
+        if not os.path.exists(path):
+            if voice is None:
+                onnx = os.path.join(VOIX_DIR, modele + ".onnx")
+                if not os.path.exists(onnx):
+                    telecharger_modele(archive, modele)
+                from piper import PiperVoice, SynthesisConfig
+                voice = PiperVoice.load(onnx, config_path=onnx + ".json")
+                syn = SynthesisConfig(speaker_id=speaker, length_scale=1 / vitesse)
+            with tempfile.NamedTemporaryFile(suffix=".wav") as raw:
+                with wave.open(raw.name, "wb") as w:
+                    voice.synthesize_wav(texte, w, syn_config=syn)
+                # 44,1 kHz, coupe des graves, légère compression et niveau homogène
+                subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw.name, "-af",
+                                "highpass=f=70,acompressor=threshold=-20dB:ratio=3:attack=5:release=90,"
+                                "loudnorm=I=-16:TP=-1.5:LRA=7,aresample=44100",
+                                "-ac", "1", "-ar", str(sr), "-c:a", "pcm_s16le", path], check=True)
+        with wave.open(path, "rb") as w:
+            sig = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float32) / 32768
+        VOIX[key] = sig
+        durees[key] = len(sig) / sr
+    return durees
 
 
 def scene_local_time(k, t):
@@ -1458,8 +1562,22 @@ def synth_audio(path, sr=44100):
     vol_fx = float(sons.get("volume_effets", 1.0)) if sons.get("effets", True) else 0.0
     mus *= float(sons.get("volume_musique", 1.0))
     sfx *= vol_fx
-    out = np.tanh((mus * 0.9 + sfx) * 1.1)
-    out /= max(1e-6, np.abs(out).max()) / 0.8
+    # voix off : la musique s'efface (≈ -8 dB) pendant qu'elle parle
+    voix = np.zeros(n, np.float32)
+    duck = np.ones(n, np.float32)
+    for t0, key in VO:
+        sig = VOIX.get(key)
+        if sig is None:
+            continue
+        add(voix, sig, t0)
+        ramp = np.clip(np.minimum((x - t0 + 0.35) / 0.35, (t0 + len(sig) / sr + 0.5 - x) / 0.5), 0, 1)
+        duck = np.minimum(duck, 1 - 0.6 * ramp)
+    ref = np.abs(np.tanh((mus * 0.9 + sfx) * 1.1)).max()
+    out = np.tanh((mus * 0.9 * duck + sfx * (0.6 + 0.4 * duck)) * 1.1) * (0.8 / max(1e-6, ref))
+    if VO and VOIX:
+        vol_voix = float(CFG.get("voix", {}).get("volume", 1.0))
+        out = out * 0.6 + voix * (0.9 / max(1e-6, np.abs(voix).max())) * vol_voix
+        out /= max(1.0, np.abs(out).max() / 0.95)
     pcm = (out * 32767).astype(np.int16)
     with wave.open(path, "wb") as wf:
         wf.setnchannels(2)
@@ -1481,6 +1599,7 @@ def main():
 
     with open(args.config, encoding="utf-8") as f:
         cfg = json.load(f)
+    cfg["_durees_voix"] = prepare_voix(cfg)
     init_worker(cfg, args.format)
     suffix = "-mobile" if VERT else ""
     args.out = args.out or os.path.join(ROOT, "output", f"5-erreurs-bourse{suffix}.mp4")
@@ -1491,9 +1610,9 @@ def main():
         os.makedirs(outdir, exist_ok=True)
         secs = args.preview
         if not secs:
-            for s, (d, f, *_) in zip(STARTS, TIMELINE):
-                if f.__name__ == "scene":           # erreurs : avant et après « le bon réflexe »
-                    secs.append(s + reflexe_at(d) - 0.9)
+            for k, (s, (d, *_)) in enumerate(zip(STARTS, TIMELINE)):
+                if 1 <= k <= len(REFLEXE):          # erreurs : avant et après « le bon réflexe »
+                    secs.append(s + REFLEXE[k - 1] - 0.9)
                 secs.append(s + d - 0.6)
         for sec in secs:
             buf = render_frame(int(round(sec * FPS)))

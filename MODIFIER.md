@@ -84,6 +84,8 @@ sont régénérées par la tâche « Générer la vidéo « 5 erreurs » ».
 
 | Rubrique | Ce que c'est à l'écran |
 |---|---|
+| `voix` | voix off : `active` (true/false), `modele` (`siwis` ou `jessica`), `vitesse` (1.0 = normale, 1.2 = plus rapide), `volume` |
+| `voix_off` | le texte lu : `couverture`, puis pour chaque erreur deux phrases (avant et pendant « Le bon réflexe »), `recap`, `conclusion`, `fin`. Écrivez les nombres en toutes lettres (« dix mille ») pour une prononciation correcte. Les scènes s'allongent toutes seules si le texte est plus long |
 | `couverture` | titre d'ouverture et phrase d'accroche |
 | `erreurs` | les 5 erreurs, dans l'ordre : `titre`, `contexte`, `resultat` (ligne avec la flèche), `reflexe` (encadré vert), puis les étiquettes du `graphique` |
 | `recap` | liste des 5 erreurs et question finale |

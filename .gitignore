@@ -4,3 +4,5 @@ output/*.wav
 __pycache__/
 output/apercu-erreurs/
 output/apercu-erreurs-mobile/
+voix/
+output/voix-cache/
