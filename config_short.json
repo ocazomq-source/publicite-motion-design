@@ -1,0 +1,79 @@
+{
+  "couleurs": {
+    "fond": "#F7F5F0",
+    "carte": "#FFFFFF",
+    "marine": "#0F1E36",
+    "gris": "#5F6675",
+    "gris_clair": "#9AA0AB",
+    "trait": "#E6E1D7",
+    "or": "#D29B35",
+    "rouge": "#D8443A",
+    "vert": "#1E8A5B",
+    "vert_clair": "#E8F3EC",
+    "rouge_clair": "#F8E6E3",
+    "blanc": "#FFFFFF"
+  },
+
+  "voix": { "active": true, "modele": "siwis", "vitesse": 1.3, "volume": 1.0 },
+  "sons": { "effets": true, "volume_effets": 1.0, "volume_musique": 1.0, "desactiver": [] },
+
+  "accroche": {
+    "lignes": ["Cette erreur coûte", "{21 ans de Netflix}"],
+    "compteur": "ANS",
+    "note": "abonnement Standard à 14,99 € par mois",
+    "sticker": "Elle est en n°4",
+    "voix": "Cette erreur en bourse coûte vingt et un ans de Netflix. Elle est en numéro quatre."
+  },
+
+  "erreurs": [
+    {
+      "titre": ["Suivre", "{la mode}"],
+      "badge": "TENDANCE IA",
+      "action": "ORACLE",
+      "de": 345, "a": 115, "unite": "$",
+      "tampon": "−67 %",
+      "legende": "en 10 mois",
+      "voix": "Suivre la mode : Oracle, star de l'IA, moins soixante-sept pour cent."
+    },
+    {
+      "titre": ["Tout miser sur", "{une seule action}"],
+      "contexte": "10 000 € dans Atos en 2017…",
+      "de": 10000, "a": 0.47,
+      "chute": "Même pas de quoi payer un café.",
+      "voix": "Tout miser sur une action : dix mille euros dans Atos… même pas de quoi payer un café."
+    },
+    {
+      "titre": ["Vendre", "{en panique}"],
+      "contexte": "Covid, mars 2020",
+      "creux": "−34 % en un mois",
+      "bouton": "VENDRE",
+      "retour": "5 mois plus tard : tout est revenu",
+      "voix": "Vendre en panique : le Covid fait chuter la bourse d'un tiers… tout revient en cinq mois."
+    },
+    {
+      "titre": ["Ignorer", "{les frais}"],
+      "contexte": "+1 % de frais par an · 10 000 € sur 20 ans",
+      "montant": 3850,
+      "egal": "= 21 ans de Netflix",
+      "voix": "Les frais : un pour cent de plus sur vingt ans, c'est vingt et un ans de Netflix."
+    },
+    {
+      "titre": ["Ne pas", "{diversifier}"],
+      "contexte": "Nasdaq : record de mars 2000…",
+      "annees": 15,
+      "retour": "…retrouvé en avril 2015",
+      "chute": "Le temps qu'un bébé arrive en 3e.",
+      "voix": "Ne pas diversifier : quinze ans pour que le Nasdaq s'en remette. Le temps qu'un bébé arrive en troisième."
+    }
+  ],
+
+  "fin": {
+    "question": ["Laquelle avez-vous", "{déjà faite} ?"],
+    "choix": ["1", "2", "3", "4", "5"],
+    "marque": "O'MORGAN",
+    "activite": "CONSEIL EN GESTION DE PATRIMOINE",
+    "voix": "Et vous, laquelle avez-vous déjà faite ?"
+  },
+
+  "mentions": "Exemples pédagogiques, ni conseil ni recommandation. Performances passées ≠ futures. Risque de perte en capital."
+}

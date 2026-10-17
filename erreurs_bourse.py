@@ -1219,6 +1219,8 @@ MODELES = {   # nom : (archive, modèle, locuteur)
     "jessica": ("vits-piper-fr_FR-upmc-medium", "fr_FR-upmc-medium", 0),
 }
 VOIX = {}     # clé -> signal mono 44,1 kHz (processus principal uniquement)
+KICK_EVERY = 2  # pulsation grave : un temps sur deux (1 = chaque temps, plus nerveux)
+KICK_STOP = -2  # scène où la pulsation s'arrête (None : jusqu'à la fin)
 
 
 def voix_textes(cfg):
@@ -1244,12 +1246,13 @@ def telecharger_modele(archive, modele):
                         dst.write(src.read())
 
 
-def prepare_voix(cfg, sr=44100):
-    """Synthétise chaque phrase de la voix off (avec cache) ; renvoie {clé: durée en s}."""
+def prepare_voix(cfg, textes=None, sr=44100):
+    """Synthétise chaque phrase de la voix off (avec cache) ; renvoie {clé: durée en s}.
+    `textes` : [(clé, texte)], par défaut ceux de la rubrique « voix_off » de la config."""
     opts = cfg.get("voix", {})
     if not opts.get("active", True):
         return {}
-    textes = voix_textes(cfg)
+    textes = voix_textes(cfg) if textes is None else textes
     if not textes:
         return {}
     nom = opts.get("modele", "siwis")
@@ -1260,7 +1263,7 @@ def prepare_voix(cfg, sr=44100):
     voice = None
     durees = {}
     for key, texte in textes:
-        h = hashlib.sha1(f"{nom}|{vitesse}|{texte}".encode()).hexdigest()[:16]
+        h = hashlib.sha1(f"{nom}|{vitesse}|{texte}|v2".encode()).hexdigest()[:16]
         path = os.path.join(cache, f"{key}-{h}.wav")
         if not os.path.exists(path):
             if voice is None:
@@ -1275,6 +1278,8 @@ def prepare_voix(cfg, sr=44100):
                     voice.synthesize_wav(texte, w, syn_config=syn)
                 # 44,1 kHz, coupe des graves, légère compression et niveau homogène
                 subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw.name, "-af",
+                                "silenceremove=start_periods=1:start_threshold=-50dB,areverse,"
+                                "silenceremove=start_periods=1:start_threshold=-50dB,areverse,"
                                 "highpass=f=70,acompressor=threshold=-20dB:ratio=3:attack=5:release=90,"
                                 "loudnorm=I=-16:TP=-1.5:LRA=7,aresample=44100",
                                 "-ac", "1", "-ar", str(sr), "-c:a", "pcm_s16le", path], check=True)
@@ -1427,7 +1432,7 @@ def synth_audio(path, sr=44100):
     bar = 4 * beat
     end = DURATION - 3.0
     beats_in = STARTS[1]                # la pulsation démarre avec la 1re erreur
-    beats_out = STARTS[-2]              # et s'arrête pour la conclusion
+    beats_out = STARTS[KICK_STOP] if KICK_STOP else DURATION - 1.5   # et s'arrête pour la conclusion
     off = set(CFG.get("sons", {}).get("desactiver", []))
     for b in range(int(math.ceil(end / bar))):
         ch = chords[b % 4]
@@ -1439,7 +1444,7 @@ def synth_audio(path, sr=44100):
             add(mus, keys(midi(ch[1 + idx % 4] + 12), 0.6, 0.25), t0 + k8 * beat / 2, 0.06)
     for k in range(int(end / beat)):
         t0 = k * beat
-        if beats_in <= t0 < beats_out and k % 2 == 0 and "batterie" not in off:
+        if beats_in <= t0 < beats_out and k % KICK_EVERY == 0 and "batterie" not in off:
             add(mus, kick(), t0, 0.45)
     add(mus, pad([midi(m) for m in (57, 60, 64, 67, 72)], 3.5), end, 0.12)
     add(mus, keys(midi(45), 3.0, 1.4), end, 0.25)

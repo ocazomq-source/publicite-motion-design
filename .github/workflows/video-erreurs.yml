@@ -7,6 +7,8 @@ on:
     paths:
       - "config_erreurs.json"
       - "erreurs_bourse.py"
+      - "config_short.json"
+      - "short_erreurs.py"
   workflow_dispatch:
 
 permissions:
@@ -40,6 +42,9 @@ jobs:
       - name: Générer la vidéo (format mobile)
         run: python3 erreurs_bourse.py --format vertical
 
+      - name: Générer le short 30 s (vertical)
+        run: python3 short_erreurs.py
+
       - name: Mettre la vidéo à disposition (onglet Actions)
         uses: actions/upload-artifact@v4
         with:
@@ -47,12 +52,13 @@ jobs:
           path: |
             output/5-erreurs-bourse.mp4
             output/5-erreurs-bourse-mobile.mp4
+            output/short-5-erreurs.mp4
 
       - name: Enregistrer la vidéo dans le dépôt
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add output/5-erreurs-bourse.mp4 output/5-erreurs-bourse-mobile.mp4
+          git add output/5-erreurs-bourse.mp4 output/5-erreurs-bourse-mobile.mp4 output/short-5-erreurs.mp4
           git commit -m "Vidéo « 5 erreurs » régénérée après modification" || exit 0
           git pull --rebase
           git push
