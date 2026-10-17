@@ -1,0 +1,58 @@
+name: Générer la vidéo « 5 erreurs »
+
+# Se lance à chaque modification des textes (config_erreurs.json) ou du code,
+# ou à la main depuis l'onglet « Actions » (bouton « Run workflow »).
+on:
+  push:
+    paths:
+      - "config_erreurs.json"
+      - "erreurs_bourse.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video-erreurs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rendu:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vérifier config_erreurs.json
+        run: |
+          python3 -c "import json; json.load(open('config_erreurs.json', encoding='utf-8'))" \
+            || { echo "::error file=config_erreurs.json::Le fichier contient une erreur de syntaxe (guillemet, virgule ou crochet manquant). Voir MODIFIER.md."; exit 1; }
+
+      - name: Installer ffmpeg et les polices
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-inter fonts-dejavu-core
+          pip install --quiet pillow numpy
+
+      - name: Générer la vidéo (format horizontal)
+        run: python3 erreurs_bourse.py
+
+      - name: Générer la vidéo (format mobile)
+        run: python3 erreurs_bourse.py --format vertical
+
+      - name: Mettre la vidéo à disposition (onglet Actions)
+        uses: actions/upload-artifact@v4
+        with:
+          name: 5-erreurs-bourse
+          path: |
+            output/5-erreurs-bourse.mp4
+            output/5-erreurs-bourse-mobile.mp4
+
+      - name: Enregistrer la vidéo dans le dépôt
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/5-erreurs-bourse.mp4 output/5-erreurs-bourse-mobile.mp4
+          git commit -m "Vidéo « 5 erreurs » régénérée après modification" || exit 0
+          git pull --rebase
+          git push

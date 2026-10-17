@@ -1,0 +1,138 @@
+{
+  "couleurs": {
+    "fond": "#F7F5F0",
+    "carte": "#FFFFFF",
+    "marine": "#0F1E36",
+    "gris": "#5F6675",
+    "gris_clair": "#9AA0AB",
+    "trait": "#E6E1D7",
+    "or": "#B0802F",
+    "rouge": "#C9423A",
+    "vert": "#1E7F55",
+    "vert_clair": "#E8F3EC",
+    "rouge_clair": "#F8E6E3"
+  },
+
+  "rythme": { "duree": 1.0 },
+
+  "sons": {
+    "effets": true,
+    "volume_effets": 1.0,
+    "volume_musique": 1.0,
+    "desactiver": []
+  },
+
+  "couverture": {
+    "surtitre": "INVESTIR EN BOURSE",
+    "lignes": ["{5 erreurs} qui coûtent cher", "quand on débute en bourse"],
+    "accroche": "La n°4 passe souvent inaperçue… pendant 20 ans."
+  },
+
+  "erreurs": [
+    {
+      "numero": "ERREUR N°1",
+      "titre": "Suivre {la mode}",
+      "contexte": "Septembre 2025 : portée par l'euphorie autour de l'intelligence artificielle, l'action Oracle atteint son plus haut historique, autour de 345 $. Tout le monde en parle. Fin juillet 2026, elle cote environ 115 $, soit −67 % depuis le sommet.",
+      "resultat": "Pour 10 000 investis au sommet, il ne restait qu'environ {3 300} dix mois plus tard.",
+      "reflexe": "Quand une valeur fait la une, une grande partie de la hausse est souvent déjà passée. Investissez dans ce que vous comprenez, pas dans ce qui fait le buzz.",
+      "graphique": {
+        "titre": "ORACLE · COURS DE L'ACTION",
+        "note": "Illustration schématique",
+        "sommet": "≈ 345 $",
+        "creux": "≈ 115 $",
+        "axe": ["sept. 2025", "fin juil. 2026"],
+        "badge": "−67 %",
+        "compteur": { "label": "Pour 10 000 investis au sommet", "debut": 10000, "fin": 3300, "texte_fin": "≈ 3 300" }
+      }
+    },
+    {
+      "numero": "ERREUR N°2",
+      "titre": "Tout miser sur {une seule action}",
+      "contexte": "En 2017, l'action Atos, fleuron français du numérique, valait plus de 100 €. Fin 2025, après des années de difficultés et une restructuration de sa dette, une action de l'époque ne valait plus qu'environ 0,005 €.",
+      "resultat": "Pour 10 000 € investis en 2017 sur cette seule action, il restait {moins de 1 €}.",
+      "reflexe": "Même une grande entreprise peut s'effondrer. Aucune ligne ne devrait peser assez lourd pour mettre en danger votre épargne.",
+      "graphique": {
+        "titre": "ATOS · COURS DE L'ACTION",
+        "note": "Illustration schématique",
+        "depart": "> 100 €",
+        "arrivee": "≈ 0,005 €",
+        "axe": ["2017", "fin 2025"],
+        "compteur": { "label": "Pour 10 000 € investis en 2017", "debut": 10000, "texte_fin": "moins de 1 €" }
+      }
+    },
+    {
+      "numero": "ERREUR N°3",
+      "titre": "Vendre {en panique}",
+      "contexte": "Février-mars 2020, crise du Covid : en un mois, le S&P 500 (les 500 plus grandes entreprises américaines) chute de −34 %. L'indice retrouve son niveau d'avant-crise dès le 18 août 2020, soit 5 mois plus tard.",
+      "resultat": "Vendre au plus bas transforme une baisse passagère en {perte réelle}.",
+      "reflexe": "Définir votre horizon de placement avant d'investir, et vous y tenir.",
+      "graphique": {
+        "titre": "S&P 500 · 10 000 INVESTIS LA VEILLE DE LA CRISE",
+        "note": "Illustration schématique",
+        "creux": "−34 % en un mois",
+        "avant_crise": "Niveau d'avant-crise",
+        "retour": "18 août 2020",
+        "axe": ["févr. 2020", "août 2020", "nov. 2021"],
+        "vendu": { "label": "Vendu au plus bas (23 mars 2020)", "valeur": "≈ 6 600", "sous": "La perte devient définitive" },
+        "reste": { "label": "Resté investi", "valeur": "≈ 13 900", "sous": "en novembre 2021" }
+      }
+    },
+    {
+      "numero": "ERREUR N°4",
+      "titre": "Ignorer {les frais}",
+      "contexte": "10 000 € placés pendant 20 ans, avec un rendement de 5 % brut par an. Avec 2 % de frais par an, il reste ≈ 18 060 €. Avec 1 % de frais par an : ≈ 21 910 €.",
+      "resultat": "1 point de frais en plus = {3 850 € de moins} au bout de 20 ans.",
+      "reflexe": "Vérifier les frais d'entrée, de gestion et d'arbitrage avant de signer.",
+      "graphique": {
+        "titre": "10 000 € PLACÉS 20 ANS À 5 % BRUT PAR AN",
+        "note": "Simulation",
+        "capital": 10000,
+        "rendement": 5,
+        "frais": [1, 2],
+        "annees": 20,
+        "valeurs": ["≈ 21 910 €", "≈ 18 060 €"],
+        "legendes": ["1 % de frais par an", "2 % de frais par an"],
+        "axe": ["Départ", "10 ans", "20 ans"],
+        "compteur": { "label": "Écart au bout de 20 ans", "texte_fin": "−3 850 €" }
+      }
+    },
+    {
+      "numero": "ERREUR N°5",
+      "titre": "Ne pas {diversifier}",
+      "contexte": "Mars 2000 : la bulle internet. Beaucoup d'investisseurs ne détiennent que des valeurs technologiques. Le Nasdaq culmine à 5 048 points le 10 mars 2000. En octobre 2002, il est tombé à 1 114 points, soit −78 %.",
+      "resultat": "Il lui a fallu {15 ans}, jusqu'en avril 2015, pour retrouver son niveau de 2000. Pendant ce temps, d'autres actifs, comme les obligations, ont continué de progresser.",
+      "reflexe": "Avoir 10 actions du même secteur ou du même pays, ce n'est pas diversifier. Répartissez entre classes d'actifs (actions, obligations, immobilier, fonds en euros), zones géographiques et secteurs, et investissez progressivement dans le temps.",
+      "graphique": {
+        "titre": "NASDAQ · VALEURS TECHNOLOGIQUES US",
+        "note": "Illustration schématique",
+        "sommet": "5 048 pts",
+        "sommet_date": "10 mars 2000",
+        "creux": "1 114 pts",
+        "creux_date": "oct. 2002",
+        "badge": "−78 %",
+        "retour": "avril 2015",
+        "compteur": { "label": "Pour retrouver le niveau de mars 2000", "texte_fin": "15 ans" }
+      }
+    }
+  ],
+
+  "reflexe_titre": "LE BON RÉFLEXE",
+
+  "recap": {
+    "titre": "Les 5 erreurs {à éviter}",
+    "lignes": ["Suivre la mode", "Tout miser sur une ligne", "Vendre en panique", "Ignorer les frais", "Ne pas diversifier"],
+    "question": "Laquelle avez-vous déjà faite ?"
+  },
+
+  "conclusion": {
+    "lignes": ["Ces erreurs, presque tout le monde", "{les fait un jour.}"],
+    "texte": "La différence se joue dans le fait de les repérer avant qu'elles ne coûtent cher."
+  },
+
+  "fin": {
+    "lignes": ["Besoin d'un regard extérieur ?", "Nous sommes là pour {vous accompagner.}"],
+    "marque": "O'MORGAN",
+    "activite": "CONSEIL EN GESTION DE PATRIMOINE",
+    "mentions": "Exemples à visée pédagogique, ne constituant ni un conseil en investissement ni une recommandation d'achat ou de vente. Les performances passées ne préjugent pas des performances futures. Investir en bourse comporte un risque de perte en capital."
+  }
+}

@@ -39,6 +39,30 @@ règlent dans `TIMELINE` en bas de `parcours.py`.
 43 s, reprend la présentation PDF (titre, qui sommes-nous, processus, déploiement, KPI, pilote).
 Textes dans `config_presentation.json`, rendu avec `python3 presentation.py`.
 
+## 3. O'MORGAN : « 5 erreurs qui coûtent cher » — [`output/5-erreurs-bourse.mp4`](output/5-erreurs-bourse.mp4)
+
+≈ 100 s, 1920×1080, adaptée du carrousel PDF « 5 erreurs qui coûtent cher à un investisseur
+débutant ». Version mobile 9:16 : [`output/5-erreurs-bourse-mobile.mp4`](output/5-erreurs-bourse-mobile.mp4).
+
+| Temps | Scène |
+|---|---|
+| 0–6,5 s | Couverture : « 5 erreurs qui coûtent cher quand on débute en bourse » |
+| 6,5–76 s | Les 5 erreurs : texte + graphique animé (Oracle, Atos, S&P 500 Covid, frais, Nasdaq), puis « Le bon réflexe » |
+| 76–84,5 s | Récapitulatif (les 5 erreurs barrées) et « Laquelle avez-vous déjà faite ? » |
+| 84,5–100,5 s | Conclusion, signature O'MORGAN et mentions légales |
+
+```bash
+python3 erreurs_bourse.py                    # vidéo horizontale
+python3 erreurs_bourse.py --format vertical  # version mobile
+python3 erreurs_bourse.py --preview          # images clés dans output/apercu-erreurs/
+```
+
+Tous les textes, chiffres affichés et couleurs sont dans `config_erreurs.json` (`{texte}` = mots en
+rouge, ou en or dans la conclusion). Les courbes sont des illustrations schématiques passant par
+les points chiffrés du document (indiqué sur chaque graphique) ; la courbe des frais est calculée.
+Les sources du PDF (« à ne pas publier ») ne figurent pas dans la vidéo. Une modification de
+`config_erreurs.json` sur GitHub régénère automatiquement les deux vidéos.
+
 ## Prérequis et visuels
 
 Python 3 avec Pillow et numpy, ffmpeg, police Inter (sinon DejaVu est utilisée).

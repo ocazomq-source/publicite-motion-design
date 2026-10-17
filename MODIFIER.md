@@ -75,3 +75,20 @@ enregistrez à nouveau.
 Changer la durée des scènes, l'animation ou la mise en page se fait dans `parcours.py`
 (section `TIMELINE` en bas du fichier pour les durées). Pour ce type de changement, vous
 pouvez aussi simplement le demander à Claude.
+
+## Vidéo O'MORGAN « 5 erreurs qui coûtent cher »
+
+Même principe avec le fichier **`config_erreurs.json`** (les accolades `{ }` mettent les mots en
+rouge). Les deux vidéos `output/5-erreurs-bourse.mp4` et `output/5-erreurs-bourse-mobile.mp4`
+sont régénérées par la tâche « Générer la vidéo « 5 erreurs » ».
+
+| Rubrique | Ce que c'est à l'écran |
+|---|---|
+| `couverture` | titre d'ouverture et phrase d'accroche |
+| `erreurs` | les 5 erreurs, dans l'ordre : `titre`, `contexte`, `resultat` (ligne avec la flèche), `reflexe` (encadré vert), puis les étiquettes du `graphique` |
+| `recap` | liste des 5 erreurs et question finale |
+| `conclusion` | « Ces erreurs, presque tout le monde… » |
+| `fin` | phrase d'accompagnement, nom du cabinet et mentions légales |
+
+`rythme`, `sons` et `couleurs` fonctionnent comme pour la vidéo du parcours. La forme des courbes
+se règle dans `erreurs_bourse.py`.
