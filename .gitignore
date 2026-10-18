@@ -4,3 +4,4 @@ output/*.wav
 __pycache__/
 reseaux/*.mp4
 reseaux/sources/
+reseaux/*.f32
