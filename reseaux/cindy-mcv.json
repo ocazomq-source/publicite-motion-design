@@ -12,7 +12,5 @@
   "punchs": [27.31, 41.2]
  },
  "transitions": [[6.1, "whip"], [15.53, "glisse"], [21.73, "flou"], [25.4, "choc"], [34.63, "glisse"],
-                 [51.13, "whip"], [54.6, "flou"]],
- "bandeau": {"nom": "Cindy Sunkiss", "debut": 0.4, "fin": 4.0},
- "cta": {"duree": 3.0, "ligne1": "Commente", "mot": "MCV"}
+                 [51.13, "whip"], [54.6, "flou"]]
 }
