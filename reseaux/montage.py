@@ -128,22 +128,46 @@ class Montage:
 
     # ------------------------------------------------------------ cadrage
 
+    def plans(self):
+        """Plans de cadrage [début, zoom, centre_y, centre_x] : donnés dans le JSON, sinon un par segment."""
+        z = self.cfg.get("zoom", {})
+        defaut = (z.get("centre_y", 0.36), z.get("centre_x", 0.5))
+        if "plans" in z:
+            return [tuple(p[:2]) + tuple(p[2:]) + defaut[len(p) - 2:] for p in z["plans"]]
+        return [(o, z.get("serre", 1.18) if i % 2 else 1.0) + defaut for i, o in enumerate(self.offsets)]
+
     def zoom(self, t):
-        """Zoom alterné à chaque coupe + légère poussée continue + « punch » sur mots forts."""
+        """Zoom par plan + entrée « whip » à chaque coupe + poussée continue + « punchs »."""
         z = self.cfg.get("zoom", {})
         if t >= self.duree_parole:
-            return 1.0, 0.5
-        idx = max(i for i, o in enumerate(self.offsets) if o <= t)
-        base = z.get("serre", 1.18) if idx % 2 else 1.0
-        local = t - self.offsets[idx]
-        seg_len = self.segments[idx][1] - self.segments[idx][0]
-        base *= 1 + z.get("poussee", 0.035) * local / max(seg_len, 1)
-        for m in self.mots:
-            if self._fort(m["w"]) and m["t0"] - 0.05 <= t < m["t0"] + 0.6:
-                x = (t - m["t0"] + 0.05) / 0.65
-                base *= 1 + 0.07 * math.sin(math.pi * min(x, 1)) ** 0.6
+            return 1.0, 0.5, 0.5
+        plans = self.plans()
+        idx = max(i for i, p in enumerate(plans) if p[0] <= t)
+        debut, base, cy, cx = plans[idx]
+        fin = plans[idx + 1][0] if idx + 1 < len(plans) else self.duree_parole
+        local = t - debut
+        base *= 1 + z.get("poussee", 0.035) * local / max(fin - debut, 1)
+        tr = self.transition(t)
+        if tr and tr[0] in ("whip", "flou", "choc"):
+            base *= 1 + z.get("entree", 0.1) * (1 - ease_in_out(tr[1]))
+        punchs = list(z.get("punchs", [])) + [m["t0"] for m in self.mots if self._fort(m["w"])]
+        for tp in punchs:
+            if tp - 0.05 <= t < tp + 0.6:
+                x = (t - tp + 0.05) / 0.65
+                base *= 1 + z.get("punch", 0.07) * math.sin(math.pi * min(x, 1)) ** 0.6
                 break
-        return base, z.get("centre_y", 0.36)
+        return base, cy, cx
+
+    def transition(self, t):
+        """(type, avancement 0→1) si t est dans une transition, sinon None.
+
+        "transitions" : [[temps, type], …] avec type whip (zoom + éclair), glisse (filé
+        horizontal), flou (flou de zoom), choc (secousse + éclair)."""
+        for i, (tt, typ) in enumerate(self.cfg.get("transitions", [])):
+            d = 0.22 if typ == "glisse" else 0.28
+            if tt <= t < tt + d and t < self.duree_parole:
+                return typ, (t - tt) / d, i
+        return None
 
     def _fort(self, w):
         return w.lower().strip(".,!?;:«»\"'") in self.forts
@@ -291,19 +315,60 @@ def dessiner_progression(img, mt, t):
 
 # ---------------------------------------------------------------- rendu
 
-def cadrer(frame, z, cy):
-    """frame : image source (déjà en W×H) ; zoom centré horizontalement, à cy en hauteur."""
+def cadrer(frame, z, cy, cx=0.5):
+    """frame : image source (déjà en W×H) ; zoom qui garde fixe le point (cx, cy)."""
     if abs(z - 1) < 1e-3:
         return frame
     cw, ch = W / z, H / z
-    x0 = (W - cw) / 2
+    x0 = min(max(cx * W - cw * cx, 0), W - cw)
     y0 = min(max(cy * H - ch * cy, 0), H - ch)
     return frame.resize((W, H), Image.BICUBIC, box=(x0, y0, x0 + cw, y0 + ch))
 
 
+def flou_rapide(img, rayon, horizontal=False):
+    """Flou approximatif calculé en basse résolution (filé horizontal si demandé)."""
+    if rayon < 0.5:
+        return img
+    k = 4
+    petit = img.resize((W // k, H // k), Image.BILINEAR)
+    if horizontal:
+        a = np.asarray(petit).astype(np.float32)
+        n = max(1, int(rayon / k * 2))
+        a = sum(np.roll(a, s, axis=1) for s in range(-n, n + 1)) / (2 * n + 1)
+        petit = Image.fromarray(a.astype(np.uint8), petit.mode)
+    else:
+        petit = petit.filter(ImageFilter.GaussianBlur(rayon / k))
+    return petit.resize((W, H), Image.BILINEAR)
+
+
+def appliquer_transition(img, mt, t):
+    tr = mt.transition(t)
+    if not tr:
+        return img
+    typ, x, i = tr
+    flash = mt.cfg.get("zoom", {}).get("flash", 0.35)
+    if typ == "glisse":
+        sens = 1 if i % 2 else -1
+        e = ease_in_out(x)
+        dx = int(sens * W * 0.22 * (1 - e))
+        img = Image.fromarray(np.roll(np.asarray(img), dx, axis=1), img.mode)
+        img = Image.blend(img, flou_rapide(img, 60 * (1 - e), horizontal=True), 1 - e)
+    elif typ == "flou":
+        img = flou_rapide(img, 26 * (1 - ease_in_out(x)))
+    elif typ == "choc":
+        amp = 26 * (1 - x) ** 2
+        dx, dy = int(amp * math.sin(x * 47)), int(amp * math.cos(x * 39))
+        img = Image.fromarray(np.roll(np.roll(np.asarray(img), dx, axis=1), dy, axis=0), img.mode)
+    if typ in ("whip", "choc") and x < 0.45:
+        a = int(255 * flash * (1 - x / 0.45))
+        img.alpha_composite(Image.new("RGBA", img.size, (255, 255, 255, a)))
+    return img
+
+
 def image(mt, src, t):
-    z, cy = mt.zoom(t)
-    img = cadrer(src, z, cy).convert("RGBA")
+    z, cy, cx = mt.zoom(t)
+    img = cadrer(src, z, cy, cx).convert("RGBA")
+    img = appliquer_transition(img, mt, t)
     dessiner_bandeau(img, mt, t)
     if t < mt.duree_parole:
         dessiner_sous_titres(img, mt, t)
@@ -323,6 +388,10 @@ def filtre_coupes(mt, piste):
                          f"afade=t=in:d=0.02,afade=t=out:st={b - a - 0.03:.3f}:d=0.03[s{i}];")
     v, a = (1, 0) if piste == "v" else (0, 1)
     parts.append("".join(f"[s{i}]" for i in range(n)) + f"concat=n={n}:v={v}:a={a}")
+    if piste == "a" and mt.cfg.get("audio_filtre"):
+        parts.append("," + mt.cfg["audio_filtre"])
+    if piste == "v" and mt.cfg.get("etalonnage"):
+        parts.append("," + mt.cfg["etalonnage"])
     if piste == "v":
         parts.append(f",scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,"
                      f"crop={W}:{H},fps={FPS},setsar=1")

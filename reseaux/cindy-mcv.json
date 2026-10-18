@@ -1,0 +1,18 @@
+{
+ "source": "/root/.claude/uploads/bb500445-683b-5668-ac8a-273ec8d6fb5d/d16f0bdd-WhatsApp_Video_2026-10-18_at_13.41.31.mp4",
+ "sortie": "cindy-mcv-instagram.mp4",
+ "segments": [[0, 59.6]],
+ "mots": [],
+ "etalonnage": "eq=contrast=1.07:saturation=1.18:brightness=0.01:gamma=0.98,unsharp=5:5:0.5",
+ "audio_filtre": "highpass=f=80,acompressor=threshold=-20dB:ratio=3:attack=5:release=120,loudnorm=I=-14:TP=-1.5:LRA=9",
+ "zoom": {
+  "centre_y": 0.38, "poussee": 0.05, "entree": 0.12, "flash": 0.35, "punch": 0.08,
+  "plans": [[0, 1.0], [6.1, 1.22], [10.8, 1.08], [15.53, 1.0], [21.73, 1.2], [25.4, 1.05, 0.38, 0.4],
+            [29.9, 1.3, 0.38, 0.62], [34.63, 1.0], [39.26, 1.22], [45.0, 1.1], [49.54, 1.3], [51.13, 1.0], [54.6, 1.2, 0.38, 0.7]],
+  "punchs": [27.31, 41.2]
+ },
+ "transitions": [[6.1, "whip"], [15.53, "glisse"], [21.73, "flou"], [25.4, "choc"], [34.63, "glisse"],
+                 [51.13, "whip"], [54.6, "flou"]],
+ "bandeau": {"nom": "Cindy Sunkiss", "debut": 0.4, "fin": 4.0},
+ "cta": {"duree": 3.0, "ligne1": "Commente", "mot": "MCV"}
+}
