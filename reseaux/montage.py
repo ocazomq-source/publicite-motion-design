@@ -87,6 +87,7 @@ class Montage:
                 mots = json.load(f)
         self.mots = self._mots_montes(mots)
         self.lignes = self._grouper(self.mots)
+        self.blocs = self._blocs(self.mots)
         self.forts = {w.lower().strip(".,!?;:«»\"'") for w in cfg.get("mots_forts", [])}
 
     def vers_monte(self, ts):
@@ -125,6 +126,36 @@ class Montage:
             fin = lignes[i + 1][0]["t0"] - 0.05 if i + 1 < len(lignes) else l[-1]["t1"] + 0.4
             l[-1]["fin_ligne"] = min(fin, l[-1]["t1"] + 0.6)
         return lignes
+
+    def _blocs(self, mots):
+        """Style « reel » : blocs de 2 à 4 lignes, coupés en fin de phrase ou sur une pause."""
+        st = self.cfg.get("sous_titres", {})
+        f = font(st.get("police", "InterDisplay-Bold.otf"), st.get("taille", 98))
+        maxw, maxl = st.get("largeur_max", 820), st.get("lignes_max", 4)
+        blocs, lignes, cur = [], [], []
+        for i, m in enumerate(mots):
+            if cur and f.getlength(" ".join(x["w"] for x in cur + [m])) > maxw:
+                lignes.append(cur)
+                cur = []
+            cur.append(m)
+            suivant = mots[i + 1] if i + 1 < len(mots) else None
+            fin = (suivant is None or suivant["t0"] - m["t1"] > 0.6
+                   or (m["w"][-1:] in ".!?" and len(lignes) >= 1)
+                   or (len(lignes) == maxl - 1 and suivant is not None
+                       and f.getlength(" ".join(x["w"] for x in cur + [suivant])) > maxw))
+            if fin:
+                lignes.append(cur)
+                cur = []
+                blocs.append(lignes)
+                lignes = []
+        for i, b in enumerate(blocs):
+            dernier = b[-1][-1]
+            suite = blocs[i + 1][0][0]["t0"] if i + 1 < len(blocs) else dernier["t1"] + 0.8
+            b_fin = min(suite - 0.02, dernier["t1"] + 0.8)
+            for l in b:
+                for m in l:
+                    m["fin_bloc"] = b_fin
+        return blocs
 
     # ------------------------------------------------------------ cadrage
 
@@ -193,8 +224,45 @@ def texte_contour(img, xy, texte, f, fill, contour=9, ombre=True, anchor="mm"):
     d.text(xy, texte, font=f, fill=fill, anchor=anchor, stroke_width=contour, stroke_fill=(0, 0, 0, 255))
 
 
+def dessiner_sous_titres_reel(img, mt, t):
+    """Blocs de plusieurs lignes, mots qui apparaissent au fil de la voix, mots-clés en couleur."""
+    st = mt.cfg.get("sous_titres", {})
+    taille = st.get("taille", 98)
+    f = font(st.get("police", "InterDisplay-Bold.otf"), taille)
+    interligne = int(taille * st.get("interligne", 0.95))
+    cle = hex_rgb(st.get("couleur", "#FFC21A"))
+    cx, y_bas = st.get("x", 0.47) * W, st.get("y", 1500)
+    esp = f.getlength(" ")
+    for bloc in mt.blocs:
+        if not (bloc[0][0]["t0"] - 0.03 <= t < bloc[-1][-1]["fin_bloc"]):
+            continue
+        y0 = y_bas - interligne * len(bloc)
+        calque = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        ombre = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        dc, do = ImageDraw.Draw(calque), ImageDraw.Draw(ombre)
+        for k, ligne in enumerate(bloc):
+            larg = sum(f.getlength(m["w"]) for m in ligne) + esp * (len(ligne) - 1)
+            # lignes légèrement décalées les unes des autres, comme dans les reels
+            x = cx - larg / 2 + (k % 2) * st.get("decalage", 18)
+            y = y0 + k * interligne
+            for m in ligne:
+                a = (t - m["t0"] + 0.03) / 0.12
+                if a > 0:
+                    a = min(a, 1)
+                    lev = int(10 * (1 - ease_in_out(a)))
+                    col = cle if mt._fort(m["w"]) else (255, 255, 255)
+                    dc.text((x, y + lev), m["w"], font=f, fill=col + (int(255 * a),))
+                    do.text((x, y + lev + 4), m["w"], font=f, fill=(0, 0, 0, int(170 * a)))
+                x += f.getlength(m["w"]) + esp
+        bande = (0, max(int(y0) - 30, 0), W, min(int(y_bas + taille * 0.6) + 30, H))
+        img.alpha_composite(ombre.crop(bande).filter(ImageFilter.GaussianBlur(7)), bande[:2])
+        img.alpha_composite(calque)
+
+
 def dessiner_sous_titres(img, mt, t):
     st = mt.cfg.get("sous_titres", {})
+    if st.get("style") == "reel":
+        return dessiner_sous_titres_reel(img, mt, t)
     taille = st.get("taille", 92)
     y = st.get("y", 1330)
     surl = hex_rgb(st.get("couleur", "#FFE03A")) + (255,)
@@ -388,8 +456,6 @@ def filtre_coupes(mt, piste):
                          f"afade=t=in:d=0.02,afade=t=out:st={b - a - 0.03:.3f}:d=0.03[s{i}];")
     v, a = (1, 0) if piste == "v" else (0, 1)
     parts.append("".join(f"[s{i}]" for i in range(n)) + f"concat=n={n}:v={v}:a={a}")
-    if piste == "a" and mt.cfg.get("audio_filtre"):
-        parts.append("," + mt.cfg["audio_filtre"])
     if piste == "v" and mt.cfg.get("etalonnage"):
         parts.append("," + mt.cfg["etalonnage"])
     if piste == "v":
@@ -398,12 +464,31 @@ def filtre_coupes(mt, piste):
     return "".join(parts) + "[out]"
 
 
+def traiter_voix(mt, voix, sr, tmp):
+    """Débruitage spectral doux (noisereduce), puis chaîne ffmpeg « audio_filtre » (EQ, compression…)."""
+    force = mt.cfg.get("debruitage", 0)
+    if force:
+        import noisereduce
+        voix = noisereduce.reduce_noise(y=voix, sr=sr, stationary=True, prop_decrease=force,
+                                        n_fft=2048, freq_mask_smooth_hz=300, time_mask_smooth_ms=60)
+        voix = voix.astype(np.float32)
+    filtre = mt.cfg.get("audio_filtre")
+    if filtre:
+        voix.tofile(tmp)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(sr), "-ac", "1", "-i", tmp,
+                        "-af", filtre + f",aresample={sr}", "-f", "f32le", tmp + ".2"], check=True)
+        voix = np.fromfile(tmp + ".2", dtype=np.float32)
+        os.remove(tmp + ".2")
+    return voix
+
+
 def audio_final(mt, tmp):
     """Voix coupée + silence pendant l'appel à l'action + « pop » à l'apparition de MCV."""
     sr = 48000
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", mt.source, "-filter_complex", filtre_coupes(mt, "a"),
                     "-map", "[out]", "-ac", "1", "-ar", str(sr), "-f", "f32le", tmp], check=True)
     voix = np.fromfile(tmp, dtype=np.float32)
+    voix = traiter_voix(mt, voix, sr, tmp)
     n = int(mt.duree * sr)
     out = np.zeros(n, dtype=np.float32)
     out[:min(len(voix), n)] = voix[:n]

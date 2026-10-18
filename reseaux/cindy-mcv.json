@@ -3,8 +3,11 @@
  "sortie": "cindy-mcv-instagram.mp4",
  "segments": [[0, 59.6]],
  "mots": [],
+ "mots_forts": [],
+ "sous_titres": {"style": "reel", "couleur": "#FFC21A"},
  "etalonnage": "eq=contrast=1.07:saturation=1.18:brightness=0.01:gamma=0.98,unsharp=5:5:0.5",
- "audio_filtre": "highpass=f=80,acompressor=threshold=-20dB:ratio=3:attack=5:release=120,loudnorm=I=-14:TP=-1.5:LRA=9",
+ "debruitage": 0.7,
+ "audio_filtre": "highpass=f=85:poles=2,equalizer=f=250:t=q:w=1.2:g=-3.5,equalizer=f=3500:t=q:w=1.4:g=3.5,highshelf=f=7500:g=3,deesser=i=0.35,agate=threshold=0.012:ratio=2:range=0.25:attack=5:release=250,acompressor=threshold=-24dB:ratio=3.5:attack=4:release=140:makeup=4,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=7",
  "zoom": {
   "centre_y": 0.38, "poussee": 0.05, "entree": 0.12, "flash": 0.35, "punch": 0.08,
   "plans": [[0, 1.0], [6.1, 1.22], [10.8, 1.08], [15.53, 1.0], [21.73, 1.2], [25.4, 1.05, 0.38, 0.4],
