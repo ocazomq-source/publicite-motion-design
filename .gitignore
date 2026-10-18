@@ -2,3 +2,5 @@ output/apercu/
 output/apercu-parcours/
 output/*.wav
 __pycache__/
+reseaux/*.mp4
+reseaux/sources/
