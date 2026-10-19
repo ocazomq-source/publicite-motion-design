@@ -69,21 +69,23 @@ Les sources du PDF (« à ne pas publier ») ne figurent pas dans la vidéo. Une
 
 ## 4. Short 30 s « 3 erreurs qui coûtent cher » — [`output/short-3-erreurs.mp4`](output/short-3-erreurs.mp4)
 
-30 s, vertical 1080×1920 (Reels, TikTok, Shorts), pensé pour être compris du premier coup :
-trois erreurs seulement, environ 8 s chacune, une situation du quotidien par erreur, un seul
-chiffre clé à l'écran, le bon réflexe en fin de scène, sous-titres synchronisés (lisible sans
-le son) et question finale pour les commentaires. Mentions légales visibles en permanence.
+30 s, vertical 1080×1920 (Reels, TikTok, Shorts), erreurs n°1, 3 et 5 du carrousel. Palette
+marron et beige avec un terracotta chaud. Pensé pour être compris du premier coup : environ 8 s
+par erreur, une situation du quotidien, un seul chiffre clé à l'écran, le bon réflexe en fin de
+scène, sous-titres synchronisés (lisible sans le son). Ouverture avec une tirelire qui se
+fissure, fin avec un échange en bulles et un bouton « Parlez-en à un conseiller ». Mentions
+légales visibles en permanence.
 
 | Erreur | Situation du quotidien | Fait réel |
 |---|---|---|
 | Suivre la mode | discussion de groupe « T'as vu Oracle ? » | Oracle : 345 $ (sept. 2025) → 115 $ (juil. 2026), −67 % |
 | Vendre en panique | alerte sur le téléphone | Covid, mars 2020 : −34 % en un mois, niveau retrouvé 5 mois plus tard |
-| Ignorer les frais | relevé de placement | 1 % de frais en plus, 10 000 € sur 20 ans à 5 % : 3 850 € de moins |
+| Ne pas diversifier | tous les œufs dans le même panier « 100 % tech » | Nasdaq : −78 % entre mars 2000 et oct. 2002, 15 ans pour retrouver son niveau |
 
-Voix off féminine Kokoro (voix « ff_siwis », plus naturelle que Piper, via `pip install
-sherpa-onnx`, modèle ≈ 350 Mo téléchargé dans `voix/` au premier lancement). Textes, sous-titres
-et voix dans `config_short.json` ; rendu avec `python3 short_erreurs.py` (`--preview` pour les
-images clés). La durée totale est plafonnée à 30 s.
+Voix off féminine Kokoro (voix « ff_siwis », via `pip install sherpa-onnx`, modèle ≈ 350 Mo
+téléchargé dans `voix/` au premier lancement). Textes, couleurs, sous-titres et voix dans
+`config_short.json` ; rendu avec `python3 short_erreurs.py` (`--preview` pour les images clés).
+La durée totale est plafonnée à 30 s.
 
 ## Prérequis et visuels
 

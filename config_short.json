@@ -1,36 +1,54 @@
 {
   "couleurs": {
-    "fond": "#F7F5F0",
+    "fond": "#F3E7D5",
     "carte": "#FFFFFF",
-    "marine": "#0F1E36",
-    "gris": "#5F6675",
-    "gris_clair": "#9AA0AB",
-    "trait": "#E6E1D7",
-    "or": "#D29B35",
-    "rouge": "#D8443A",
-    "vert": "#1E8A5B",
-    "vert_clair": "#E8F3EC",
-    "rouge_clair": "#F8E6E3",
+    "marine": "#3E2416",
+    "brun": "#9A6440",
+    "gris": "#7A6455",
+    "gris_clair": "#B39E8C",
+    "trait": "#E3D2BA",
+    "or": "#C98A4B",
+    "chaud": "#E0703A",
+    "rouge": "#C8432B",
+    "vert": "#5E8A45",
+    "vert_clair": "#E9F0DF",
+    "rouge_clair": "#F6DDD3",
     "blanc": "#FFFFFF"
   },
-
-  "voix": { "active": true, "modele": "kokoro", "vitesse": 1.05, "volume": 1.0 },
-  "sons": { "effets": true, "volume_effets": 0.8, "volume_musique": 0.9, "desactiver": [] },
+  "voix": {
+    "active": true,
+    "modele": "kokoro",
+    "vitesse": 1.12,
+    "volume": 1.0
+  },
+  "sons": {
+    "effets": true,
+    "volume_effets": 0.8,
+    "volume_musique": 0.9,
+    "desactiver": []
+  },
   "sous_titres": true,
-
   "accroche": {
-    "chiffre": "3",
-    "lignes": ["erreurs qui coûtent cher", "quand on débute {en bourse}"],
-    "sticker": "La n°3 ne se voit pas…",
+    "lignes": [
+      "{3 erreurs}",
+      "qui coûtent cher",
+      "quand on débute en bourse"
+    ],
+    "sticker": "La n°3 a coûté 15 ans…",
     "voix": "Trois erreurs qui coûtent cher quand on débute en bourse."
   },
-
   "erreurs": [
     {
       "titre": "Suivre {la mode}",
-      "messages": ["T'as vu Oracle ?", "Tout le monde en parle !", "J'achète !"],
+      "messages": [
+        "T'as vu Oracle ?",
+        "Tout le monde en parle !",
+        "J'achète !"
+      ],
       "action": "ORACLE",
-      "de": 345, "a": 115, "unite": "$",
+      "de": 345,
+      "a": 115,
+      "unite": "$",
       "tampon": "−67 %",
       "legende": "sept. 2025 → juil. 2026",
       "reflexe": "Investir dans ce qu'on comprend",
@@ -48,24 +66,36 @@
       "voix": "Deux : vendre en panique. En mars deux mille vingt, la bourse chute d'un tiers. Cinq mois plus tard, tout est revenu. Ceux qui ont vendu ont perdu."
     },
     {
-      "titre": "Ignorer {les frais}",
-      "contexte": "10 000 € placés 20 ans à 5 % par an",
-      "ligne": "Frais en plus : 1 % par an",
-      "montant": 3850,
-      "total": "de moins au bout de 20 ans",
-      "reflexe": "Comparer les frais avant de signer",
-      "sous_titre": "3 : ignorer les frais. 1 % de plus par an, ça paraît peu. Sur 20 ans, c'est 3 850 € de moins.",
-      "voix": "Trois : ignorer les frais. Un pour cent de plus par an, ça paraît peu. Sur vingt ans, c'est trois mille huit cent cinquante euros de moins."
+      "titre": "Ne pas {diversifier}",
+      "panier": "100 % TECH",
+      "tampon": "−78 %",
+      "annees": 15,
+      "legende": "pour retrouver le niveau de mars 2000",
+      "reflexe": "Répartir entre plusieurs placements",
+      "sous_titre": "3 : ne pas diversifier. En 2000, beaucoup ont tout misé sur la tech. Le Nasdaq a perdu 78 %, et mis 15 ans à s'en remettre.",
+      "voix": "Trois : ne pas diversifier. En deux mille, beaucoup ont tout misé sur la tech. Le Nasdaq a perdu soixante-dix-huit pour cent, et mis quinze ans à s'en remettre."
     }
   ],
-
   "fin": {
-    "question": ["Laquelle avez-vous", "{déjà faite} ?"],
-    "choix": ["1", "2", "3"],
+    "titre": [
+      "Ces erreurs, on les évite",
+      "{mieux à deux.}"
+    ],
+    "bouton": "Parlez-en à un conseiller",
     "marque": "O'MORGAN",
     "activite": "CONSEIL EN GESTION DE PATRIMOINE",
-    "voix": "Et vous, laquelle avez-vous déjà faite ?"
+    "commentaire": "Et vous, laquelle avez-vous déjà faite ?",
+    "voix": "Ces erreurs, on les évite mieux à deux. Parlez-en à un conseiller Ô Morgane.",
+    "echange": [
+      [
+        "J'ai une question sur mon épargne…",
+        false
+      ],
+      [
+        "Parlons-en !",
+        true
+      ]
+    ]
   },
-
   "mentions": "Exemples pédagogiques, ni conseil ni recommandation. Performances passées ≠ futures. Risque de perte en capital."
 }

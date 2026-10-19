@@ -3,7 +3,7 @@
 
 Format réseaux sociaux, pensé pour être compris du premier coup : trois erreurs seulement,
 une scène d'environ 8 s par erreur avec une situation du quotidien (discussion de groupe,
-alerte sur le téléphone, relevé de frais), un seul chiffre clé à l'écran, le bon réflexe
+alerte sur le téléphone, tous les œufs dans le même panier), un seul chiffre clé à l'écran, le bon réflexe
 en fin de scène, sous-titres synchronisés avec la voix off et question finale pour les
 commentaires. Voix off (Kokoro, plus naturelle), musique et bruitages reprennent le moteur
 d'erreurs_bourse.py.
@@ -143,6 +143,50 @@ def bubble(cv, x0, y0, x1, y1, fill):
 
 
 # --------------------------------------------------------------------------- #
+# Tirelire (illustration en aplats)
+# --------------------------------------------------------------------------- #
+def tirelire(cv, cx, cy, w, body, dark, t=0.0, fissure=0.0):
+    """Tirelire cochon inquiète ; (cx, cy) = centre du corps, w = largeur du corps."""
+    h = w * 0.72
+    cy += math.sin(t * 2.4) * w * 0.01
+    for k, dx in enumerate((-0.28, -0.1, 0.12, 0.3)):                               # pattes
+        cv.rrect(cx + dx * w - w * 0.06, cy + h * 0.3, cx + dx * w + w * 0.06, cy + h * 0.62, w * 0.04,
+                 fill=mix(body, dark, 0.25 if k % 2 else 0.0))
+    cv.d.arc(cv.P((cx - w * 0.62, cy - h * 0.12), (cx - w * 0.44, cy + h * 0.08)), 60, 330, fill=dark,
+             width=int(w * 0.02 * S))                                                  # queue
+    cv.d.ellipse(cv.P((cx - w / 2, cy - h / 2), (cx + w / 2, cy + h / 2)), fill=body)
+    cv.poly([(cx + w * 0.12, cy - h * 0.38), (cx + w * 0.2, cy - h * 0.66), (cx + w * 0.3, cy - h * 0.34)],
+            mix(body, dark, 0.2))                                                      # oreille
+    cv.rrect(cx - w * 0.12, cy - h * 0.5 - 6, cx + w * 0.08, cy - h * 0.5 + 8, 7, fill=dark)   # fente
+    sx, sy = cx + w * 0.5, cy + h * 0.02                                               # groin
+    cv.d.ellipse(cv.P((sx - w * 0.1, sy - h * 0.15), (sx + w * 0.08, sy + h * 0.15)), fill=mix(body, dark, 0.2))
+    cv.disc(sx - w * 0.03, sy - h * 0.05, w * 0.017, dark)
+    cv.disc(sx - w * 0.03, sy + h * 0.05, w * 0.017, dark)
+    ex, ey = cx + w * 0.3, cy - h * 0.14                                               # œil inquiet
+    cv.disc(ex, ey, w * 0.045, C["blanc"])
+    cv.disc(ex + w * 0.01, ey + w * 0.012, w * 0.024, dark)
+    cv.line([(ex - w * 0.06, ey - w * 0.1), (ex + w * 0.05, ey - w * 0.065)], dark, w * 0.016)
+    if fissure > 0:
+        pts = [(cx - w * 0.05, cy - h * 0.48), (cx + w * 0.03, cy - h * 0.25), (cx - w * 0.06, cy - h * 0.05),
+               (cx + w * 0.04, cy + h * 0.15), (cx - w * 0.03, cy + h * 0.33), (cx + w * 0.02, cy + h * 0.48)]
+        cv.line(pts[:max(2, int(len(pts) * fissure))], dark, w * 0.016)
+
+
+def goutte(cv, x, y, s, color):
+    cv.poly([(x, y - s * 1.3), (x - s * 0.62, y), (x + s * 0.62, y)], color)
+    cv.disc(x, y + s * 0.1, s * 0.66, color)
+
+
+def rayons(cv, cx, cy, r, n, t, color):
+    """Rayons de soleil qui tournent lentement (fond festif)."""
+    for k in range(n):
+        a0 = 2 * math.pi * k / n + t * 0.15
+        a1 = a0 + math.pi / n
+        cv.poly([(cx, cy), (cx + math.cos(a0) * r, cy + math.sin(a0) * r),
+                 (cx + math.cos(a1) * r, cy + math.sin(a1) * r)], color)
+
+
+# --------------------------------------------------------------------------- #
 # Scènes : (world, t local, D) -> caméra (zoom, dx, dy)
 # --------------------------------------------------------------------------- #
 def punch(t, D, amount=0.04):
@@ -172,14 +216,43 @@ def scene_accroche(world, t, D):
     cfg = CFG["accroche"]
     bg = C["marine"]
     cv = Cv(world)
-    p = prog(t, 0.0, 0.5)
+    # courbe qui dégringole derrière la tirelire
+    zig = [(90, 600), (260, 700), (360, 650), (520, 860), (640, 800), (800, 1050), (990, 1180)]
+    k = ease_in_out_cubic(prog(t, 0.2, 1.3))
+    if k > 0:
+        L = sum(math.dist(p, q) for p, q in zip(zig, zig[1:])) * k
+        pts = [zig[0]]
+        for p, q in zip(zig, zig[1:]):
+            seg = math.dist(p, q)
+            if L >= seg:
+                pts.append(q)
+                L -= seg
+            else:
+                pts.append((lerp(p[0], q[0], L / seg), lerp(p[1], q[1], L / seg)))
+                break
+        col = mix(bg, C["rouge"], 0.75)
+        cv.line(pts, col, 18)
+        if k >= 1:
+            cv.poly([(1010, 1190), (930, 1195), (985, 1125)], col)
+    for j in range(5):                                       # pièces qui tombent
+        tj = (t - 0.6 - j * 0.45) % 2.4
+        if t > 0.6 + j * 0.45:
+            coin(cv, 150 + j * 190, 560 + 700 * (tj / 2.4) ** 1.6, 30, mix(bg, C["or"], 0.9), mix(bg, C["marine"], 0.6))
+    # la tirelire inquiète se fissure et perd ses pièces
+    p = prog(t, 0.15, 0.6)
     if p > 0:
-        pop_layer(cv, text_layer(cfg["chiffre"], "titre_b", 420, C["or"]), W / 2, 640, p, overshoot=2.2)
-    pop_words(world, cfg["lignes"], "titre_b", 76, 880, t - 0.35, C["blanc"], C["or"], stagger=0.07)
-    q = prog(t, 1.5, 0.45)
+        lay = Image.new("RGBA", (int(700 * S), int(560 * S)), (0, 0, 0, 0))
+        tirelire(Cv(lay, 330, 280), 0, 0, 520, C["or"], C["marine"], t, ease_out_cubic(prog(t, 0.9, 0.6)))
+        pop_layer(cv, lay, W / 2, 920, p, overshoot=1.6)
+        g = prog(t, 1.0, 1.2)
+        if 0 < g < 1:
+            goutte(cv, W / 2 + 205, 700 + 60 * g, 18, mix(bg, (120, 190, 255), 0.95 * (1 - g * 0.6)))
+    pop_words(world, cfg["lignes"][:2], "titre_b", 100, 200, t - 0.05, C["blanc"], C["or"], stagger=0.07)
+    pop_words(world, cfg["lignes"][2:], "titre", 52, 445, t - 0.5, mix(bg, C["blanc"], 0.8), C["or"])
+    q = prog(t, 1.6, 0.45)
     if q > 0:
-        wig = math.sin((t - 1.5) * 8) * 3 * (1 - prog(t, 1.5, 1.0))
-        pop_layer(cv, sticker(cfg["sticker"], 40, C["blanc"], C["rouge"]), W / 2, 1180, q, rot=-4 + wig)
+        wig = math.sin((t - 1.6) * 8) * 3 * (1 - prog(t, 1.6, 1.0))
+        pop_layer(cv, sticker(cfg["sticker"], 40, C["blanc"], C["rouge"]), W / 2, 1440, q, rot=-4 + wig)
     return punch(t, D), 0, 0
 
 
@@ -290,79 +363,129 @@ def scene_panique(world, t, D):
     return punch(t, D), dx, dy
 
 
-def scene_frais(world, t, D):
+def panier(cv, cx, cy, w, body, dark, t_shake=0.0):
+    """Panier en osier (vu de face) ; (cx, cy) = milieu du bord supérieur."""
+    h = w * 0.55
+    cv.d.arc(cv.P((cx - w * 0.36, cy - w * 0.5), (cx + w * 0.36, cy + w * 0.2)), 180, 360, fill=dark,
+             width=int(w * 0.045 * S))                                               # anse
+    cv.poly([(cx - w / 2, cy), (cx + w / 2, cy), (cx + w * 0.38, cy + h), (cx - w * 0.38, cy + h)], body)
+    for k in range(1, 4):                                                            # tressage
+        y = cy + h * k / 4
+        x = w / 2 - (w / 2 - w * 0.38) * k / 4
+        cv.line([(cx - x + 10, y), (cx + x - 10, y)], dark, 5)
+    for k in range(-3, 4):
+        cv.line([(cx + k * w * 0.13, cy + 6), (cx + k * w * 0.1, cy + h - 6)], dark, 4)
+    cv.rrect(cx - w / 2 - 14, cy - 16, cx + w / 2 + 14, cy + 16, 16, fill=dark)       # bord
+
+
+def oeuf(cv, cx, cy, r, fill, crack, dark):
+    cv.d.ellipse(cv.P((cx - r * 0.78, cy - r), (cx + r * 0.78, cy + r * 0.92)), fill=fill)
+    if crack > 0:
+        pts = [(cx - r * 0.7, cy - r * 0.1), (cx - r * 0.35, cy + r * 0.12), (cx - r * 0.1, cy - r * 0.18),
+               (cx + r * 0.2, cy + r * 0.1), (cx + r * 0.45, cy - r * 0.15), (cx + r * 0.72, cy + r * 0.05)]
+        n = max(2, int(len(pts) * crack))
+        cv.line(pts[:n], dark, max(3, r * 0.07))
+
+
+def scene_diversifier(world, t, D):
     cfg = CFG["erreurs"][2]
-    bg = C["or"]
+    bg = C["fond"]
     cv = Cv(world)
     header(world, cv, 3, cfg["titre"], bg, t)
-    # relevé de compte
+    # tous les œufs dans le même panier « 100 % tech »
+    crash = 3.3
+    sx, sy = shake(t, crash, 16, 0.6)
+    tilt = 7 * math.sin(max(0.0, t - crash) * 7) * math.exp(-max(0.0, t - crash) * 2.5) if t > crash else 0.0
     p = prog(t, 0.3, 0.5)
     if p > 0:
-        w, h = 900, 640
-        lay = Image.new("RGBA", (int((w + 20) * S), int((h + 20) * S)), (0, 0, 0, 0))
-        lc = Cv(lay, 10, 10)
-        lc.rrect(0, 0, w, h, 40, fill=C["blanc"])
-        lc.text("RELEVÉ DE VOTRE PLACEMENT", "ui_bold", 22, C["gris"], 50, 60, tracking=0.12)
-        lc.text(cfg["contexte"], "ui_semi", 32, C["marine"], 50, 125)
-        hl = prog(t, 1.4, 0.4)
-        lc.rrect(36, 170, 36 + (w - 72) * ease_out_cubic(hl), 236, 18, fill=C["rouge_clair"])
-        lc.text(cfg["ligne"], "ui_bold", 34, C["rouge"], 50, 203)
-        # les années défilent
-        run = prog(t, 3.4, 2.2)
-        n = int(20 * ease_in_out_cubic(run))
-        lc.text(f"Année {n}{NB}/{NB}20", "ui_semi", 26, C["gris"], 50, 290)
-        lc.rrect(50, 320, w - 50, 336, 8, fill=C["trait"])
-        if n:
-            lc.rrect(50, 320, 50 + (w - 100) * n / 20, 336, 8, fill=C["rouge"])
-        # le total qui grimpe
-        tot = cfg["montant"] * ((1.04 / 1.03) ** (20 * ease_in_out_cubic(run)) - 1) / ((1.04 / 1.03) ** 20 - 1)
-        val = "−" + fmt_n(round(tot / 10) * 10) + NB + "€"
-        lc.text(val, "titre_b", 128, C["rouge"], w / 2, 460, align="c")
-        lc.text(cfg["total"], "ui_semi", 32, C["marine"], w / 2, 570, align="c", opacity=prog(t, 5.4, 0.4))
-        pop_layer(cv, lay, W / 2, 900, p, overshoot=1.3)
-    for j in range(6):                                     # les pièces qui s'échappent
-        tj = t - 3.4 - j * 0.35
-        if 0 < tj < 0.9:
-            coin(cv, W / 2 + ((j * 37) % 5 - 2) * 120, 1230 + 140 * (tj / 0.9) ** 2, 34, C["blanc"], C["marine"])
+        lay = Image.new("RGBA", (int(760 * S), int(640 * S)), (0, 0, 0, 0))
+        lc = Cv(lay, 380, 300)
+        for k, (ex, ey) in enumerate([(-150, -95), (-55, -130), (55, -120), (150, -90), (0, -70)]):
+            q = prog(t, 0.6 + k * 0.18, 0.35)
+            if q > 0:
+                oeuf(lc, ex, ey - (1 - ease_out_back(q, 2)) * 60, 62, mix(C["fond"], C["blanc"], 0.6),
+                     prog(t, crash + 0.15 + k * 0.08, 0.3), C["marine"])
+        panier(lc, 0, 0, 500, C["brun"], C["marine"])
+        lc.chip(cfg["panier"], 0, 135, "ui_bold", 34, C["blanc"], C["chaud"], align="c", tracking=0.08)
+        if tilt:
+            lay = lay.rotate(tilt, resample=Image.BICUBIC)
+        pop_layer(cv, lay, W / 2, 830, p, overshoot=1.4)
+    q = prog(t, crash + 0.35, 0.45)
+    pop_layer(cv, sticker(cfg["tampon"], 84, C["blanc"], C["rouge"]), W / 2 + 250, 600, q, rot=-10)
+    # le temps qu'il a fallu pour revenir au niveau de 2000
+    run = prog(t, crash + 1.0, 2.0)
+    if run > 0:
+        yrs = int(cfg["annees"] * ease_in_out_cubic(run))
+        cv.text(f"{yrs}{NB}ans", "titre_b", 120, C["rouge"] if run < 1 else C["marine"], W / 2, 1175, align="c")
+        cv.text(cfg["legende"], "ui_semi", 32, C["gris"], W / 2, 1262, align="c", opacity=clamp(run * 3))
     reflexe(cv, cfg["reflexe"], 1370, prog(t, D - 2.2, 0.5), bg)
-    return punch(t, D), 0, 0
+    return punch(t, D), sx, sy
 
 
 def scene_fin(world, t, D):
     cfg = CFG["fin"]
+    bg = C["or"]
     cv = Cv(world)
-    q = prog(t, 0.0, 0.5)
-    if q > 0:
-        lay = Image.new("RGBA", (int(880 * S), int(380 * S)), (0, 0, 0, 0))
-        bubble(Cv(lay, 0, 0), 20, 20, 860, 300, C["blanc"])
-        pop_layer(cv, lay, W / 2, 520, q)
-        pop_words(world, cfg["question"], "titre_b", 74, 400, t - 0.15, C["marine"], C["rouge"])
-    for k, s in enumerate(cfg["choix"]):
-        p = prog(t, 0.8 + k * 0.15, 0.4)
-        if p > 0:
-            pop_layer(cv, sticker(s, 60, C["marine"], C["or"], pad=0.75), W / 2 + (k - (len(cfg["choix"]) - 1) / 2) * 170,
-                      850 + math.sin(t * 5 + k) * 5 * clamp(t - 1.3), p)
-    r = prog(t, 1.3, 0.7)
+    rayons(cv, W / 2, 900, 1400, 18, t, mix(bg, C["blanc"], 0.13))
+    pop_words(world, cfg["titre"], "titre_b", 80, 210, t - 0.05, C["marine"], C["blanc"], stagger=0.07)
+    # l'échange avec le conseiller, en bulles de messagerie
+    for k, (txt, mine) in enumerate(cfg["echange"]):
+        p = prog(t, 0.35 + k * 0.55, 0.45)
+        if p <= 0:
+            continue
+        size = 42
+        tw = text_w(txt, "ui_semi", size)
+        w, h = tw + 80, 110
+        lay = Image.new("RGBA", (int((w + 70) * S), int((h + 70) * S)), (0, 0, 0, 0))
+        lc = Cv(lay, 35, 20)
+        fill, fg = (C["chaud"], C["blanc"]) if mine else (C["blanc"], C["marine"])
+        lc.rrect(0, 0, w, h, 40, fill=fill)
+        tx = w - 70 if mine else 70
+        lc.poly([(tx - 30, h - 4), (tx + 30, h - 4), (tx + (40 if mine else -40), h + 40)], fill)
+        lc.text(txt, "ui_semi", size, fg, 40, h / 2)
+        x = W - 80 - w / 2 if mine else 80 + w / 2
+        pop_layer(cv, lay, x, 650 + k * 230, p, overshoot=1.6)
+    # pastille « ✓ » : le plan est clair
+    c = prog(t, 1.5, 0.5)
+    if c > 0:
+        k = ease_out_back(c, 2.4)
+        cv.disc(W / 2, 1110, 62 * k, C["vert"])
+        cv.check(W / 2, 1110, 62, C["blanc"], ease_out_cubic(prog(c, 0.3, 0.7)), width=10)
+    # bouton d'action qui « respire »
+    b = prog(t, 1.1, 0.5)
+    if b > 0:
+        txt = cfg["bouton"]
+        tw = text_w(txt, "ui_bold", 40)
+        w, h = tw + 150, 104
+        lay = Image.new("RGBA", (int((w + 10) * S), int((h + 10) * S)), (0, 0, 0, 0))
+        lc = Cv(lay, 5, 5)
+        lc.rrect(0, 0, w, h, h / 2, fill=C["marine"])
+        lc.text(txt, "ui_bold", 40, C["blanc"], 46, h / 2)
+        lc.arrow(w - 58, h / 2, 34, C["or"], width=5)
+        pulse = 1 + 0.03 * math.sin(max(0.0, t - 1.6) * 6)
+        pop_layer(cv, lay.resize((max(1, int(lay.width * pulse)), max(1, int(lay.height * pulse))),
+                                 Image.BICUBIC), W / 2, 1300, b)
+    r = prog(t, 1.6, 0.6)
     if r > 0:
-        lay = text_layer(eb.typo(cfg["marque"]), "titre_b", 92, C["blanc"], 0.12)
+        lay = text_layer(eb.typo(cfg["marque"]), "titre_b", 58, C["marine"], 0.14)
         e = ease_out_expo(r)
         part = Image.new("RGBA", lay.size, (0, 0, 0, 0))
         part.paste(lay.crop((0, 0, max(1, int(lay.width * e)), lay.height)), (0, 0))
-        cv.paste(part, W / 2, 1110)
-        lw = 170 * ease_in_out_cubic(prog(t, 1.7, 0.5))
-        cv.line([(W / 2 - lw, 1180), (W / 2 + lw, 1180)], C["or"], 3)
-        cv.text(cfg["activite"], "ui_semi", 24, C["or"], W / 2, 1225, align="c", opacity=prog(t, 1.9, 0.4),
+        cv.paste(part, W / 2, 1418)
+        cv.text(cfg["activite"], "ui_bold", 20, C["marine"], W / 2, 1468, align="c", opacity=prog(t, 1.9, 0.4),
                 tracking=0.2)
+    cv.text(cfg["commentaire"], "ui_semi", 30, C["blanc"], W / 2, 1535, align="c", opacity=prog(t, 2.2, 0.4))
     return punch(t, D, 0.02), 0, 0
 
 
 SCENES = [  # (scène, clé de voix, durée minimale, fond, sons [(t local, type)])
-    (scene_accroche, "accroche", 3.4, "marine", [(0.05, "impact"), (1.5, "pop")]),
+    (scene_accroche, "accroche", 3.4, "marine", [(0.05, "impact"), (0.2, "chute"), (1.6, "pop")]),
     (scene_mode, "e1", 7.5, "fond", [(0.3, "pop"), (0.8, "tic"), (1.55, "tic"), (2.3, "tic"), (3.6, "souffle"),
                                      (4.3, "chute"), (5.8, "pop")]),
     (scene_panique, "e2", 7.5, "fond", [(1.4, "ping"), (1.6, "chute"), (4.6, "succes"), (5.6, "pop")]),
-    (scene_frais, "e3", 7.0, "or", [(0.3, "pop"), (1.4, "tic")] + [(3.4 + 0.35 * j, "tic") for j in range(6)]),
-    (scene_fin, "fin", 3.4, "marine", [(0.05, "pop"), (0.8, "tic"), (0.95, "tic"), (1.1, "tic"), (1.3, "impact")]),
+    (scene_diversifier, "e3", 7.0, "fond", [(0.3, "pop")] + [(0.6 + 0.18 * j, "tic") for j in range(5)]
+     + [(3.3, "chute"), (3.65, "pop")]),
+    (scene_fin, "fin", 4.5, "or", [(0.35, "pop"), (0.9, "pop"), (1.5, "succes"), (1.6, "impact")]),
 ]
 TIMELINE, STARTS, DURATION = [], [], 0.0
 
@@ -376,7 +499,7 @@ def build_timeline():
     durs = [max(m, LEAD + dv.get(key, 0) + tl) for (_, key, m, _, _), tl in zip(SCENES, tail)]
     over = sum(durs) - MAX_DUREE
     if over > 0:
-        slack = [d - (LEAD + dv.get(key, 0) + (1.5 if key == "fin" else 0.2)) for d, (_, key, *_r) in zip(durs, SCENES)]
+        slack = [d - (LEAD + dv.get(key, 0) + (1.1 if key == "fin" else 0.2)) for d, (_, key, *_r) in zip(durs, SCENES)]
         k = min(1.0, over / max(1e-6, sum(slack)))
         durs = [d - s * k for d, s in zip(durs, slack)]
     TIMELINE[:] = []
