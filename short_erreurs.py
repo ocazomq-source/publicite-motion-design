@@ -427,7 +427,7 @@ def scene_fin(world, t, D):
     bg = C["or"]
     cv = Cv(world)
     rayons(cv, W / 2, 900, 1400, 18, t, mix(bg, C["blanc"], 0.13))
-    pop_words(world, cfg["titre"], "titre_b", 80, 210, t - 0.05, C["marine"], C["blanc"], stagger=0.07)
+    pop_words(world, cfg["titre"], "titre_b", 96, 200, t - 0.05, C["marine"], C["blanc"], stagger=0.07)
     # l'échange avec le conseiller, en bulles de messagerie
     for k, (txt, mine) in enumerate(cfg["echange"]):
         p = prog(t, 0.35 + k * 0.55, 0.45)
@@ -451,29 +451,8 @@ def scene_fin(world, t, D):
         k = ease_out_back(c, 2.4)
         cv.disc(W / 2, 1110, 62 * k, C["vert"])
         cv.check(W / 2, 1110, 62, C["blanc"], ease_out_cubic(prog(c, 0.3, 0.7)), width=10)
-    # bouton d'action qui « respire »
-    b = prog(t, 1.1, 0.5)
-    if b > 0:
-        txt = cfg["bouton"]
-        tw = text_w(txt, "ui_bold", 40)
-        w, h = tw + 150, 104
-        lay = Image.new("RGBA", (int((w + 10) * S), int((h + 10) * S)), (0, 0, 0, 0))
-        lc = Cv(lay, 5, 5)
-        lc.rrect(0, 0, w, h, h / 2, fill=C["marine"])
-        lc.text(txt, "ui_bold", 40, C["blanc"], 46, h / 2)
-        lc.arrow(w - 58, h / 2, 34, C["or"], width=5)
-        pulse = 1 + 0.03 * math.sin(max(0.0, t - 1.6) * 6)
-        pop_layer(cv, lay.resize((max(1, int(lay.width * pulse)), max(1, int(lay.height * pulse))),
-                                 Image.BICUBIC), W / 2, 1300, b)
-    r = prog(t, 1.6, 0.6)
-    if r > 0:
-        lay = text_layer(eb.typo(cfg["marque"]), "titre_b", 58, C["marine"], 0.14)
-        e = ease_out_expo(r)
-        part = Image.new("RGBA", lay.size, (0, 0, 0, 0))
-        part.paste(lay.crop((0, 0, max(1, int(lay.width * e)), lay.height)), (0, 0))
-        cv.paste(part, W / 2, 1418)
-        cv.text(cfg["activite"], "ui_bold", 20, C["marine"], W / 2, 1468, align="c", opacity=prog(t, 1.9, 0.4),
-                tracking=0.2)
+    # le message du cabinet
+    pop_words(world, cfg["message"], "titre", 50, 1235, t - 1.2, C["marine"], C["blanc"], stagger=0.06)
     cv.text(cfg["commentaire"], "ui_semi", 30, C["blanc"], W / 2, 1535, align="c", opacity=prog(t, 2.2, 0.4))
     return punch(t, D, 0.02), 0, 0
 
@@ -499,7 +478,7 @@ def build_timeline():
     durs = [max(m, LEAD + dv.get(key, 0) + tl) for (_, key, m, _, _), tl in zip(SCENES, tail)]
     over = sum(durs) - MAX_DUREE
     if over > 0:
-        slack = [d - (LEAD + dv.get(key, 0) + (1.1 if key == "fin" else 0.2)) for d, (_, key, *_r) in zip(durs, SCENES)]
+        slack = [d - (LEAD + dv.get(key, 0) + (1.0 if key == "fin" else 0.2)) for d, (_, key, *_r) in zip(durs, SCENES)]
         k = min(1.0, over / max(1e-6, sum(slack)))
         durs = [d - s * k for d, s in zip(durs, slack)]
     TIMELINE[:] = []

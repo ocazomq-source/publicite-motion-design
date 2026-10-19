@@ -73,7 +73,8 @@ Les sources du PDF (« à ne pas publier ») ne figurent pas dans la vidéo. Une
 marron et beige avec un terracotta chaud. Pensé pour être compris du premier coup : environ 8 s
 par erreur, une situation du quotidien, un seul chiffre clé à l'écran, le bon réflexe en fin de
 scène, sous-titres synchronisés (lisible sans le son). Ouverture avec une tirelire qui se
-fissure, fin avec un échange en bulles et un bouton « Parlez-en à un conseiller ». Mentions
+fissure, fin avec un échange en bulles et « Chaque projet est unique. Le cabinet O'Morgan
+est là pour vous conseiller. » Mentions
 légales visibles en permanence.
 
 | Erreur | Situation du quotidien | Fait réel |

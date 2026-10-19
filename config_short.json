@@ -78,14 +78,9 @@
   ],
   "fin": {
     "titre": [
-      "Ces erreurs, on les évite",
-      "{mieux à deux.}"
+      "Chaque projet",
+      "{est unique.}"
     ],
-    "bouton": "Parlez-en à un conseiller",
-    "marque": "O'MORGAN",
-    "activite": "CONSEIL EN GESTION DE PATRIMOINE",
-    "commentaire": "Et vous, laquelle avez-vous déjà faite ?",
-    "voix": "Ces erreurs, on les évite mieux à deux. Parlez-en à un conseiller Ô Morgane.",
     "echange": [
       [
         "J'ai une question sur mon épargne…",
@@ -95,7 +90,13 @@
         "Parlons-en !",
         true
       ]
-    ]
+    ],
+    "message": [
+      "Le cabinet {O'Morgan} est là",
+      "pour vous conseiller."
+    ],
+    "commentaire": "Et vous, laquelle avez-vous déjà faite ?",
+    "voix": "Chaque projet est unique. Le cabinet Ô Morgane est là pour vous conseiller."
   },
   "mentions": "Exemples pédagogiques, ni conseil ni recommandation. Performances passées ≠ futures. Risque de perte en capital."
 }
