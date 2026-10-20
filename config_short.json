@@ -18,7 +18,7 @@
   "voix": {
     "active": true,
     "modele": "kokoro",
-    "vitesse": 1.05,
+    "vitesse": 1.0,
     "volume": 1.0
   },
   "sons": {
@@ -36,7 +36,7 @@
       "quand on débute en bourse"
     ],
     "sticker": "La n°3 a coûté 15 ans…",
-    "voix": "Trois erreurs qui coûtent cher, quand on débute en bourse."
+    "voix": "Trois erreurs… qui coûtent cher quand on débute en bourse."
   },
   "erreurs": [
     {
@@ -53,8 +53,8 @@
       "tampon": "−67 %",
       "legende": "sept. 2025 → juil. 2026",
       "reflexe": "Investir dans ce qu'on comprend",
-      "sous_titre": "1 : suivre la mode. En 2025, tout le monde parlait d'Oracle. Dix mois après, l'action avait perdu les deux tiers.",
-      "voix": "Un : suivre la mode. En deux mille vingt-cinq, tout le monde parlait d'Oracle. Dix mois après, l'action avait perdu les deux tiers."
+      "sous_titre": "Première erreur : suivre la mode. En 2025, tout le monde parlait d'Oracle, la star de l'IA. Dix mois plus tard ? L'action avait perdu les deux tiers de sa valeur. Le bon réflexe : investir dans ce que l'on comprend.",
+      "voix": "Première erreur : suivre la mode. En deux mille vingt-cinq, tout le monde parlait d'Oracle, la star de l'IA. Dix mois plus tard ? L'action avait perdu les deux tiers de sa valeur. Le bon réflexe : investir dans ce que l'on comprend."
     },
     {
       "titre": "Vendre {en panique}",
@@ -63,8 +63,8 @@
       "vendu": "Vendu au plus bas : perte définitive",
       "retour": "5 mois plus tard : tout est revenu",
       "reflexe": "Fixer son horizon, et s'y tenir",
-      "sous_titre": "2 : vendre en panique. En mars 2020, la bourse chute d'un tiers. Cinq mois après, tout est revenu.",
-      "voix": "Deux : vendre en panique. En mars deux mille vingt, la bourse chute d'un tiers. Cinq mois après, tout est revenu."
+      "sous_titre": "Deuxième erreur : vendre en panique. En mars 2020, la bourse perd un tiers en un mois. Cinq mois plus tard, tout était revenu. Ceux qui avaient vendu, eux, ont perdu. Le bon réflexe : fixer son horizon, et s'y tenir.",
+      "voix": "Deuxième erreur : vendre en panique. En mars deux mille vingt, la bourse perd un tiers en un mois. Cinq mois plus tard, tout était revenu. Ceux qui avaient vendu, eux, ont perdu. Le bon réflexe : fixer son horizon, et s'y tenir."
     },
     {
       "titre": "Ne pas {diversifier}",
@@ -73,31 +73,9 @@
       "annees": 15,
       "legende": "pour retrouver le niveau de mars 2000",
       "reflexe": "Répartir entre plusieurs placements",
-      "sous_titre": "3 : ne pas diversifier. En 2000, beaucoup misaient tout sur la tech. Le Nasdaq a chuté de 78 %. Quinze ans pour s'en remettre.",
-      "voix": "Trois : ne pas diversifier. En deux mille, beaucoup misaient tout sur la tech. Le Nasdaq a chuté de soixante-dix-huit pour cent. Quinze ans pour s'en remettre."
+      "sous_titre": "Troisième erreur : ne pas diversifier. En 2000, beaucoup avaient tout misé sur la tech. Le Nasdaq a chuté de 78 %… Et il a mis 15 ans à s'en remettre. Le bon réflexe : répartir entre plusieurs placements.",
+      "voix": "Troisième erreur : ne pas diversifier. En deux mille, beaucoup avaient tout misé sur la tech. Le Nasdaq a chuté de soixante-dix-huit pour cent… Et il a mis quinze ans à s'en remettre. Le bon réflexe : répartir entre plusieurs placements."
     }
   ],
-  "fin": {
-    "titre": [
-      "Chaque projet",
-      "{est unique.}"
-    ],
-    "echange": [
-      [
-        "J'ai une question sur mon épargne…",
-        false
-      ],
-      [
-        "Parlons-en !",
-        true
-      ]
-    ],
-    "message": [
-      "Le cabinet {O'Morgan} est là",
-      "pour vous conseiller."
-    ],
-    "commentaire": "Et vous, laquelle avez-vous déjà faite ?",
-    "voix": "Chaque projet est unique. Ô Morgane est là pour vous conseiller."
-  },
   "mentions": "Exemples pédagogiques, ni conseil ni recommandation. Performances passées ≠ futures. Risque de perte en capital."
 }

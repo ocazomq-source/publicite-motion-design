@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Short vertical (≤ 30 s, 1080x1920) « 3 erreurs qui coûtent cher quand on débute en bourse » (O'MORGAN).
 
-Format réseaux sociaux, pensé pour être compris du premier coup : trois erreurs seulement,
+Format réseaux sociaux (45 s maximum), pensé pour être compris du premier coup : trois erreurs,
 une scène d'environ 8 s par erreur avec une situation du quotidien (discussion de groupe,
 alerte sur le téléphone, tous les œufs dans le même panier), un seul chiffre clé à l'écran, le bon réflexe
 en fin de scène, sous-titres synchronisés avec la voix off et question finale pour les
@@ -33,7 +33,7 @@ W, H = 1080, 1920
 S = eb.S
 FPS = 30
 TR = 0.45            # coupe en volet (s)
-MAX_DUREE = 30.0
+MAX_DUREE = 45.0
 LEAD = 0.2          # la voix démarre peu après la coupe
 
 
@@ -137,11 +137,6 @@ def coin(cv, cx, cy, r, color, dark):
     cv.text("€", "titre_b", r * 0.95, dark, cx, cy - r * 0.1, align="c")
 
 
-def bubble(cv, x0, y0, x1, y1, fill):
-    cv.rrect(x0, y0, x1, y1, 44, fill=fill)
-    cv.poly([(x0 + 90, y1 - 2), (x0 + 70, y1 + 56), (x0 + 160, y1 - 2)], fill)
-
-
 # --------------------------------------------------------------------------- #
 # Tirelire (illustration en aplats)
 # --------------------------------------------------------------------------- #
@@ -177,18 +172,18 @@ def goutte(cv, x, y, s, color):
     cv.disc(x, y + s * 0.1, s * 0.66, color)
 
 
-def rayons(cv, cx, cy, r, n, t, color):
-    """Rayons de soleil qui tournent lentement (fond festif)."""
-    for k in range(n):
-        a0 = 2 * math.pi * k / n + t * 0.15
-        a1 = a0 + math.pi / n
-        cv.poly([(cx, cy), (cx + math.cos(a0) * r, cy + math.sin(a0) * r),
-                 (cx + math.cos(a1) * r, cy + math.sin(a1) * r)], color)
-
-
 # --------------------------------------------------------------------------- #
 # Scènes : (world, t local, D) -> caméra (zoom, dx, dy)
 # --------------------------------------------------------------------------- #
+def a_phrase(key, i, defaut):
+    """Instant (local à la scène) où la voix commence sa phrase n° i : l'image suit la voix.
+    `defaut` sert quand la voix off est coupée."""
+    debuts = CFG.get("_phrases_voix", {}).get(key)
+    if debuts and i < len(debuts):
+        return LEAD + debuts[i]
+    return defaut
+
+
 def punch(t, D, amount=0.04):
     """Petit zoom d'attaque à chaque coupe puis lente poussée."""
     return 1.0 + amount * (1 - ease_out_cubic(prog(t, 0, 0.6))) + 0.015 * prog(t, 0, D)
@@ -272,13 +267,14 @@ def scene_mode(world, t, D):
     lay = Image.new("RGBA", (int((pw + 40) * S), int((ph + 40) * S)), (0, 0, 0, 0))
     lc = Cv(lay, (pw + 40) / 2, (ph + 40) / 2)
     phone(lc, 0, 0, pw, ph, C["marine"], C["blanc"])
-    swap = ease_in_out_cubic(prog(t, 3.6, 0.5))           # discussion -> appli de bourse
+    t_chat, t_crash, t_tampon = a_phrase("e1", 1, 0.8), a_phrase("e1", 2, 4.3), a_phrase("e1", 3, 5.6) + 0.3
+    swap = ease_in_out_cubic(prog(t, t_crash - 0.6, 0.5))  # discussion -> appli de bourse
     # 1) la discussion de groupe : tout le monde en parle
     ox = -swap * pw
     if swap < 1:
         lc.text("Groupe « Famille »", "ui_bold", 24, C["gris"], ox, -ph / 2 + 110, align="c")
         for k, msg in enumerate(cfg["messages"]):
-            q = prog(t, 0.8 + k * 0.75, 0.35)
+            q = prog(t, t_chat + k * 0.7, 0.35)
             if q > 0:
                 mine = k == len(cfg["messages"]) - 1
                 y = -ph / 2 + 200 + k * 110 + (1 - ease_out_expo(q)) * 30
@@ -287,12 +283,12 @@ def scene_mode(world, t, D):
     if swap > 0:
         ox = (1 - swap) * pw
         lc.text(cfg["action"], "ui_bold", 30, C["marine"], ox - pw / 2 + 56, -ph / 2 + 110, tracking=0.1)
-        k = ease_in_out_cubic(prog(t, 4.3, 1.4))
+        k = ease_in_out_cubic(prog(t, t_crash, 1.6))
         price = lerp(cfg["de"], cfg["a"], k)
         col = C["marine"] if k == 0 else C["rouge"]
         lc.text(f"{fmt_n(price)}{NB}{cfg['unite']}", "titre_b", 92, col, ox - pw / 2 + 56, -ph / 2 + 200)
         path = monotone(ORACLE, 200)
-        xc = 0.55 + 0.45 * ease_in_out_cubic(prog(t, 4.3, 1.4))
+        xc = 0.55 + 0.45 * ease_in_out_cubic(prog(t, t_crash, 1.6))
         x0, x1, y0, y1 = ox - pw / 2 + 50, ox + pw / 2 - 50, -ph / 2 + 300, ph / 2 - 110
         part = clip_path(path, 0, xc)
         pts = [(lerp(x0, x1, x), lerp(y1, y0, y)) for x, y in part]
@@ -305,10 +301,10 @@ def scene_mode(world, t, D):
         lc.text(cfg["legende"], "ui_semi", 26, C["gris"], ox, ph / 2 - 62, align="c")
     tilt = 1 - ease_out_expo(p)
     pop_layer(cv, eb.tilt_layer(lay, tilt * 18), W / 2, 940 + tilt * 60, min(1.0, p * 1.4), overshoot=1.2)
-    q = prog(t, 5.8, 0.45)
+    q = prog(t, t_tampon, 0.45)
     pop_layer(cv, sticker(cfg["tampon"], 84, C["blanc"], C["rouge"]), W / 2 + 200, 1190, q, rot=-10)
-    reflexe(cv, cfg["reflexe"], 1370, prog(t, D - 2.2, 0.5), bg)
-    dx, dy = shake(t, 5.8, 14)
+    reflexe(cv, cfg["reflexe"], 1370, prog(t, a_phrase("e1", 4, D - 2.2), 0.5), bg)
+    dx, dy = shake(t, t_tampon, 14)
     return punch(t, D), dx, dy
 
 
@@ -322,7 +318,8 @@ def scene_panique(world, t, D):
     cv = Cv(world)
     header(world, cv, 2, cfg["titre"], bg, t)
     # notification d'alerte qui tombe sur l'écran
-    a = prog(t, 1.4, 0.5)
+    t_alerte, t_retour, t_vendu = a_phrase("e2", 1, 1.4), a_phrase("e2", 2, 3.8), a_phrase("e2", 3, 5.6)
+    a = prog(t, t_alerte, 0.5)
     if a > 0:
         w, h = 900, 150
         y = 560 + (1 - ease_out_back(a, 1.6)) * -160
@@ -337,7 +334,7 @@ def scene_panique(world, t, D):
     # la courbe : la chute, puis la remontée
     path = monotone(COVID, 200)
     x0, x1, y0, y1 = 110, W - 110, 800, 1250
-    xc = 0.24 * ease_in_out_cubic(prog(t, 1.6, 1.0)) + 0.76 * ease_in_out_cubic(prog(t, 3.8, 1.6))
+    xc = 0.24 * ease_in_out_cubic(prog(t, t_alerte + 0.2, 1.2)) + 0.76 * ease_in_out_cubic(prog(t, t_retour, 1.8))
     lvl = lerp(y1, y0, 0.86)
     cv.dashed((x0, lvl), (x1, lvl), mix(bg, C["gris_clair"], 0.8), 3, 16, 12)
     if xc > 0:
@@ -351,15 +348,15 @@ def scene_panique(world, t, D):
         cv.disc(pts[-1][0], pts[-1][1], 8, C["blanc"])
     lowx, lowy = lerp(x0, x1, 0.24), lerp(y1, y0, 0.22)
     # « ceux qui ont vendu » : la perte reste au plus bas
-    v = prog(t, 5.6, 0.5)
+    v = prog(t, t_vendu, 0.5)
     if v > 0:
         cv.dashed((lowx, lowy), (lowx + (x1 - lowx) * ease_out_cubic(v), lowy), C["rouge"], 5, 14, 10)
         pop_layer(cv, sticker(cfg["vendu"], 28, C["blanc"], C["rouge"], kind="ui_bold"), W / 2 + 90, lowy + 60, v)
-    ok = prog(t, 4.6, 0.4)
+    ok = prog(t, t_retour + 1.0, 0.4)
     if ok > 0:
         pop_layer(cv, sticker(cfg["retour"], 28, C["blanc"], C["vert"], kind="ui_bold"), W / 2 + 120, lvl - 60, ok)
-    reflexe(cv, cfg["reflexe"], 1370, prog(t, D - 2.2, 0.5), bg)
-    dx, dy = shake(t, 1.6, 12)
+    reflexe(cv, cfg["reflexe"], 1370, prog(t, a_phrase("e2", 4, D - 2.2), 0.5), bg)
+    dx, dy = shake(t, t_alerte + 0.2, 12)
     return punch(t, D), dx, dy
 
 
@@ -393,7 +390,7 @@ def scene_diversifier(world, t, D):
     cv = Cv(world)
     header(world, cv, 3, cfg["titre"], bg, t)
     # tous les œufs dans le même panier « 100 % tech »
-    crash = 3.3
+    crash = a_phrase("e3", 2, 3.3)
     sx, sy = shake(t, crash, 16, 0.6)
     tilt = 7 * math.sin(max(0.0, t - crash) * 7) * math.exp(-max(0.0, t - crash) * 2.5) if t > crash else 0.0
     p = prog(t, 0.3, 0.5)
@@ -413,78 +410,56 @@ def scene_diversifier(world, t, D):
     q = prog(t, crash + 0.35, 0.45)
     pop_layer(cv, sticker(cfg["tampon"], 84, C["blanc"], C["rouge"]), W / 2 + 250, 600, q, rot=-10)
     # le temps qu'il a fallu pour revenir au niveau de 2000
-    run = prog(t, crash + 1.0, 2.0)
+    run = prog(t, a_phrase("e3", 3, crash + 1.0), 2.0)
     if run > 0:
         yrs = int(cfg["annees"] * ease_in_out_cubic(run))
         cv.text(f"{yrs}{NB}ans", "titre_b", 120, C["rouge"] if run < 1 else C["marine"], W / 2, 1175, align="c")
         cv.text(cfg["legende"], "ui_semi", 32, C["gris"], W / 2, 1262, align="c", opacity=clamp(run * 3))
-    reflexe(cv, cfg["reflexe"], 1370, prog(t, D - 2.2, 0.5), bg)
+    reflexe(cv, cfg["reflexe"], 1370, prog(t, a_phrase("e3", 4, D - 2.2), 0.5), bg)
     return punch(t, D), sx, sy
 
 
-def scene_fin(world, t, D):
-    cfg = CFG["fin"]
-    bg = C["or"]
-    cv = Cv(world)
-    rayons(cv, W / 2, 900, 1400, 18, t, mix(bg, C["blanc"], 0.13))
-    pop_words(world, cfg["titre"], "titre_b", 96, 200, t - 0.05, C["marine"], C["blanc"], stagger=0.07)
-    # l'échange avec le conseiller, en bulles de messagerie
-    for k, (txt, mine) in enumerate(cfg["echange"]):
-        p = prog(t, 0.35 + k * 0.55, 0.45)
-        if p <= 0:
-            continue
-        size = 42
-        tw = text_w(txt, "ui_semi", size)
-        w, h = tw + 80, 110
-        lay = Image.new("RGBA", (int((w + 70) * S), int((h + 70) * S)), (0, 0, 0, 0))
-        lc = Cv(lay, 35, 20)
-        fill, fg = (C["chaud"], C["blanc"]) if mine else (C["blanc"], C["marine"])
-        lc.rrect(0, 0, w, h, 40, fill=fill)
-        tx = w - 70 if mine else 70
-        lc.poly([(tx - 30, h - 4), (tx + 30, h - 4), (tx + (40 if mine else -40), h + 40)], fill)
-        lc.text(txt, "ui_semi", size, fg, 40, h / 2)
-        x = W - 80 - w / 2 if mine else 80 + w / 2
-        pop_layer(cv, lay, x, 650 + k * 230, p, overshoot=1.6)
-    # pastille « ✓ » : le plan est clair
-    c = prog(t, 1.5, 0.5)
-    if c > 0:
-        k = ease_out_back(c, 2.4)
-        cv.disc(W / 2, 1110, 62 * k, C["vert"])
-        cv.check(W / 2, 1110, 62, C["blanc"], ease_out_cubic(prog(c, 0.3, 0.7)), width=10)
-    # le message du cabinet
-    pop_words(world, cfg["message"], "titre", 50, 1235, t - 1.2, C["marine"], C["blanc"], stagger=0.06)
-    cv.text(cfg["commentaire"], "ui_semi", 30, C["blanc"], W / 2, 1535, align="c", opacity=prog(t, 2.2, 0.4))
-    return punch(t, D, 0.02), 0, 0
-
-
-SCENES = [  # (scène, clé de voix, durée minimale, fond, sons [(t local, type)])
-    (scene_accroche, "accroche", 3.4, "marine", [(0.05, "impact"), (0.2, "chute"), (1.6, "pop")]),
-    (scene_mode, "e1", 7.5, "fond", [(0.3, "pop"), (0.8, "tic"), (1.55, "tic"), (2.3, "tic"), (3.6, "souffle"),
-                                     (4.3, "chute"), (5.8, "pop")]),
-    (scene_panique, "e2", 7.5, "fond", [(1.4, "ping"), (1.6, "chute"), (4.6, "succes"), (5.6, "pop")]),
-    (scene_diversifier, "e3", 7.0, "fond", [(0.3, "pop")] + [(0.6 + 0.18 * j, "tic") for j in range(5)]
-     + [(3.3, "chute"), (3.65, "pop")]),
-    (scene_fin, "fin", 4.5, "or", [(0.35, "pop"), (0.9, "pop"), (1.5, "succes"), (1.6, "impact")]),
+SCENES = [  # (scène, clé de voix, durée minimale, fond)
+    (scene_accroche, "accroche", 3.4, "marine"),
+    (scene_mode, "e1", 7.5, "fond"),
+    (scene_panique, "e2", 7.5, "fond"),
+    (scene_diversifier, "e3", 7.5, "fond"),
 ]
+
+
+def sons(key):
+    """Bruitages calés sur les phrases de la voix : [(t local, type)]."""
+    if key == "accroche":
+        return [(0.05, "impact"), (0.2, "chute"), (1.6, "pop")]
+    if key == "e1":
+        c = a_phrase("e1", 2, 4.3)
+        return [(0.3, "pop")] + [(a_phrase("e1", 1, 0.8) + 0.7 * k, "tic") for k in range(3)] + \
+            [(c - 0.6, "souffle"), (c, "chute"), (a_phrase("e1", 3, 5.6) + 0.3, "pop"), (a_phrase("e1", 4, 6.5), "succes")]
+    if key == "e2":
+        a = a_phrase("e2", 1, 1.4)
+        return [(a, "ping"), (a + 0.2, "chute"), (a_phrase("e2", 2, 3.8) + 1.0, "succes"), (a_phrase("e2", 3, 5.6), "pop"),
+                (a_phrase("e2", 4, 6.5), "succes")]
+    c = a_phrase("e3", 2, 3.3)
+    return [(0.3, "pop")] + [(0.6 + 0.18 * j, "tic") for j in range(5)] + [(c, "chute"), (c + 0.35, "pop"),
+                                                                          (a_phrase("e3", 4, 6.5), "succes")]
+
+
 TIMELINE, STARTS, DURATION = [], [], 0.0
 
 
 def build_timeline():
-    """Durée des scènes : au moins le minimum, et assez pour la phrase de voix off plus
-    un temps de respiration. Le total est plafonné à 30 s (on rogne les respirations)."""
+    """Durée des scènes : au moins le minimum, et assez pour la voix off plus un temps de
+    respiration. Le total est plafonné à MAX_DUREE (on rogne les respirations)."""
     global STARTS, DURATION
     dv = CFG.get("_durees_voix", {})
-    tail = [0.3, 0.6, 0.6, 0.6, 1.8]          # respiration après la voix ; la fin laisse lire la signature
-    durs = [max(m, LEAD + dv.get(key, 0) + tl) for (_, key, m, _, _), tl in zip(SCENES, tail)]
+    tail = [0.4, 0.9, 0.9, 1.6]               # respiration après la voix ; la dernière laisse lire le réflexe
+    durs = [max(m, LEAD + dv.get(key, 0) + tl) for (_, key, m, _), tl in zip(SCENES, tail)]
     over = sum(durs) - MAX_DUREE
     if over > 0:
-        slack = [d - (LEAD + dv.get(key, 0) + (1.0 if key == "fin" else 0.2)) for d, (_, key, *_r) in zip(durs, SCENES)]
+        slack = [d - (LEAD + dv.get(key, 0) + 0.2) for d, (_, key, *_r) in zip(durs, SCENES)]
         k = min(1.0, over / max(1e-6, sum(slack)))
         durs = [d - s * k for d, s in zip(durs, slack)]
-    TIMELINE[:] = []
-    for i, (d, (f, _, _, _, snd)) in enumerate(zip(durs, SCENES)):
-        snd = list(snd) + ([(d - 2.2, "succes")] if 1 <= i <= 3 else [])
-        TIMELINE.append((d, f, "volet" if i else None, snd))
+    TIMELINE[:] = [(d, f, "volet" if i else None, sons(key)) for i, (d, (f, key, *_r)) in enumerate(zip(durs, SCENES))]
     STARTS, acc = [], 0.0
     for d in durs:
         STARTS.append(acc)
@@ -505,7 +480,7 @@ def caption_chunks(text):
     chunks, cur = [], ""
     for w in text.split(" "):
         cur = f"{cur} {w}" if cur else w
-        if cur.endswith((".", "?", "!")):
+        if cur.endswith((".", "?", "!", "…")):
             chunks.append(cur)
             cur = ""
     if cur:
@@ -518,7 +493,7 @@ def caption(cv, k, t_local, bg):
         return
     key = SCENES[k][1]
     d = CFG.get("_durees_voix", {}).get(key)
-    src = CFG["accroche"] if key == "accroche" else (CFG["fin"] if key == "fin" else CFG["erreurs"][int(key[1]) - 1])
+    src = CFG["accroche"] if key == "accroche" else CFG["erreurs"][int(key[1]) - 1]
     text = src.get("sous_titre")
     if not d or not text:
         return
@@ -526,12 +501,16 @@ def caption(cv, k, t_local, bg):
     if u < 0 or u > 1.08:
         return
     chunks = caption_chunks(text)
-    total = sum(len(c) + 4 for c in chunks)
-    acc = 0
-    for c in chunks:
-        a, acc = acc, acc + len(c) + 4
-        if u <= acc / total or c is chunks[-1]:
-            break
+    debuts = CFG.get("_phrases_voix", {}).get(key)
+    if debuts and len(debuts) == len(chunks):                 # calé sur les phrases de la voix
+        c = chunks[max(i for i, d0 in enumerate(debuts) if d0 <= max(0.0, t_local - LEAD))]
+    else:                                                     # sinon, au prorata de la longueur
+        total = sum(len(c) + 4 for c in chunks)
+        acc = 0
+        for c in chunks:
+            acc += len(c) + 4
+            if u <= acc / total or c is chunks[-1]:
+                break
     size, lh = 38, 50
     rows = [" ".join(w for w, _ in ln) for ln in eb.layout([c], "ui_bold", size, W - 200)]
     tw = max(text_w(r, "ui_bold", size) for r in rows)
@@ -609,7 +588,6 @@ def render_frame(i):
 def voix_textes(cfg):
     out = [("accroche", cfg["accroche"].get("voix"))]
     out += [(f"e{i + 1}", e.get("voix")) for i, e in enumerate(cfg["erreurs"])]
-    out.append(("fin", cfg["fin"].get("voix")))
     return [(k, v) for k, v in out if v]
 
 
@@ -633,6 +611,7 @@ def main():
     with open(args.config, encoding="utf-8") as f:
         cfg = json.load(f)
     cfg["_durees_voix"] = eb.prepare_voix(cfg, voix_textes(cfg))
+    cfg["_phrases_voix"] = dict(eb.PHRASES)
     init_worker(cfg)
     print("Scènes :", " | ".join(f"{d:.1f}" for d, *_ in TIMELINE), f"→ {DURATION:.1f} s")
 

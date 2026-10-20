@@ -1220,6 +1220,7 @@ MODELES = {   # nom : (archive, modèle, locuteur) ; « kokoro » = voix plus na
     "kokoro": ("kokoro-multi-lang-v1_0", None, 30),          # 30 = ff_siwis, voix féminine française
 }
 VOIX = {}     # clé -> signal mono 44,1 kHz (processus principal uniquement)
+PHRASES = {}  # clé -> début de chaque phrase dans le fichier (s), pour caler l'image sur la voix
 KICK_EVERY = 2  # pulsation grave : un temps sur deux (1 = chaque temps, plus nerveux)
 KICK_STOP = -2  # scène où la pulsation s'arrête (None : jusqu'à la fin)
 
@@ -1272,15 +1273,19 @@ def moteur_voix(nom, vitesse):
             """Phrase par phrase, avec une vraie respiration entre elles et un débit qui varie un peu :
             le rythme d'une personne qui parle plutôt qu'une lecture d'un seul souffle."""
             phrases = [p for p in re.split(r"(?<=[.!?…])\s+", texte.strip()) if p]
-            parts, rate = [], 24000
+            parts, rate, debuts, n = [], 24000, [], 0
             for i, ph in enumerate(phrases):
-                a = tts.generate(ph, sid=speaker, speed=vitesse * (1.0, 0.96, 1.03)[i % 3])
+                a = tts.generate(ph, sid=speaker, speed=vitesse * (1.0, 0.97, 1.02)[i % 3])
                 rate = a.sample_rate
-                parts.append(np.clip(np.array(a.samples, np.float32), -1, 1))
+                sig = np.clip(np.array(a.samples, np.float32), -1, 1)
+                debuts.append(n / rate)
+                parts.append(sig)
+                n += len(sig)
                 if i < len(phrases) - 1:
-                    pause = 0.28 if ph.endswith(("?", "!")) else (0.34 if ph.endswith("…") else 0.2)
+                    pause = 0.36 if ph.endswith(("?", "!", ":")) else (0.45 if ph.endswith("…") else 0.3)
                     parts.append(np.zeros(int(pause * rate), np.float32))
-            return (np.concatenate(parts) * 32767).astype(np.int16), rate
+                    n += int(pause * rate)
+            return (np.concatenate(parts) * 32767).astype(np.int16), rate, debuts
         return synth
     onnx = os.path.join(VOIX_DIR, modele + ".onnx")
     if not os.path.exists(onnx):
@@ -1291,7 +1296,7 @@ def moteur_voix(nom, vitesse):
 
     def synth(texte):
         chunks = list(voice.synthesize(texte, syn_config=syn))
-        return np.concatenate([c.audio_int16_array for c in chunks]), voice.config.sample_rate
+        return np.concatenate([c.audio_int16_array for c in chunks]), voice.config.sample_rate, [0.0]
     return synth
 
 
@@ -1311,12 +1316,14 @@ def prepare_voix(cfg, textes=None, sr=44100):
     voice = None
     durees = {}
     for key, texte in textes:
-        h = hashlib.sha1(f"{nom}|{vitesse}|{texte}|v3".encode()).hexdigest()[:16]
+        h = hashlib.sha1(f"{nom}|{vitesse}|{texte}|v4".encode()).hexdigest()[:16]
         path = os.path.join(cache, f"{key}-{h}.wav")
         if not os.path.exists(path):
             if voice is None:
                 voice = moteur_voix(nom, vitesse)
-            pcm, rate = voice(texte)
+            pcm, rate, debuts = voice(texte)
+            with open(path + ".json", "w") as f:
+                json.dump(debuts, f)
             with tempfile.NamedTemporaryFile(suffix=".wav") as raw:
                 with wave.open(raw.name, "wb") as w:
                     w.setnchannels(1)
@@ -1337,6 +1344,9 @@ def prepare_voix(cfg, textes=None, sr=44100):
             sig = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float32) / 32768
         VOIX[key] = sig
         durees[key] = len(sig) / sr
+        if os.path.exists(path + ".json"):
+            with open(path + ".json") as f:
+                PHRASES[key] = json.load(f)
     return durees
 
 

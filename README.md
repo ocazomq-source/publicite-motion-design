@@ -67,15 +67,13 @@ les points chiffrés du document (indiqué sur chaque graphique) ; la courbe des
 Les sources du PDF (« à ne pas publier ») ne figurent pas dans la vidéo. Une modification de
 `config_erreurs.json` sur GitHub régénère automatiquement les deux vidéos.
 
-## 4. Short 30 s « 3 erreurs qui coûtent cher » — [`output/short-3-erreurs.mp4`](output/short-3-erreurs.mp4)
+## 4. Short 45 s « 3 erreurs qui coûtent cher » — [`output/short-3-erreurs.mp4`](output/short-3-erreurs.mp4)
 
-30 s, vertical 1080×1920 (Reels, TikTok, Shorts), erreurs n°1, 3 et 5 du carrousel. Palette
-marron et beige avec un terracotta chaud. Pensé pour être compris du premier coup : environ 8 s
-par erreur, une situation du quotidien, un seul chiffre clé à l'écran, le bon réflexe en fin de
-scène, sous-titres synchronisés (lisible sans le son). Ouverture avec une tirelire qui se
-fissure, fin avec un échange en bulles et « Chaque projet est unique. Le cabinet O'Morgan
-est là pour vous conseiller. » Mentions
-légales visibles en permanence.
+45 s, vertical 1080×1920 (Reels, TikTok, Shorts), erreurs n°1, 3 et 5 du carrousel. Palette
+marron et beige avec un terracotta chaud. Ouverture avec une tirelire qui se fissure, puis une
+scène par erreur : situation du quotidien, chiffre clé, bon réflexe (dit par la voix et affiché).
+Sous-titres et animations calés phrase par phrase sur la voix off. Mentions légales visibles en
+permanence.
 
 | Erreur | Situation du quotidien | Fait réel |
 |---|---|---|
@@ -84,9 +82,10 @@ légales visibles en permanence.
 | Ne pas diversifier | tous les œufs dans le même panier « 100 % tech » | Nasdaq : −78 % entre mars 2000 et oct. 2002, 15 ans pour retrouver son niveau |
 
 Voix off féminine Kokoro (voix « ff_siwis », via `pip install sherpa-onnx`, modèle ≈ 350 Mo
-téléchargé dans `voix/` au premier lancement). Textes, couleurs, sous-titres et voix dans
-`config_short.json` ; rendu avec `python3 short_erreurs.py` (`--preview` pour les images clés).
-La durée totale est plafonnée à 30 s.
+téléchargé dans `voix/` au premier lancement), lue phrase par phrase avec des respirations et un
+timbre adouci. Textes, couleurs, sous-titres et voix dans `config_short.json` ; rendu avec
+`python3 short_erreurs.py` (`--preview` pour les images clés). Durée plafonnée à 45 s
+(`MAX_DUREE`).
 
 ## Prérequis et visuels
 
