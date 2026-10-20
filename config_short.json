@@ -25,7 +25,7 @@
     },
     "traitement": "suave",
     "hauteur": 0.93,
-    "pauses": 1.05
+    "pauses": 1.0
   },
   "sons": {
     "effets": true,
@@ -79,8 +79,8 @@
       "annees": 15,
       "legende": "pour retrouver le niveau de mars 2000",
       "reflexe": "Répartir entre plusieurs placements",
-      "sous_titre": "Troisième erreur : ne pas diversifier. En 2000, beaucoup avaient tout misé sur la tech. Le Nasdaq a chuté de 78 %… Et il a mis 15 ans à s'en remettre. Le bon réflexe : répartir entre plusieurs placements.",
-      "voix": "Troisième erreur : ne pas diversifier. En deux mille, beaucoup avaient tout misé sur la tech. Le Nasdaq a chuté de soixante-dix-huit pour cent… Et il a mis quinze ans à s'en remettre. Le bon réflexe : répartir entre plusieurs placements."
+      "sous_titre": "Troisième erreur : ne pas diversifier. En 2000, beaucoup avaient tout misé sur la tech. Le Nasdaq a chuté de 78 %… Il a fallu 15 ans pour retrouver ce niveau. Le bon réflexe : répartir entre plusieurs placements.",
+      "voix": "Troisième erreur : ne pas diversifier. En deux mille, beaucoup avaient tout misé sur la tech. Le Nasdaq a chuté de soixante-dix-huit pour cent… Il a fallu quinze ans pour retrouver ce niveau. Le bon réflexe : répartir entre plusieurs placements."
     }
   ],
   "mentions": "Exemples pédagogiques, ni conseil ni recommandation. Performances passées ≠ futures. Risque de perte en capital."
