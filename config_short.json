@@ -18,8 +18,14 @@
   "voix": {
     "active": true,
     "modele": "kokoro",
-    "vitesse": 1.0,
-    "volume": 1.0
+    "vitesse": 0.96,
+    "volume": 1.0,
+    "melange": {
+      "af_bella": 0.3
+    },
+    "traitement": "suave",
+    "hauteur": 0.93,
+    "pauses": 1.05
   },
   "sons": {
     "effets": true,

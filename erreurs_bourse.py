@@ -1254,13 +1254,38 @@ def telecharger_modele(archive, modele):
                         dst.write(src.read())
 
 
-def moteur_voix(nom, vitesse):
-    """Renvoie une fonction texte -> (échantillons int16, fréquence)."""
+KOKORO_VOIX = {"af_bella": 2, "af_heart": 3, "af_nicole": 6, "af_sky": 10, "ff_siwis": 30}
+
+
+def kokoro_melange(d, speaker, melange):
+    """Copie du modèle Kokoro dont la voix `speaker` est mélangée avec d'autres timbres,
+    ex. {"af_bella": 0.3} : 70 % de la voix française, 30 % d'une voix plus suave."""
+    cle = hashlib.sha1(json.dumps(melange, sort_keys=True).encode()).hexdigest()[:10]
+    md = os.path.join(VOIX_DIR, f"kokoro-melange-{cle}")
+    if not os.path.exists(os.path.join(md, "voices.bin")):
+        os.makedirs(md, exist_ok=True)
+        for f in ("model.onnx", "tokens.txt", "lexicon-us-en.txt", "espeak-ng-data", "dict"):
+            if not os.path.exists(os.path.join(md, f)):
+                os.symlink(os.path.abspath(os.path.join(d, f)), os.path.join(md, f))
+        base = np.fromfile(os.path.join(d, "voices.bin"), np.float32).reshape(-1, 510, 256)
+        v = base.copy()
+        v[speaker] = (1 - sum(melange.values())) * base[speaker] + sum(
+            w * base[KOKORO_VOIX[n]] for n, w in melange.items())
+        v.tofile(os.path.join(md, "voices.bin"))
+    return md
+
+
+def moteur_voix(nom, vitesse, opts=None):
+    """Renvoie une fonction texte -> (échantillons int16, fréquence, débuts des phrases)."""
+    opts = opts or {}
     archive, modele, speaker = MODELES[nom]
     if modele is None:
         d = os.path.join(VOIX_DIR, archive)
         if not os.path.exists(os.path.join(d, "model.onnx")):
             telecharger_modele(archive, None)
+        if opts.get("melange"):
+            d = kokoro_melange(d, speaker, opts["melange"])
+        respiration = float(opts.get("pauses", 1.0))
         import sherpa_onnx
         tts = sherpa_onnx.OfflineTts(sherpa_onnx.OfflineTtsConfig(model=sherpa_onnx.OfflineTtsModelConfig(
             kokoro=sherpa_onnx.OfflineTtsKokoroModelConfig(
@@ -1282,7 +1307,7 @@ def moteur_voix(nom, vitesse):
                 parts.append(sig)
                 n += len(sig)
                 if i < len(phrases) - 1:
-                    pause = 0.36 if ph.endswith(("?", "!", ":")) else (0.45 if ph.endswith("…") else 0.3)
+                    pause = respiration * (0.36 if ph.endswith(("?", "!", ":")) else (0.45 if ph.endswith("…") else 0.3))
                     parts.append(np.zeros(int(pause * rate), np.float32))
                     n += int(pause * rate)
             return (np.concatenate(parts) * 32767).astype(np.int16), rate, debuts
@@ -1316,11 +1341,11 @@ def prepare_voix(cfg, textes=None, sr=44100):
     voice = None
     durees = {}
     for key, texte in textes:
-        h = hashlib.sha1(f"{nom}|{vitesse}|{texte}|v4".encode()).hexdigest()[:16]
+        h = hashlib.sha1(f"{nom}|{vitesse}|{texte}|{json.dumps(opts, sort_keys=True)}|v4".encode()).hexdigest()[:16]
         path = os.path.join(cache, f"{key}-{h}.wav")
         if not os.path.exists(path):
             if voice is None:
-                voice = moteur_voix(nom, vitesse)
+                voice = moteur_voix(nom, vitesse, opts)
             pcm, rate, debuts = voice(texte)
             with open(path + ".json", "w") as f:
                 json.dump(debuts, f)
@@ -1330,15 +1355,25 @@ def prepare_voix(cfg, textes=None, sr=44100):
                     w.setsampwidth(2)
                     w.setframerate(rate)
                     w.writeframes(pcm.tobytes())
-                # 44,1 kHz, coupe des graves, légère compression et niveau homogène
+                if opts.get("traitement") == "suave":
+                    # plus grave, chaude et proche du micro : graves ronds, aigus durs adoucis,
+                    # un peu de souffle, compression douce et petite pièce
+                    filtres = (f"rubberband=pitch={float(opts.get('hauteur', 0.93))}:formant=preserved,"
+                               "highpass=f=70,equalizer=f=190:t=q:w=1:g=3.5,equalizer=f=3500:t=q:w=1.4:g=-3,"
+                               "highshelf=f=9500:g=3,deesser=i=0.5,"
+                               "acompressor=threshold=-24dB:ratio=3.5:attack=4:release=120:makeup=2,"
+                               "aecho=0.9:0.55:28|47:0.10|0.06,loudnorm=I=-16:TP=-1.5:LRA=6")
+                else:
+                    filtres = ("highpass=f=70,equalizer=f=220:t=q:w=1:g=2.5,"         # chaleur
+                               "equalizer=f=3800:t=q:w=1.4:g=-2.5,deesser,"           # moins métallique
+                               "aecho=0.9:0.5:23|41:0.10|0.06,"                       # petite pièce
+                               "acompressor=threshold=-20dB:ratio=3:attack=5:release=90,"
+                               "loudnorm=I=-16:TP=-1.5:LRA=7")
+                # 44,1 kHz, silences de début et de fin retirés, puis le traitement choisi
                 subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw.name, "-af",
                                 "silenceremove=start_periods=1:start_threshold=-50dB,areverse,"
                                 "silenceremove=start_periods=1:start_threshold=-50dB,areverse,"
-                                "highpass=f=70,equalizer=f=220:t=q:w=1:g=2.5,"         # chaleur
-                                "equalizer=f=3800:t=q:w=1.4:g=-2.5,deesser,"           # moins métallique
-                                "aecho=0.9:0.5:23|41:0.10|0.06,"                       # petite pièce
-                                "acompressor=threshold=-20dB:ratio=3:attack=5:release=90,"
-                                "loudnorm=I=-16:TP=-1.5:LRA=7,aresample=44100",
+                                + filtres + ",aresample=44100",
                                 "-ac", "1", "-ar", str(sr), "-c:a", "pcm_s16le", path], check=True)
         with wave.open(path, "rb") as w:
             sig = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float32) / 32768
