@@ -67,25 +67,19 @@ les points chiffrés du document (indiqué sur chaque graphique) ; la courbe des
 Les sources du PDF (« à ne pas publier ») ne figurent pas dans la vidéo. Une modification de
 `config_erreurs.json` sur GitHub régénère automatiquement les deux vidéos.
 
-## 4. Short 45 s « 3 erreurs qui coûtent cher » — [`output/short-3-erreurs.mp4`](output/short-3-erreurs.mp4)
+## 4. Vidéo « 3 erreurs qui coûtent cher » — [`output/short-3-erreurs.mp4`](output/short-3-erreurs.mp4)
 
-45 s, vertical 1080×1920 (Reels, TikTok, Shorts), erreurs n°1, 3 et 5 du carrousel. Palette
-marron et beige avec un terracotta chaud. Ouverture avec une tirelire qui se fissure, puis une
-scène par erreur : situation du quotidien, chiffre clé, bon réflexe (dit par la voix et affiché).
-Sous-titres et animations calés phrase par phrase sur la voix off. Mentions légales visibles en
-permanence.
+≈ 1 min 46, vertical 1080×1920, erreurs n°1, 3 et 5 du carrousel et conclusion. La voix off
+reprend le texte du document presque mot pour mot. Palette marron et beige avec un terracotta
+chaud. Ouverture avec une tirelire qui se fissure, une scène par erreur (situation du quotidien,
+chiffres du document, bon réflexe), puis la conclusion « Ces erreurs, presque tout le monde les
+fait un jour… » et O'MORGAN — Conseil en gestion de patrimoine. Sous-titres et animations calés
+phrase par phrase sur la voix ; mentions légales complètes visibles en permanence.
 
-| Erreur | Situation du quotidien | Fait réel |
-|---|---|---|
-| Suivre la mode | discussion de groupe « T'as vu Oracle ? » | Oracle : 345 $ (sept. 2025) → 115 $ (juil. 2026), −67 % |
-| Vendre en panique | alerte sur le téléphone | Covid, mars 2020 : −34 % en un mois, niveau retrouvé 5 mois plus tard |
-| Ne pas diversifier | tous les œufs dans le même panier « 100 % tech » | Nasdaq : −78 % entre mars 2000 et oct. 2002, 15 ans pour retrouver son niveau |
-
-Voix off féminine Kokoro (voix « ff_siwis », via `pip install sherpa-onnx`, modèle ≈ 350 Mo
-téléchargé dans `voix/` au premier lancement), lue phrase par phrase avec des respirations et un
-timbre adouci. Textes, couleurs, sous-titres et voix dans `config_short.json` ; rendu avec
-`python3 short_erreurs.py` (`--preview` pour les images clés). Durée plafonnée à 45 s
-(`MAX_DUREE`).
+Voix off féminine Kokoro (via `pip install sherpa-onnx`, modèle ≈ 350 Mo téléchargé dans
+`voix/`), mélangée à 30 % avec une voix plus suave, plus grave et au timbre adouci (rubrique
+`voix` de `config_short.json`). Les moments clés de l'animation se règlent par numéro de phrase
+dans `reperes`. Rendu avec `python3 short_erreurs.py` (`--preview` pour les images clés).
 
 ## Prérequis et visuels
 
