@@ -1269,8 +1269,18 @@ def moteur_voix(nom, vitesse):
             num_threads=os.cpu_count() or 2)))
 
         def synth(texte):
-            a = tts.generate(texte, sid=speaker, speed=vitesse)
-            return (np.clip(np.array(a.samples), -1, 1) * 32767).astype(np.int16), a.sample_rate
+            """Phrase par phrase, avec une vraie respiration entre elles et un débit qui varie un peu :
+            le rythme d'une personne qui parle plutôt qu'une lecture d'un seul souffle."""
+            phrases = [p for p in re.split(r"(?<=[.!?…])\s+", texte.strip()) if p]
+            parts, rate = [], 24000
+            for i, ph in enumerate(phrases):
+                a = tts.generate(ph, sid=speaker, speed=vitesse * (1.0, 0.96, 1.03)[i % 3])
+                rate = a.sample_rate
+                parts.append(np.clip(np.array(a.samples, np.float32), -1, 1))
+                if i < len(phrases) - 1:
+                    pause = 0.28 if ph.endswith(("?", "!")) else (0.34 if ph.endswith("…") else 0.2)
+                    parts.append(np.zeros(int(pause * rate), np.float32))
+            return (np.concatenate(parts) * 32767).astype(np.int16), rate
         return synth
     onnx = os.path.join(VOIX_DIR, modele + ".onnx")
     if not os.path.exists(onnx):
@@ -1301,7 +1311,7 @@ def prepare_voix(cfg, textes=None, sr=44100):
     voice = None
     durees = {}
     for key, texte in textes:
-        h = hashlib.sha1(f"{nom}|{vitesse}|{texte}|v2".encode()).hexdigest()[:16]
+        h = hashlib.sha1(f"{nom}|{vitesse}|{texte}|v3".encode()).hexdigest()[:16]
         path = os.path.join(cache, f"{key}-{h}.wav")
         if not os.path.exists(path):
             if voice is None:
@@ -1317,7 +1327,10 @@ def prepare_voix(cfg, textes=None, sr=44100):
                 subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw.name, "-af",
                                 "silenceremove=start_periods=1:start_threshold=-50dB,areverse,"
                                 "silenceremove=start_periods=1:start_threshold=-50dB,areverse,"
-                                "highpass=f=70,acompressor=threshold=-20dB:ratio=3:attack=5:release=90,"
+                                "highpass=f=70,equalizer=f=220:t=q:w=1:g=2.5,"         # chaleur
+                                "equalizer=f=3800:t=q:w=1.4:g=-2.5,deesser,"           # moins métallique
+                                "aecho=0.9:0.5:23|41:0.10|0.06,"                       # petite pièce
+                                "acompressor=threshold=-20dB:ratio=3:attack=5:release=90,"
                                 "loudnorm=I=-16:TP=-1.5:LRA=7,aresample=44100",
                                 "-ac", "1", "-ar", str(sr), "-c:a", "pcm_s16le", path], check=True)
         with wave.open(path, "rb") as w:

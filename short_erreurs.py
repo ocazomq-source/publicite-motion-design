@@ -34,7 +34,7 @@ S = eb.S
 FPS = 30
 TR = 0.45            # coupe en volet (s)
 MAX_DUREE = 30.0
-LEAD = 0.35          # la voix démarre peu après la coupe
+LEAD = 0.2          # la voix démarre peu après la coupe
 
 
 # --------------------------------------------------------------------------- #
@@ -544,18 +544,19 @@ def caption(cv, k, t_local, bg):
 
 
 def overlays(world, k, t_local, bg):
-    """Barre de progression, sous-titres et mentions légales (fixes, hors caméra)."""
+    """Barre de progression (si « barre_progression »), sous-titres et mentions légales (fixes, hors caméra)."""
     cv = Cv(world)
     fg = ink(bg)
-    n = len(SCENES)
-    gap, x0, x1 = 10, 60, W - 60
-    seg = (x1 - x0 - gap * (n - 1)) / n
-    for j in range(n):
-        xa = x0 + j * (seg + gap)
-        cv.rrect(xa, 120, xa + seg, 128, 4, fill=mix(bg, fg, 0.25))
-        f = 1.0 if j < k else (clamp(t_local / TIMELINE[k][0]) if j == k else 0.0)
-        if f > 0:
-            cv.rrect(xa, 120, xa + seg * f, 128, 4, fill=fg)
+    if CFG.get("barre_progression", False):
+        n = len(SCENES)
+        gap, x0, x1 = 10, 60, W - 60
+        seg = (x1 - x0 - gap * (n - 1)) / n
+        for j in range(n):
+            xa = x0 + j * (seg + gap)
+            cv.rrect(xa, 120, xa + seg, 128, 4, fill=mix(bg, fg, 0.25))
+            f = 1.0 if j < k else (clamp(t_local / TIMELINE[k][0]) if j == k else 0.0)
+            if f > 0:
+                cv.rrect(xa, 120, xa + seg * f, 128, 4, fill=fg)
     caption(cv, k, t_local, bg)
     rows = eb.layout([CFG["mentions"]], "texte", 21, W - 140)
     for r, ln in enumerate(rows):

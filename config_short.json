@@ -18,7 +18,7 @@
   "voix": {
     "active": true,
     "modele": "kokoro",
-    "vitesse": 1.12,
+    "vitesse": 1.05,
     "volume": 1.0
   },
   "sons": {
@@ -28,6 +28,7 @@
     "desactiver": []
   },
   "sous_titres": true,
+  "barre_progression": false,
   "accroche": {
     "lignes": [
       "{3 erreurs}",
@@ -35,7 +36,7 @@
       "quand on débute en bourse"
     ],
     "sticker": "La n°3 a coûté 15 ans…",
-    "voix": "Trois erreurs qui coûtent cher quand on débute en bourse."
+    "voix": "Trois erreurs qui coûtent cher, quand on débute en bourse."
   },
   "erreurs": [
     {
@@ -52,8 +53,8 @@
       "tampon": "−67 %",
       "legende": "sept. 2025 → juil. 2026",
       "reflexe": "Investir dans ce qu'on comprend",
-      "sous_titre": "1 : suivre la mode. En 2025, tout le monde parlait d'Oracle. Dix mois plus tard, l'action avait perdu deux tiers de sa valeur.",
-      "voix": "Un : suivre la mode. En deux mille vingt-cinq, tout le monde parlait d'Oracle. Dix mois plus tard, l'action avait perdu deux tiers de sa valeur."
+      "sous_titre": "1 : suivre la mode. En 2025, tout le monde parlait d'Oracle. Dix mois après, l'action avait perdu les deux tiers.",
+      "voix": "Un : suivre la mode. En deux mille vingt-cinq, tout le monde parlait d'Oracle. Dix mois après, l'action avait perdu les deux tiers."
     },
     {
       "titre": "Vendre {en panique}",
@@ -62,8 +63,8 @@
       "vendu": "Vendu au plus bas : perte définitive",
       "retour": "5 mois plus tard : tout est revenu",
       "reflexe": "Fixer son horizon, et s'y tenir",
-      "sous_titre": "2 : vendre en panique. En mars 2020, la bourse chute d'un tiers. Cinq mois plus tard, tout est revenu. Ceux qui ont vendu ont perdu.",
-      "voix": "Deux : vendre en panique. En mars deux mille vingt, la bourse chute d'un tiers. Cinq mois plus tard, tout est revenu. Ceux qui ont vendu ont perdu."
+      "sous_titre": "2 : vendre en panique. En mars 2020, la bourse chute d'un tiers. Cinq mois après, tout est revenu.",
+      "voix": "Deux : vendre en panique. En mars deux mille vingt, la bourse chute d'un tiers. Cinq mois après, tout est revenu."
     },
     {
       "titre": "Ne pas {diversifier}",
@@ -72,8 +73,8 @@
       "annees": 15,
       "legende": "pour retrouver le niveau de mars 2000",
       "reflexe": "Répartir entre plusieurs placements",
-      "sous_titre": "3 : ne pas diversifier. En 2000, beaucoup ont tout misé sur la tech. Le Nasdaq a perdu 78 %, et mis 15 ans à s'en remettre.",
-      "voix": "Trois : ne pas diversifier. En deux mille, beaucoup ont tout misé sur la tech. Le Nasdaq a perdu soixante-dix-huit pour cent, et mis quinze ans à s'en remettre."
+      "sous_titre": "3 : ne pas diversifier. En 2000, beaucoup misaient tout sur la tech. Le Nasdaq a chuté de 78 %. Quinze ans pour s'en remettre.",
+      "voix": "Trois : ne pas diversifier. En deux mille, beaucoup misaient tout sur la tech. Le Nasdaq a chuté de soixante-dix-huit pour cent. Quinze ans pour s'en remettre."
     }
   ],
   "fin": {
@@ -96,7 +97,7 @@
       "pour vous conseiller."
     ],
     "commentaire": "Et vous, laquelle avez-vous déjà faite ?",
-    "voix": "Chaque projet est unique. Le cabinet Ô Morgane est là pour vous conseiller."
+    "voix": "Chaque projet est unique. Ô Morgane est là pour vous conseiller."
   },
   "mentions": "Exemples pédagogiques, ni conseil ni recommandation. Performances passées ≠ futures. Risque de perte en capital."
 }
