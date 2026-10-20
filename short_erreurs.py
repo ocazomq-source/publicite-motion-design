@@ -486,9 +486,10 @@ def build_timeline():
     respiration. Le total est plafonné à MAX_DUREE (on rogne les respirations)."""
     global STARTS, DURATION
     dv = CFG.get("_durees_voix", {})
+    max_duree = float(CFG.get("duree_max", MAX_DUREE))
     tail = [0.4, 0.9, 0.9, 1.2, 2.0]          # respiration après la voix ; la fin laisse lire la signature
     durs = [max(m, LEAD + dv.get(key, 0) + tl) for (_, key, m, _), tl in zip(SCENES, tail)]
-    over = sum(durs) - MAX_DUREE
+    over = sum(durs) - max_duree
     if over > 0:
         slack = [d - (LEAD + dv.get(key, 0) + 0.2) for d, (_, key, *_r) in zip(durs, SCENES)]
         k = min(1.0, over / max(1e-6, sum(slack)))
