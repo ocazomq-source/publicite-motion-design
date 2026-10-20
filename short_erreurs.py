@@ -33,7 +33,7 @@ W, H = 1080, 1920
 S = eb.S
 FPS = 30
 TR = 0.45            # coupe en volet (s)
-MAX_DUREE = 45.0
+MAX_DUREE = 75.0
 LEAD = 0.2          # la voix démarre peu après la coupe
 
 
@@ -179,9 +179,15 @@ def a_phrase(key, i, defaut):
     """Instant (local à la scène) où la voix commence sa phrase n° i : l'image suit la voix.
     `defaut` sert quand la voix off est coupée."""
     debuts = CFG.get("_phrases_voix", {}).get(key)
-    if debuts and i < len(debuts):
+    if debuts and -len(debuts) <= i < len(debuts):
         return LEAD + debuts[i]
     return defaut
+
+
+def repere(key, nom, defaut_i, defaut_t):
+    """Phrase de la voix où se produit un moment clé (« reperes » dans la config de l'erreur)."""
+    i = CFG["erreurs"][int(key[1]) - 1].get("reperes", {}).get(nom, defaut_i)
+    return a_phrase(key, i, defaut_t)
 
 
 def punch(t, D, amount=0.04):
@@ -202,7 +208,7 @@ def header(world, cv, i, title, bg, t):
     fg = ink(bg)
     p = prog(t, 0.0, 0.4)
     if p > 0:
-        cv.chip(f"ERREUR {i}/3", W / 2, 290, "ui_bold", 26, C["blanc"] if fg == C["marine"] else C["marine"],
+        cv.chip(CFG["erreurs"][i - 1].get("numero", f"ERREUR {i}/3"), W / 2, 290, "ui_bold", 26, C["blanc"] if fg == C["marine"] else C["marine"],
                 fg, align="c", tracking=0.14)
     pop_words(world, [title], "titre_b", 92, 335, t - 0.1, fg, C["rouge"] if bg != C["rouge"] else C["or"])
 
@@ -267,7 +273,8 @@ def scene_mode(world, t, D):
     lay = Image.new("RGBA", (int((pw + 40) * S), int((ph + 40) * S)), (0, 0, 0, 0))
     lc = Cv(lay, (pw + 40) / 2, (ph + 40) / 2)
     phone(lc, 0, 0, pw, ph, C["marine"], C["blanc"])
-    t_chat, t_crash, t_tampon = a_phrase("e1", 1, 0.8), a_phrase("e1", 2, 4.3), a_phrase("e1", 3, 5.6) + 0.3
+    t_chat, t_crash = repere("e1", "discussion", 1, 0.8), repere("e1", "chute", 2, 4.3)
+    t_tampon = repere("e1", "tampon", 3, 5.6) + 0.3
     swap = ease_in_out_cubic(prog(t, t_crash - 0.6, 0.5))  # discussion -> appli de bourse
     # 1) la discussion de groupe : tout le monde en parle
     ox = -swap * pw
@@ -303,7 +310,7 @@ def scene_mode(world, t, D):
     pop_layer(cv, eb.tilt_layer(lay, tilt * 18), W / 2, 940 + tilt * 60, min(1.0, p * 1.4), overshoot=1.2)
     q = prog(t, t_tampon, 0.45)
     pop_layer(cv, sticker(cfg["tampon"], 84, C["blanc"], C["rouge"]), W / 2 + 200, 1190, q, rot=-10)
-    reflexe(cv, cfg["reflexe"], 1370, prog(t, a_phrase("e1", 4, D - 2.2), 0.5), bg)
+    reflexe(cv, cfg["reflexe"], 1370, prog(t, repere("e1", "reflexe", -1, D - 2.2), 0.5), bg)
     dx, dy = shake(t, t_tampon, 14)
     return punch(t, D), dx, dy
 
@@ -318,7 +325,8 @@ def scene_panique(world, t, D):
     cv = Cv(world)
     header(world, cv, 2, cfg["titre"], bg, t)
     # notification d'alerte qui tombe sur l'écran
-    t_alerte, t_retour, t_vendu = a_phrase("e2", 1, 1.4), a_phrase("e2", 2, 3.8), a_phrase("e2", 3, 5.6)
+    t_alerte, t_retour, t_vendu = repere("e2", "alerte", 1, 1.4), repere("e2", "retour", 2, 3.8), repere("e2", "vendu", 3, 5.6)
+    t_final = repere("e2", "final", 99, 1e9)
     a = prog(t, t_alerte, 0.5)
     if a > 0:
         w, h = 900, 150
@@ -355,7 +363,10 @@ def scene_panique(world, t, D):
     ok = prog(t, t_retour + 1.0, 0.4)
     if ok > 0:
         pop_layer(cv, sticker(cfg["retour"], 28, C["blanc"], C["vert"], kind="ui_bold"), W / 2 + 120, lvl - 60, ok)
-    reflexe(cv, cfg["reflexe"], 1370, prog(t, a_phrase("e2", 4, D - 2.2), 0.5), bg)
+    fin = prog(t, t_final, 0.4)
+    if fin > 0 and cfg.get("final"):
+        pop_layer(cv, sticker(cfg["final"], 30, C["blanc"], C["vert"], kind="ui_bold"), W - 250, y0 + 95, fin)
+    reflexe(cv, cfg["reflexe"], 1370, prog(t, repere("e2", "reflexe", -1, D - 2.2), 0.5), bg)
     dx, dy = shake(t, t_alerte + 0.2, 12)
     return punch(t, D), dx, dy
 
@@ -390,7 +401,7 @@ def scene_diversifier(world, t, D):
     cv = Cv(world)
     header(world, cv, 3, cfg["titre"], bg, t)
     # tous les œufs dans le même panier « 100 % tech »
-    crash = a_phrase("e3", 2, 3.3)
+    crash = repere("e3", "chute", 2, 3.3)
     sx, sy = shake(t, crash, 16, 0.6)
     tilt = 7 * math.sin(max(0.0, t - crash) * 7) * math.exp(-max(0.0, t - crash) * 2.5) if t > crash else 0.0
     p = prog(t, 0.3, 0.5)
@@ -410,13 +421,32 @@ def scene_diversifier(world, t, D):
     q = prog(t, crash + 0.35, 0.45)
     pop_layer(cv, sticker(cfg["tampon"], 84, C["blanc"], C["rouge"]), W / 2 + 250, 600, q, rot=-10)
     # le temps qu'il a fallu pour revenir au niveau de 2000
-    run = prog(t, a_phrase("e3", 3, crash + 1.0), 2.0)
+    run = prog(t, repere("e3", "annees", 3, crash + 1.0), 2.0)
     if run > 0:
         yrs = int(cfg["annees"] * ease_in_out_cubic(run))
         cv.text(f"{yrs}{NB}ans", "titre_b", 120, C["rouge"] if run < 1 else C["marine"], W / 2, 1175, align="c")
         cv.text(cfg["legende"], "ui_semi", 32, C["gris"], W / 2, 1262, align="c", opacity=clamp(run * 3))
-    reflexe(cv, cfg["reflexe"], 1370, prog(t, a_phrase("e3", 4, D - 2.2), 0.5), bg)
+    reflexe(cv, cfg["reflexe"], 1370, prog(t, repere("e3", "reflexe", -1, D - 2.2), 0.5), bg)
     return punch(t, D), sx, sy
+
+
+def scene_conclusion(world, t, D):
+    cfg = CFG["conclusion"]
+    bg = C["marine"]
+    cv = Cv(world)
+    t_q = a_phrase("conclusion", 2, 4.0)
+    bas = pop_words(world, cfg["lignes"], "titre_b", 66, 330, t - 0.1, C["blanc"], C["or"], stagger=0.06)
+    pop_words(world, cfg["suite"], "titre", 42, bas + 40, t - a_phrase("conclusion", 1, 2.0), mix(bg, C["blanc"], 0.8),
+              C["or"], stagger=0.04)
+    q = prog(t, t_q, 0.5)
+    if q > 0:
+        lay = sticker(cfg["question"], 46, C["marine"], C["or"], pad=0.7)
+        pop_layer(cv, lay, W / 2, 1010, q)
+        pop_words(world, cfg["reponse"], "titre", 46, 1090, t - a_phrase("conclusion", 3, t_q + 1.5), C["blanc"],
+                  C["or"], stagger=0.05)
+    cv.text(cfg["signature"], "ui_bold", 26, C["or"], W / 2, 1300, align="c",
+            opacity=prog(t, a_phrase("conclusion", -1, t_q + 2.5), 0.5), tracking=0.12)
+    return punch(t, D, 0.02), 0, 0
 
 
 SCENES = [  # (scène, clé de voix, durée minimale, fond)
@@ -424,6 +454,7 @@ SCENES = [  # (scène, clé de voix, durée minimale, fond)
     (scene_mode, "e1", 7.5, "fond"),
     (scene_panique, "e2", 7.5, "fond"),
     (scene_diversifier, "e3", 7.5, "fond"),
+    (scene_conclusion, "conclusion", 6.0, "marine"),
 ]
 
 
@@ -431,17 +462,20 @@ def sons(key):
     """Bruitages calés sur les phrases de la voix : [(t local, type)]."""
     if key == "accroche":
         return [(0.05, "impact"), (0.2, "chute"), (1.6, "pop")]
+    if key == "conclusion":
+        return [(0.2, "pop"), (2.0, "tic")]
     if key == "e1":
-        c = a_phrase("e1", 2, 4.3)
-        return [(0.3, "pop")] + [(a_phrase("e1", 1, 0.8) + 0.7 * k, "tic") for k in range(3)] + \
-            [(c - 0.6, "souffle"), (c, "chute"), (a_phrase("e1", 3, 5.6) + 0.3, "pop"), (a_phrase("e1", 4, 6.5), "succes")]
+        c = repere("e1", "chute", 2, 4.3)
+        return [(0.3, "pop")] + [(repere("e1", "discussion", 1, 0.8) + 0.7 * k, "tic") for k in range(3)] + \
+            [(c - 0.6, "souffle"), (c, "chute"), (repere("e1", "tampon", 3, 5.6) + 0.3, "pop"),
+             (repere("e1", "reflexe", -1, 6.5), "succes")]
     if key == "e2":
-        a = a_phrase("e2", 1, 1.4)
-        return [(a, "ping"), (a + 0.2, "chute"), (a_phrase("e2", 2, 3.8) + 1.0, "succes"), (a_phrase("e2", 3, 5.6), "pop"),
-                (a_phrase("e2", 4, 6.5), "succes")]
-    c = a_phrase("e3", 2, 3.3)
+        a = repere("e2", "alerte", 1, 1.4)
+        return [(a, "ping"), (a + 0.2, "chute"), (repere("e2", "vendu", 3, 5.6), "pop"),
+                (repere("e2", "retour", 2, 3.8) + 1.0, "succes"), (repere("e2", "reflexe", -1, 6.5), "succes")]
+    c = repere("e3", "chute", 2, 3.3)
     return [(0.3, "pop")] + [(0.6 + 0.18 * j, "tic") for j in range(5)] + [(c, "chute"), (c + 0.35, "pop"),
-                                                                          (a_phrase("e3", 4, 6.5), "succes")]
+                                                                          (repere("e3", "reflexe", -1, 6.5), "succes")]
 
 
 TIMELINE, STARTS, DURATION = [], [], 0.0
@@ -452,7 +486,7 @@ def build_timeline():
     respiration. Le total est plafonné à MAX_DUREE (on rogne les respirations)."""
     global STARTS, DURATION
     dv = CFG.get("_durees_voix", {})
-    tail = [0.4, 0.9, 0.9, 1.6]               # respiration après la voix ; la dernière laisse lire le réflexe
+    tail = [0.4, 0.9, 0.9, 1.2, 2.0]          # respiration après la voix ; la fin laisse lire la signature
     durs = [max(m, LEAD + dv.get(key, 0) + tl) for (_, key, m, _), tl in zip(SCENES, tail)]
     over = sum(durs) - MAX_DUREE
     if over > 0:
@@ -493,7 +527,7 @@ def caption(cv, k, t_local, bg):
         return
     key = SCENES[k][1]
     d = CFG.get("_durees_voix", {}).get(key)
-    src = CFG["accroche"] if key == "accroche" else CFG["erreurs"][int(key[1]) - 1]
+    src = CFG[key] if key in ("accroche", "conclusion") else CFG["erreurs"][int(key[1]) - 1]
     text = src.get("sous_titre")
     if not d or not text:
         return
@@ -588,6 +622,7 @@ def render_frame(i):
 def voix_textes(cfg):
     out = [("accroche", cfg["accroche"].get("voix"))]
     out += [(f"e{i + 1}", e.get("voix")) for i, e in enumerate(cfg["erreurs"])]
+    out.append(("conclusion", cfg.get("conclusion", {}).get("voix")))
     return [(k, v) for k, v in out if v]
 
 
