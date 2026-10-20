@@ -81,6 +81,10 @@ Voix off féminine Kokoro (via `pip install sherpa-onnx`, modèle ≈ 350 Mo té
 `voix` de `config_short.json`). Les moments clés de l'animation se règlent par numéro de phrase
 dans `reperes`. Rendu avec `python3 short_erreurs.py` (`--preview` pour les images clés).
 
+Version courte d'1 minute, mêmes visuels et même voix, texte resserré (un chiffre clé par erreur) :
+[`output/short-3-erreurs-60s.mp4`](output/short-3-erreurs-60s.mp4), textes dans `config_short_60s.json`
+(`python3 short_erreurs.py --config config_short_60s.json --out output/short-3-erreurs-60s.mp4`).
+
 ## Prérequis et visuels
 
 Python 3 avec Pillow et numpy (et piper-tts pour la voix off), ffmpeg, police Inter (sinon DejaVu est utilisée).
