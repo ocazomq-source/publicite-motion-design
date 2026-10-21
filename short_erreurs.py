@@ -434,15 +434,17 @@ def scene_conclusion(world, t, D):
     cfg = CFG["conclusion"]
     bg = C["marine"]
     cv = Cv(world)
-    t_q = a_phrase("conclusion", 2, 4.0)
+    rep_ = cfg.get("reperes", {})
+    t_q = a_phrase("conclusion", rep_.get("question", 2), 4.0)
     bas = pop_words(world, cfg["lignes"], "titre_b", 66, 330, t - 0.1, C["blanc"], C["or"], stagger=0.06)
-    pop_words(world, cfg["suite"], "titre", 42, bas + 40, t - a_phrase("conclusion", 1, 2.0), mix(bg, C["blanc"], 0.8),
-              C["or"], stagger=0.04)
+    if cfg.get("suite"):
+        pop_words(world, cfg["suite"], "titre", 42, bas + 40, t - a_phrase("conclusion", rep_.get("suite", 1), 2.0),
+                  mix(bg, C["blanc"], 0.8), C["or"], stagger=0.04)
     q = prog(t, t_q, 0.5)
     if q > 0:
         lay = sticker(cfg["question"], 46, C["marine"], C["or"], pad=0.7)
         pop_layer(cv, lay, W / 2, 1010, q)
-        pop_words(world, cfg["reponse"], "titre", 46, 1090, t - a_phrase("conclusion", 3, t_q + 1.5), C["blanc"],
+        pop_words(world, cfg["reponse"], "titre", 46, 1090, t - a_phrase("conclusion", rep_.get("reponse", 3), t_q + 1.5), C["blanc"],
                   C["or"], stagger=0.05)
     cv.text(cfg["signature"], "ui_bold", 26, C["or"], W / 2, 1300, align="c",
             opacity=prog(t, a_phrase("conclusion", -1, t_q + 2.5), 0.5), tracking=0.12)
@@ -530,7 +532,7 @@ def caption(cv, k, t_local, bg):
     d = CFG.get("_durees_voix", {}).get(key)
     src = CFG[key] if key in ("accroche", "conclusion") else CFG["erreurs"][int(key[1]) - 1]
     text = src.get("sous_titre")
-    if not d or not text:
+    if not d or not text or src.get("sans_sous_titres"):
         return
     u = (t_local - LEAD) / d
     if u < 0 or u > 1.08:
@@ -538,7 +540,10 @@ def caption(cv, k, t_local, bg):
     chunks = caption_chunks(text)
     debuts = CFG.get("_phrases_voix", {}).get(key)
     if debuts and len(debuts) == len(chunks):                 # calé sur les phrases de la voix
-        c = chunks[max(i for i, d0 in enumerate(debuts) if d0 <= max(0.0, t_local - LEAD))]
+        passes = [i for i, d0 in enumerate(debuts) if d0 <= t_local - LEAD]
+        if not passes:
+            return
+        c = chunks[passes[-1]]
     else:                                                     # sinon, au prorata de la longueur
         total = sum(len(c) + 4 for c in chunks)
         acc = 0
@@ -627,6 +632,28 @@ def voix_textes(cfg):
     return [(k, v) for k, v in out if v]
 
 
+def temps_de_lecture(cfg):
+    """Version sans voix : chaque phrase de sous-titre reste affichée le temps de la lire
+    (« lecture » : caractères par seconde, durée minimale, pause entre phrases, temps laissé
+    au titre de la scène avant le premier sous-titre). Renvoie (durées, débuts des phrases)."""
+    lc = cfg["lecture"]
+    cps, mini, pause = float(lc.get("cps", 15)), float(lc.get("min", 1.5)), float(lc.get("pause", 0.35))
+    sources = {"accroche": cfg["accroche"], "conclusion": cfg.get("conclusion", {})}
+    sources.update({f"e{i + 1}": e for i, e in enumerate(cfg["erreurs"])})
+    durees, debuts = {}, {}
+    for key, src in sources.items():
+        texte = src.get("sous_titre") or src.get("lecture")
+        if not texte:
+            continue
+        t = float(lc.get("avant", 0.0)) if key.startswith("e") else 0.0
+        d0 = []
+        for ph in caption_chunks(eb.typo(texte)):
+            d0.append(t)
+            t += max(mini, len(ph) / cps) + pause
+        debuts[key], durees[key] = d0, t - pause
+    return durees, debuts
+
+
 def init_worker(cfg):
     eb.setup_format("vertical")
     CFG.clear()
@@ -646,8 +673,11 @@ def main():
 
     with open(args.config, encoding="utf-8") as f:
         cfg = json.load(f)
-    cfg["_durees_voix"] = eb.prepare_voix(cfg, voix_textes(cfg))
-    cfg["_phrases_voix"] = dict(eb.PHRASES)
+    if cfg.get("voix", {}).get("muette") and cfg.get("lecture"):
+        cfg["_durees_voix"], cfg["_phrases_voix"] = temps_de_lecture(cfg)
+    else:
+        cfg["_durees_voix"] = eb.prepare_voix(cfg, voix_textes(cfg))
+        cfg["_phrases_voix"] = dict(eb.PHRASES)
     init_worker(cfg)
     print("Scènes :", " | ".join(f"{d:.1f}" for d, *_ in TIMELINE), f"→ {DURATION:.1f} s")
 

@@ -87,6 +87,8 @@ Version courte d'1 minute, mêmes visuels et même voix, texte resserré (un chi
 Même version sans voix off (musique, bruitages et sous-titres seuls) :
 [`output/short-3-erreurs-60s-sans-voix.mp4`](output/short-3-erreurs-60s-sans-voix.mp4), réglage `"muette": true` dans `config_short_60s_sans_voix.json`.
 
+Version 43 s sans voix off, rythmée par le temps de lecture (≈ 15 caractères par seconde, au moins 1,5 s par sous-titre, pensé pour un public de 30 à 55 ans) : [`output/short-3-erreurs-43s-sans-voix.mp4`](output/short-3-erreurs-43s-sans-voix.mp4), textes et réglages « lecture » dans `config_short_40s_sans_voix.json`.
+
 ## Prérequis et visuels
 
 Python 3 avec Pillow et numpy (et piper-tts pour la voix off), ffmpeg, police Inter (sinon DejaVu est utilisée).
