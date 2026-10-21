@@ -42,7 +42,7 @@
       "qui coûtent cher",
       "quand on débute en bourse"
     ],
-    "sticker": "La n°5 a coûté 15 ans…",
+    "sticker": "La n°3 a coûté 15 ans…",
     "voix": "Trois erreurs… qui coûtent cher quand on débute en bourse."
   },
   "erreurs": [
@@ -77,9 +77,9 @@
       "vendu": "Vendu au plus bas : ≈ 6 600",
       "retour": "Août 2020 : niveau d'avant-crise",
       "reflexe": "Fixer son horizon, et s'y tenir",
-      "sous_titre": "Erreur n°3 : vendre en panique. Mars 2020, crise du Covid : en un mois, le S&P 500 chute de −34 %. Vendu au plus bas, la perte devient définitive. Resté investi ? Tout est revenu 5 mois plus tard.",
-      "voix": "Erreur numéro trois : vendre en panique. Mars deux mille vingt, crise du Covid : en un mois, la bourse américaine chute de trente-quatre pour cent. Vendu au plus bas, la perte devient définitive. Resté investi ? Tout est revenu cinq mois plus tard.",
-      "numero": "ERREUR N°3",
+      "sous_titre": "Erreur n°2 : vendre en panique. Mars 2020, crise du Covid : en un mois, le S&P 500 chute de −34 %. Vendu au plus bas, la perte devient définitive. Resté investi ? Tout est revenu 5 mois plus tard.",
+      "voix": "Erreur numéro deux : vendre en panique. Mars deux mille vingt, crise du Covid : en un mois, la bourse américaine chute de trente-quatre pour cent. Vendu au plus bas, la perte devient définitive. Resté investi ? Tout est revenu cinq mois plus tard.",
+      "numero": "ERREUR N°2",
       "reperes": {
         "alerte": 1,
         "vendu": 2,
@@ -95,9 +95,9 @@
       "annees": 15,
       "legende": "pour retrouver son niveau de 2000",
       "reflexe": "Répartir entre plusieurs placements",
-      "sous_titre": "Erreur n°5 : ne pas diversifier. En 2000, beaucoup n'avaient que des actions technologiques. Le Nasdaq chute de −78 %. Il lui a fallu 15 ans pour retrouver son niveau. Le bon réflexe : répartissez entre classes d'actifs et secteurs.",
-      "voix": "Erreur numéro cinq : ne pas diversifier. En deux mille, beaucoup n'avaient que des actions technologiques. Le Nasdaq chute de soixante-dix-huit pour cent. Il lui a fallu quinze ans pour retrouver son niveau. Le bon réflexe : répartissez entre classes d'actifs et secteurs.",
-      "numero": "ERREUR N°5",
+      "sous_titre": "Erreur n°3 : ne pas diversifier. En 2000, beaucoup n'avaient que des actions technologiques. Le Nasdaq chute de −78 %. Il lui a fallu 15 ans pour retrouver son niveau. Le bon réflexe : répartissez entre classes d'actifs et secteurs.",
+      "voix": "Erreur numéro trois : ne pas diversifier. En deux mille, beaucoup n'avaient que des actions technologiques. Le Nasdaq chute de soixante-dix-huit pour cent. Il lui a fallu quinze ans pour retrouver son niveau. Le bon réflexe : répartissez entre classes d'actifs et secteurs.",
+      "numero": "ERREUR N°3",
       "reperes": {
         "chute": 2,
         "annees": 3,
