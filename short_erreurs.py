@@ -665,6 +665,8 @@ def main():
     eb.TIMELINE[:] = TIMELINE
     eb.STARTS, eb.DURATION, eb.TR = STARTS, DURATION, TR
     eb.KICK_EVERY, eb.KICK_STOP = 2, -1
+    if cfg.get("voix", {}).get("muette"):   # version sans voix off : même rythme, musique et bruitages seuls
+        eb.VOIX.clear()
     total = int(round(DURATION * FPS))
     wav = os.path.splitext(args.out)[0] + ".wav"
     eb.synth_audio(wav)

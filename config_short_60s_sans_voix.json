@@ -1,0 +1,127 @@
+{
+  "couleurs": {
+    "fond": "#F3E7D5",
+    "carte": "#FFFFFF",
+    "marine": "#3E2416",
+    "brun": "#9A6440",
+    "gris": "#7A6455",
+    "gris_clair": "#B39E8C",
+    "trait": "#E3D2BA",
+    "or": "#C98A4B",
+    "chaud": "#E0703A",
+    "rouge": "#C8432B",
+    "vert": "#5E8A45",
+    "vert_clair": "#E9F0DF",
+    "rouge_clair": "#F6DDD3",
+    "blanc": "#FFFFFF"
+  },
+  "voix": {
+    "active": true,
+    "modele": "kokoro",
+    "vitesse": 1.0,
+    "volume": 1.0,
+    "melange": {
+      "af_bella": 0.3
+    },
+    "traitement": "suave",
+    "hauteur": 0.93,
+    "pauses": 0.9,
+    "muette": true
+  },
+  "sons": {
+    "effets": true,
+    "volume_effets": 0.8,
+    "volume_musique": 1.0,
+    "desactiver": []
+  },
+  "sous_titres": true,
+  "barre_progression": false,
+  "accroche": {
+    "lignes": [
+      "{3 erreurs}",
+      "qui coûtent cher",
+      "quand on débute en bourse"
+    ],
+    "sticker": "La n°5 a coûté 15 ans…",
+    "voix": "Trois erreurs… qui coûtent cher quand on débute en bourse."
+  },
+  "erreurs": [
+    {
+      "titre": "Suivre {la mode}",
+      "messages": [
+        "T'as vu Oracle ?",
+        "Tout le monde en parle !",
+        "J'achète !"
+      ],
+      "action": "ORACLE",
+      "de": 345,
+      "a": 115,
+      "unite": "$",
+      "tampon": "−67 %",
+      "legende": "sept. 2025 → juil. 2026",
+      "reflexe": "Investir dans ce qu'on comprend",
+      "sous_titre": "Erreur n°1 : suivre la mode. Septembre 2025 : l'action Oracle, star de l'intelligence artificielle, atteint son plus haut historique. Tout le monde en parle. Dix mois plus tard, elle a perdu 67 %. Le bon réflexe : investissez dans ce que vous comprenez.",
+      "voix": "Erreur numéro un : suivre la mode. Septembre deux mille vingt-cinq : l'action Oracle, star de l'intelligence artificielle, atteint son plus haut historique. Tout le monde en parle. Dix mois plus tard, elle a perdu soixante-sept pour cent. Le bon réflexe : investissez dans ce que vous comprenez.",
+      "numero": "ERREUR N°1",
+      "reperes": {
+        "discussion": 1,
+        "chute": 3,
+        "tampon": 3,
+        "reflexe": -1
+      }
+    },
+    {
+      "titre": "Vendre {en panique}",
+      "alerte": "Le S&P 500 chute : −34 %",
+      "alerte_quand": "février-mars 2020",
+      "vendu": "Vendu au plus bas : ≈ 6 600",
+      "retour": "Août 2020 : niveau d'avant-crise",
+      "reflexe": "Fixer son horizon, et s'y tenir",
+      "sous_titre": "Erreur n°3 : vendre en panique. Mars 2020, crise du Covid : en un mois, le S&P 500 chute de −34 %. Vendu au plus bas, la perte devient définitive. Resté investi ? Tout est revenu 5 mois plus tard.",
+      "voix": "Erreur numéro trois : vendre en panique. Mars deux mille vingt, crise du Covid : en un mois, la bourse américaine chute de trente-quatre pour cent. Vendu au plus bas, la perte devient définitive. Resté investi ? Tout est revenu cinq mois plus tard.",
+      "numero": "ERREUR N°3",
+      "reperes": {
+        "alerte": 1,
+        "vendu": 2,
+        "retour": 4,
+        "final": 99,
+        "reflexe": 99
+      }
+    },
+    {
+      "titre": "Ne pas {diversifier}",
+      "panier": "100 % TECH",
+      "tampon": "−78 %",
+      "annees": 15,
+      "legende": "pour retrouver son niveau de 2000",
+      "reflexe": "Répartir entre plusieurs placements",
+      "sous_titre": "Erreur n°5 : ne pas diversifier. En 2000, beaucoup n'avaient que des actions technologiques. Le Nasdaq chute de −78 %. Il lui a fallu 15 ans pour retrouver son niveau. Le bon réflexe : répartissez entre classes d'actifs et secteurs.",
+      "voix": "Erreur numéro cinq : ne pas diversifier. En deux mille, beaucoup n'avaient que des actions technologiques. Le Nasdaq chute de soixante-dix-huit pour cent. Il lui a fallu quinze ans pour retrouver son niveau. Le bon réflexe : répartissez entre classes d'actifs et secteurs.",
+      "numero": "ERREUR N°5",
+      "reperes": {
+        "chute": 2,
+        "annees": 3,
+        "reflexe": -1
+      }
+    }
+  ],
+  "mentions": "Exemples à visée pédagogique, ne constituant ni un conseil en investissement ni une recommandation d'achat ou de vente. Les performances passées ne préjugent pas des performances futures. Investir en bourse comporte un risque de perte en capital.",
+  "conclusion": {
+    "lignes": [
+      "Ces erreurs,",
+      "presque tout le monde",
+      "{les fait un jour.}"
+    ],
+    "suite": [
+      "L'important, c'est de les repérer",
+      "avant qu'elles ne coûtent cher."
+    ],
+    "question": "Besoin d'un regard extérieur ?",
+    "reponse": [
+      "Nous sommes là pour {vous accompagner.}"
+    ],
+    "signature": "O'MORGAN — CONSEIL EN GESTION DE PATRIMOINE",
+    "voix": "Ces erreurs, presque tout le monde les fait un jour. L'important, c'est de les repérer avant qu'elles ne coûtent cher. Besoin d'un regard extérieur ? Nous sommes là pour vous accompagner."
+  },
+  "duree_max": 60
+}

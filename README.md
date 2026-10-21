@@ -84,6 +84,8 @@ dans `reperes`. Rendu avec `python3 short_erreurs.py` (`--preview` pour les imag
 Version courte d'1 minute, mêmes visuels et même voix, texte resserré (un chiffre clé par erreur) :
 [`output/short-3-erreurs-60s.mp4`](output/short-3-erreurs-60s.mp4), textes dans `config_short_60s.json`
 (`python3 short_erreurs.py --config config_short_60s.json --out output/short-3-erreurs-60s.mp4`).
+Même version sans voix off (musique, bruitages et sous-titres seuls) :
+[`output/short-3-erreurs-60s-sans-voix.mp4`](output/short-3-erreurs-60s-sans-voix.mp4), réglage `"muette": true` dans `config_short_60s_sans_voix.json`.
 
 ## Prérequis et visuels
 
