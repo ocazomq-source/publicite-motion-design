@@ -45,3 +45,14 @@ Python 3 avec Pillow et numpy, ffmpeg, police Inter (sinon DejaVu est utilisée)
 
 `assets/` contient les logos et visuels extraits du PDF (`outils/extraire_visuels.py`) et la photo
 du pare-chocs reprise de la première version de la vidéo.
+
+## 3. Effets dynamiques sur une vidéo face caméra — `outils/effets_dynamiques.py`
+
+Ajoute zooms, punch-in, travellings virtuels, transitions zoom / whip pan et micro-secousse à une
+vidéo déjà montée (576×1024), sans toucher aux coupes ni au son (copié tel quel). Sortie
+1080×1920. Plans et images clés en tête du script ; `--debug` incruste temps, plan et zoom.
+Nécessite `opencv-python-headless` en plus de numpy.
+
+```bash
+python3 outils/effets_dynamiques.py source.mp4 output/video-effets-dynamiques.mp4
+```

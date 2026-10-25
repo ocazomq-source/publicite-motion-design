@@ -2,3 +2,4 @@ output/apercu/
 output/apercu-parcours/
 output/*.wav
 __pycache__/
+output/video-effets-dynamiques.mp4
