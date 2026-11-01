@@ -2,3 +2,4 @@ output/apercu/
 output/apercu-parcours/
 output/*.wav
 __pycache__/
+assets/*.tflite

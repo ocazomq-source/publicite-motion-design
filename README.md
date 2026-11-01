@@ -52,3 +52,7 @@ Zooms, punch-ins, hyperzoom, whip pan et transitions zoom ajoutés sur une vidé
 sans toucher aux coupes ni à la voix. Liste des effets et timecodes : **[EFFETS_DYNAMIQUES.md](EFFETS_DYNAMIQUES.md)**.
 Rendu : `python3 outils/effets_dynamiques.py SOURCE.mp4 output/video-effets-dynamiques.mp4`
 (nécessite en plus `opencv-python-headless<5`).
+
+Version **sous-titrée** (grands titres derrière la personne + sous-titres mot à mot, palette
+chaude) : [`output/video-sous-titree.mp4`](output/video-sous-titree.mp4) — voir
+**[SOUS_TITRES.md](SOUS_TITRES.md)**. Polices Poppins (licence OFL) dans `assets/fonts/`.
