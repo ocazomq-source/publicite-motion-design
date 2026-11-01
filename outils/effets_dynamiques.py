@@ -248,7 +248,24 @@ def whoosh_track(duration, sr=48000):
     return out, sr
 
 
+def charger_plan():
+    """--plan FICHIER.py : remplace les réglages en MAJUSCULES par ceux d'une autre vidéo."""
+    if "--plan" not in sys.argv:
+        return
+    chemin = sys.argv[sys.argv.index("--plan") + 1]
+    ns = {"F": F, "FPS": FPS}
+    exec(open(chemin, encoding="utf-8").read(), ns)
+    g = globals()
+    for k, v in ns.items():
+        if k.isupper() and k in g:
+            g[k] = v
+    if "CUT_FRAMES" in ns and "CUTS" in g:
+        g["CUTS"] = [n / FPS for n in ns["CUT_FRAMES"]]
+    print("plan :", chemin)
+
+
 def main():
+    charger_plan()
     src, dst = sys.argv[1], sys.argv[2]
     preview = "--preview" in sys.argv
     info = json.loads(subprocess.check_output(

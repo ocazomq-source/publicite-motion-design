@@ -56,3 +56,11 @@ Rendu : `python3 outils/effets_dynamiques.py SOURCE.mp4 output/video-effets-dyna
 Version **sous-titrée** (grands titres derrière la personne + sous-titres mot à mot, palette
 chaude) : [`output/video-sous-titree.mp4`](output/video-sous-titree.mp4) — voir
 **[SOUS_TITRES.md](SOUS_TITRES.md)**. Polices Poppins (licence OFL) dans `assets/fonts/`.
+
+### Vidéo « SCI : unanimité ou majorité ? » — version longue (46 s)
+
+Même traitement (effets + sous-titres) : [`output/sci-unanimite-sous-titree.mp4`](output/sci-unanimite-sous-titree.mp4)
+(sans sous-titres : [`output/sci-unanimite-effets.mp4`](output/sci-unanimite-effets.mp4)).
+Les timecodes des effets, le texte et les titres sont dans
+[`outils/plans/sci-unanimite-46s.py`](outils/plans/sci-unanimite-46s.py), passé aux deux scripts avec `--plan`.
+Pour une nouvelle vidéo, copiez ce fichier et adaptez-le.

@@ -110,7 +110,9 @@ def aligner(actif):
     for t0, t1, texte in PAROLES:
         brut = []
         for gi, g in enumerate(texte.split("/")):
-            for m in g.split():
+            for m in g.split(" "):
+                if not m:
+                    continue
                 brut.append([m, gi])
         # état mot-clé : *…* peut couvrir plusieurs mots
         cle = False
@@ -162,14 +164,14 @@ def sprite_mot(mot, cle):
     return np.array(im).astype(np.float32) / 255, f.getlength(mot), pad, -t
 
 
-def sprite_titre(fin_txt, gras_txt, haut_tete):
+def sprite_titre(fin_txt, gras_txt, haut_tete, reduction=1.0):
     """Calque plein cadre (RGBA) du grand titre, aligné à gauche comme la référence.
 
     Le bas de la ligne grasse passe derrière le haut de la tête (≈ 20 % de sa hauteur),
     le reste du mot reste lisible au-dessus."""
     marge = 92
     largeur_max = W - 2 * marge
-    t_gras = 260
+    t_gras = int(260 * reduction)
     while police("Black", t_gras).getlength(gras_txt) > largeur_max and t_gras > 120:
         t_gras -= 6
     fg = police("Black", t_gras)
@@ -304,23 +306,58 @@ def preparer(entree):
     for ancre, n, fin, fin_txt, gras_txt in TITRES:
         occ = [m for m in mots if m["mot"] == ancre]
         debut = occ[n - 1]["t"]
-        haut = min(haut_tete(entree, t, det) for t in np.linspace(debut + 0.05, fin - 0.05, 4))
-        titres.append({"debut": debut, "fin": fin, "sprite": sprite_titre(fin_txt, gras_txt, haut),
-                       "texte": f"{fin_txt} / {gras_txt}"})
+        masques = [masque_a(entree, t, det) for t in np.linspace(debut + 0.05, fin - 0.05, 4)]
+        haut = min(haut_tete(m) for m in masques)
+        # remonte le titre tant que plus de 15 % des lettres passent derrière la personne
+        # (et, s'il bute en haut du cadre, réduit sa taille)
+        reduction, h = 1.0, haut
+        for _ in range(80):
+            spr = sprite_titre(fin_txt, gras_txt, h, reduction)
+            lettres = spr[..., 3] > 0.6
+            cache = float(np.median([(m[lettres] > 0.5).mean() for m in masques]))
+            if cache <= 0.15 or reduction < 0.55:
+                break
+            if h > haut - 300:
+                h -= 12
+            else:
+                reduction, h = reduction * 0.92, haut
+        titres.append({"debut": debut, "fin": fin, "sprite": spr,
+                       "texte": f"{fin_txt} / {gras_txt} (caché {cache:.0%})"})
     return mots, groupes, titres
 
 
-def haut_tete(entree, t, det):
-    """Ordonnée du haut de la tête (pixels) à l'instant t, d'après le détourage."""
+def masque_a(entree, t, det):
+    """Détourage de la personne à l'instant t."""
     b = subprocess.check_output(["ffmpeg", "-v", "error", "-ss", f"{t:.3f}", "-i", entree,
                                  "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"])
     det.prec = None
-    m = det(np.frombuffer(b, np.uint8).reshape(H, W, 3).copy())
+    return det(np.frombuffer(b, np.uint8).reshape(H, W, 3).copy())
+
+
+def haut_tete(m):
+    """Ordonnée du haut de la tête (pixels) d'après un détourage."""
     lignes = np.where((m[:, W // 4:3 * W // 4] > 0.5).sum(axis=1) > 40)[0]
     return int(lignes[0]) if len(lignes) else 420
 
 
+def charger_plan():
+    """--plan FICHIER.py : remplace les réglages en MAJUSCULES par ceux d'une autre vidéo."""
+    if "--plan" not in sys.argv:
+        return
+    chemin = sys.argv[sys.argv.index("--plan") + 1]
+    ns = {"FPS": FPS, "F": lambda n: n / FPS}
+    exec(open(chemin, encoding="utf-8").read(), ns)
+    g = globals()
+    for k, v in ns.items():
+        if k.isupper() and k in g:
+            g[k] = v
+    if "CUT_FRAMES" in ns and "CUTS" in g:
+        g["CUTS"] = [n / FPS for n in ns["CUT_FRAMES"]]
+    print("plan :", chemin)
+
+
 def main():
+    charger_plan()
     entree, sortie = sys.argv[1], sys.argv[2]
     preview = "--preview" in sys.argv
     mots, groupes, titres = preparer(entree)
